@@ -28,8 +28,12 @@ namespace Polymulator
         private float worldGroundedStickForce;
 
         private bool movementLocked;
+        private float angularTurnRate;
 
         public float CurrentSpeed => new Vector3(planarVelocity.x, 0f, planarVelocity.z).magnitude;
+        public float SpeedNormalized => worldMoveSpeed > 0.01f ? Mathf.Clamp01(CurrentSpeed / worldMoveSpeed) : 0f;
+        public Vector3 PlanarVelocity => planarVelocity;
+        public float AngularTurnRate => angularTurnRate;
         public bool IsGrounded => controller != null && controller.isGrounded;
         public bool MovementLocked => movementLocked;
 
@@ -109,9 +113,16 @@ namespace Polymulator
             Vector3 flatVelocity = new Vector3(planarVelocity.x, 0f, planarVelocity.z);
             if (flatVelocity.sqrMagnitude > 0.01f)
             {
+                Quaternion prevRot = transform.rotation;
                 Quaternion targetRotation = Quaternion.LookRotation(flatVelocity.normalized, Vector3.up);
-                transform.rotation = Quaternion.Slerp(transform.rotation, targetRotation,
+                transform.rotation = Quaternion.Slerp(prevRot, targetRotation,
                     1f - Mathf.Exp(-turnSpeed * Time.deltaTime));
+                float yawDelta = Mathf.DeltaAngle(prevRot.eulerAngles.y, transform.rotation.eulerAngles.y);
+                angularTurnRate = Mathf.Lerp(angularTurnRate, yawDelta / Mathf.Max(0.001f, Time.deltaTime), 1f - Mathf.Exp(-10f * Time.deltaTime));
+            }
+            else
+            {
+                angularTurnRate = Mathf.Lerp(angularTurnRate, 0f, 1f - Mathf.Exp(-10f * Time.deltaTime));
             }
         }
 

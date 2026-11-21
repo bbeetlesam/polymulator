@@ -57,6 +57,8 @@ namespace Polymulator
         private Texture2D backgroundTexture;
         private Texture2D buttonNormalTexture;
         private Texture2D buttonHoverTexture;
+        private Texture2D borderAccentTexture;
+        private Texture2D borderMutedTexture;
         private Texture2D squareSharpTexture;
         private Texture2D chapterDarkTexture;
         private Texture2D chapterBlueTexture;
@@ -66,14 +68,20 @@ namespace Polymulator
         private Texture2D lineBlueTexture;
 
         private GUIStyle titleStyle;
+        private GUIStyle subtitleStyle;
         private GUIStyle buttonStyle;
         private GUIStyle chapterLabelStyle;
         private GUIStyle tooltipStyle;
+        private GUIStyle hintStyle;
 
         private readonly string[,] levelTitles = new string[ChapterCount + 1, LevelsPerChapter + 1];
         private int hoveredChapter;
         private int hoveredLevel;
         private Rect hoveredDotRect;
+        private int lastHoveredChapter;
+        private int lastHoveredLevel;
+        private int lastHoveredButton = -1;
+        private bool landingChimePlayed;
 
         private readonly List<BreakPiece> pieces = new List<BreakPiece>();
         private MenuState state = MenuState.Title;
@@ -95,15 +103,18 @@ namespace Polymulator
 
         private void Awake()
         {
+            SimulationAudio.EnsureInstance();
             backgroundTexture = SolidTexture(PaletteSettings.Mantle);
             buttonNormalTexture = SolidTexture(PaletteSettings.BaseSurface);
-            buttonHoverTexture = SolidTexture(PaletteSettings.Crust);
+            buttonHoverTexture = SolidTexture(PaletteSettings.Surface1);
+            borderAccentTexture = SolidTexture(PaletteSettings.Sapphire);
+            borderMutedTexture = SolidTexture(PaletteSettings.Surface1);
             squareSharpTexture = SolidTexture(PaletteSettings.Blue);
-            chapterDarkTexture = RoundedTexture(PaletteSettings.BaseSurface, 96, 20f);
-            chapterBlueTexture = RoundedTexture(PaletteSettings.Blue, 96, 20f);
-            dotDarkTexture = RoundedTexture(PaletteSettings.BaseSurface, 24, 12f);
-            dotBlueTexture = RoundedTexture(PaletteSettings.Blue, 24, 12f);
-            lineDarkTexture = SolidTexture(PaletteSettings.BaseSurface);
+            chapterDarkTexture = RoundedTexture(PaletteSettings.BaseSurface, 128, 24f);
+            chapterBlueTexture = RoundedTexture(PaletteSettings.Blue, 128, 24f);
+            dotDarkTexture = RoundedTexture(PaletteSettings.BaseSurface, 32, 16f);
+            dotBlueTexture = RoundedTexture(PaletteSettings.Blue, 32, 16f);
+            lineDarkTexture = SolidTexture(PaletteSettings.Surface0);
             lineBlueTexture = SolidTexture(PaletteSettings.Blue);
 
             for (int chapter = 1; chapter <= ChapterCount; chapter++)
@@ -176,10 +187,40 @@ namespace Polymulator
             Rect enterRect, shutdownRect;
             GetButtonRects(out enterRect, out shutdownRect);
 
-            GUI.Label(new Rect(0f, enterRect.y - 104f, Screen.width, 64f), "POLYMULATOR", TitleStyle);
+            GUI.Label(new Rect(0f, enterRect.y - 126f, Screen.width, 64f), "POLYMULATOR", TitleStyle);
+            GUI.Label(new Rect(0f, enterRect.y - 56f, Screen.width, 28f),
+                "SIMULATION SANDBOX  //  SPATIAL CALIBRATION", SubtitleStyle);
 
-            if (GUI.Button(enterRect, "ENTER", ButtonStyle)) Select(EnterButton);
+            Vector2 mousePos = Event.current.mousePosition;
+            int hoveredBtn = enterRect.Contains(mousePos) ? EnterButton
+                : (shutdownRect.Contains(mousePos) ? ShutdownButton : -1);
+            if (hoveredBtn != -1 && hoveredBtn != lastHoveredButton)
+                SimulationAudio.PlayMenuHover();
+            lastHoveredButton = hoveredBtn;
+
+            DrawFrameBorder(enterRect, 2f, borderAccentTexture);
+            DrawFrameBorder(shutdownRect, 1.5f, borderMutedTexture);
+
+            if (GUI.Button(enterRect, "ENTER", ButtonStyle) ||
+                (Event.current.type == EventType.KeyDown &&
+                 (Event.current.keyCode == KeyCode.Return || Event.current.keyCode == KeyCode.KeypadEnter)))
+            {
+                if (Event.current.type == EventType.KeyDown) Event.current.Use();
+                Select(EnterButton);
+            }
             if (GUI.Button(shutdownRect, "SHUTDOWN", ButtonStyle)) Select(ShutdownButton);
+
+            GUI.Label(new Rect(0f, shutdownRect.yMax + 28f, Screen.width, 24f),
+                "[ ENTER ]  LAUNCH CHAPTER INDEX", HintStyle);
+        }
+
+        private void DrawFrameBorder(Rect rect, float thickness, Texture2D tex)
+        {
+            if (tex == null) return;
+            GUI.DrawTexture(new Rect(rect.x - thickness, rect.y - thickness, rect.width + thickness * 2f, thickness), tex);
+            GUI.DrawTexture(new Rect(rect.x - thickness, rect.yMax, rect.width + thickness * 2f, thickness), tex);
+            GUI.DrawTexture(new Rect(rect.x - thickness, rect.y, thickness, rect.height), tex);
+            GUI.DrawTexture(new Rect(rect.xMax, rect.y, thickness, rect.height), tex);
         }
 
         // Shutdown path: square drops onto the button and stops, then falls away.
@@ -267,6 +308,7 @@ namespace Polymulator
             if (!buttonBroken && squareY + squareSize >= enterMoved.y)
             {
                 SpawnButtonBreak(enterMoved);
+                SimulationAudio.PlayMenuSmash();
                 buttonBroken = true;
             }
 
@@ -280,6 +322,11 @@ namespace Polymulator
 
             if (t < 1f) return;
 
+            if (!landingChimePlayed)
+            {
+                SimulationAudio.PlayMenuNodeLand();
+                landingChimePlayed = true;
+            }
             state = MenuState.LevelMenu;
         }
 
@@ -287,6 +334,8 @@ namespace Polymulator
         {
             HandleLevelMenuInput();
             DrawRibbon(GetLayout());
+            GUI.Label(new Rect(0f, Screen.height - 54f, Screen.width, 28f),
+                "DRAG  OR  SCROLL / A-D  TO BROWSE CHAPTERS   •   CLICK  NODE 1.1  TO CALIBRATE", HintStyle);
         }
 
         private void DrawRibbon(Layout layout, bool skipCurrentNode = false)
@@ -342,6 +391,7 @@ namespace Polymulator
 
                     current.Use();
                     dragging = false;
+                    SimulationAudio.PlayMenuClick();
                     state = MenuState.Done;
                     SceneTransition.Begin(LevelSceneName(chapter, level), transitionDelay, fadeDuration);
                 }
@@ -368,19 +418,37 @@ namespace Polymulator
             GUI.Label(endNode, "N", ChapterLabelStyle);
 
             if (hoveredChapter > 0)
-                DrawTooltip(hoveredDotRect, levelTitles[hoveredChapter, hoveredLevel]);
+            {
+                if (hoveredChapter != lastHoveredChapter || hoveredLevel != lastHoveredLevel)
+                {
+                    SimulationAudio.PlayMenuHover();
+                    lastHoveredChapter = hoveredChapter;
+                    lastHoveredLevel = hoveredLevel;
+                }
+                string labelTitle = levelTitles[hoveredChapter, hoveredLevel];
+                string formatted = string.IsNullOrEmpty(labelTitle)
+                    ? string.Format("{0}.{1}  //  LOCKED", hoveredChapter, hoveredLevel)
+                    : string.Format("{0}.{1}  //  {2}", hoveredChapter, hoveredLevel, labelTitle.ToUpperInvariant());
+                DrawTooltip(hoveredDotRect, formatted, IsLevelUnlocked(hoveredChapter, hoveredLevel));
+            }
+            else
+            {
+                lastHoveredChapter = 0;
+                lastHoveredLevel = 0;
+            }
         }
 
-        private void DrawTooltip(Rect anchor, string title)
+        private void DrawTooltip(Rect anchor, string title, bool unlocked)
         {
             if (string.IsNullOrEmpty(title)) return;
 
             Vector2 size = TooltipStyle.CalcSize(new GUIContent(title));
-            size.x += 8f;
-            size.y += 4f;
-            Rect rect = new Rect(anchor.center.x - size.x * 0.5f, anchor.yMax + 10f,
+            size.x += 14f;
+            size.y += 6f;
+            Rect rect = new Rect(anchor.center.x - size.x * 0.5f, anchor.yMax + 14f,
                 size.x, size.y);
 
+            DrawFrameBorder(rect, 1.5f, unlocked ? borderAccentTexture : borderMutedTexture);
             GUI.DrawTexture(rect, buttonNormalTexture, ScaleMode.StretchToFill);
             GUI.Label(rect, title, TooltipStyle);
         }
@@ -429,12 +497,14 @@ namespace Polymulator
 
         private void Select(int index)
         {
+            SimulationAudio.PlayMenuClick();
             selectedButton = index;
             stateStartTime = Time.unscaledTime;
             horizontalScroll = 0f;
             targetScroll = 0f;
             dragging = false;
             buttonBroken = false;
+            landingChimePlayed = false;
 
             if (index == EnterButton)
             {
@@ -627,6 +697,40 @@ namespace Polymulator
             }
         }
 
+        private GUIStyle SubtitleStyle
+        {
+            get
+            {
+                if (subtitleStyle != null) return subtitleStyle;
+                subtitleStyle = new GUIStyle(GUI.skin.label)
+                {
+                    alignment = TextAnchor.MiddleCenter,
+                    fontSize = 13,
+                    fontStyle = FontStyle.Bold
+                };
+                subtitleStyle.font = GUI.skin.font;
+                subtitleStyle.normal.textColor = PaletteSettings.TextSecondary;
+                return subtitleStyle;
+            }
+        }
+
+        private GUIStyle HintStyle
+        {
+            get
+            {
+                if (hintStyle != null) return hintStyle;
+                hintStyle = new GUIStyle(GUI.skin.label)
+                {
+                    alignment = TextAnchor.MiddleCenter,
+                    fontSize = 12,
+                    fontStyle = FontStyle.Bold
+                };
+                hintStyle.font = GUI.skin.font;
+                hintStyle.normal.textColor = PaletteSettings.Overlay2;
+                return hintStyle;
+            }
+        }
+
         private GUIStyle ButtonStyle
         {
             get
@@ -737,6 +841,8 @@ namespace Polymulator
             Destroy(backgroundTexture);
             Destroy(buttonNormalTexture);
             Destroy(buttonHoverTexture);
+            Destroy(borderAccentTexture);
+            Destroy(borderMutedTexture);
             Destroy(squareSharpTexture);
             Destroy(chapterDarkTexture);
             Destroy(chapterBlueTexture);

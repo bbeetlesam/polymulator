@@ -31,11 +31,25 @@ namespace Polymulator
         private Vector3 positionOffset;
         private Vector3 focus;
         private Vector3 focusVelocity;
+        private float impulseTrauma;
+        private static RectCameraController activeInstance;
+
+        public static void AddImpulse(float strength)
+        {
+            if (activeInstance != null)
+                activeInstance.impulseTrauma = Mathf.Clamp(activeInstance.impulseTrauma + strength, 0f, 0.25f);
+        }
 
         private void Awake()
         {
+            activeInstance = this;
             cam = GetComponent<Camera>();
             ApplyFixedFraming();
+        }
+
+        private void OnDestroy()
+        {
+            if (activeInstance == this) activeInstance = null;
         }
 
         private void Start()
@@ -58,8 +72,19 @@ namespace Polymulator
                 ? Vector3.SmoothDamp(focus, desiredFocus, ref focusVelocity, followSmoothTime)
                 : desiredFocus;
 
-            // Position may follow the player horizontally; rotation is always fixed.
-            transform.SetPositionAndRotation(focus + positionOffset, fixedRotation);
+            Vector3 shakeOffset = Vector3.zero;
+            if (impulseTrauma > 0.0005f)
+            {
+                float s = impulseTrauma * GridSettings.Unit;
+                shakeOffset = new Vector3(
+                    Mathf.Sin(Time.time * 47f) * s,
+                    Mathf.Cos(Time.time * 53f) * s * 0.6f,
+                    Mathf.Sin(Time.time * 39f) * s);
+                impulseTrauma = Mathf.MoveTowards(impulseTrauma, 0f, Time.deltaTime * 0.85f);
+            }
+
+            // Position follows the player horizontally with decaying impulse shake; rotation is always fixed.
+            transform.SetPositionAndRotation(focus + positionOffset + shakeOffset, fixedRotation);
         }
 
         private void ApplyFixedFraming()
