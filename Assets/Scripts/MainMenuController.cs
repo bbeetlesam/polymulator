@@ -68,6 +68,12 @@ namespace Polymulator
         private GUIStyle titleStyle;
         private GUIStyle buttonStyle;
         private GUIStyle chapterLabelStyle;
+        private GUIStyle tooltipStyle;
+
+        private readonly string[,] levelTitles = new string[ChapterCount + 1, LevelsPerChapter + 1];
+        private int hoveredChapter;
+        private int hoveredLevel;
+        private Rect hoveredDotRect;
 
         private readonly List<BreakPiece> pieces = new List<BreakPiece>();
         private MenuState state = MenuState.Title;
@@ -99,6 +105,16 @@ namespace Polymulator
             dotBlueTexture = RoundedTexture(PaletteSettings.Blue, 24, 12f);
             lineDarkTexture = SolidTexture(PaletteSettings.BaseSurface);
             lineBlueTexture = SolidTexture(PaletteSettings.Blue);
+
+            for (int chapter = 1; chapter <= ChapterCount; chapter++)
+            {
+                for (int level = 1; level <= LevelsPerChapter; level++)
+                {
+                    LevelInfo info = Resources.Load<LevelInfo>("Levels/" + LevelSceneName(chapter, level));
+                    if (info != null)
+                        levelTitles[chapter, level] = info.Title;
+                }
+            }
         }
 
         private void Update()
@@ -275,6 +291,9 @@ namespace Polymulator
 
         private void DrawRibbon(Layout layout, bool skipCurrentNode = false)
         {
+            hoveredChapter = 0;
+            hoveredLevel = 0;
+
             for (int chapter = 1; chapter <= ChapterCount; chapter++)
             {
                 Rect node = GetChapterNodeRect(chapter, layout);
@@ -310,6 +329,13 @@ namespace Polymulator
                     GUI.DrawTexture(dot, dotTexture, ScaleMode.StretchToFill);
 
                     Event current = Event.current;
+                    if (state == MenuState.LevelMenu && dot.Contains(current.mousePosition))
+                    {
+                        hoveredChapter = chapter;
+                        hoveredLevel = level;
+                        hoveredDotRect = dot;
+                    }
+
                     if (state != MenuState.LevelMenu || !unlocked) continue;
                     if (current.type != EventType.MouseDown || current.button != 0 ||
                         !dot.Contains(current.mousePosition)) continue;
@@ -340,6 +366,23 @@ namespace Polymulator
             GUI.DrawTexture(endNode, chapterDarkTexture, ScaleMode.StretchToFill);
             ChapterLabelStyle.normal.textColor = PaletteSettings.TextPrimary;
             GUI.Label(endNode, "N", ChapterLabelStyle);
+
+            if (hoveredChapter > 0)
+                DrawTooltip(hoveredDotRect, levelTitles[hoveredChapter, hoveredLevel]);
+        }
+
+        private void DrawTooltip(Rect anchor, string title)
+        {
+            if (string.IsNullOrEmpty(title)) return;
+
+            Vector2 size = TooltipStyle.CalcSize(new GUIContent(title));
+            size.x += 8f;
+            size.y += 4f;
+            Rect rect = new Rect(anchor.center.x - size.x * 0.5f, anchor.yMax + 10f,
+                size.x, size.y);
+
+            GUI.DrawTexture(rect, buttonNormalTexture, ScaleMode.StretchToFill);
+            GUI.Label(rect, title, TooltipStyle);
         }
 
         private void SpawnButtonBreak(Rect buttonRect)
@@ -634,6 +677,25 @@ namespace Polymulator
                 };
                 chapterLabelStyle.font = GUI.skin.font;
                 return chapterLabelStyle;
+            }
+        }
+
+        private GUIStyle TooltipStyle
+        {
+            get
+            {
+                if (tooltipStyle != null) return tooltipStyle;
+
+                tooltipStyle = new GUIStyle(GUI.skin.label)
+                {
+                    alignment = TextAnchor.MiddleCenter,
+                    fontSize = 16,
+                    fontStyle = FontStyle.Bold,
+                    padding = new RectOffset(12, 12, 6, 6)
+                };
+                tooltipStyle.font = GUI.skin.font;
+                tooltipStyle.normal.textColor = PaletteSettings.TextPrimary;
+                return tooltipStyle;
             }
         }
 
