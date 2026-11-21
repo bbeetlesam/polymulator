@@ -35,7 +35,7 @@ namespace Polymulator.EditorTools
         {
             var scene = EditorSceneManager.GetActiveScene();
             if (!scene.IsValid() || !scene.isLoaded)
-                scene = EditorSceneManager.OpenScene("Assets/Scenes/SampleScene.unity");
+                scene = EditorSceneManager.OpenScene("Assets/Scenes/Level1.1.unity");
 
             GridSettings settings = LoadOrCreateGridSettings();
             gridUnit = settings.GridUnitSize;
