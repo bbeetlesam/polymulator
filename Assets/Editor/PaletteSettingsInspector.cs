@@ -18,6 +18,13 @@ namespace Polymulator.EditorTools
                 "after changing environment colours so the generated materials pick up the new values.",
                 MessageType.Info);
 
+            if (GUILayout.Button("Reset to Official Catppuccin Mocha (26 Colours)"))
+            {
+                ((PaletteSettings)target).ApplyCatppuccinMochaDefaults();
+                EditorUtility.SetDirty(target);
+                AssetDatabase.SaveAssets();
+            }
+
             if (GUILayout.Button("Rebuild Prototype Scene"))
                 PrototypeSceneBuilder.Build();
         }
