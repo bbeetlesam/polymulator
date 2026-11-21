@@ -38,6 +38,9 @@ namespace Polymulator
         private LineRenderer throwArcLine;
         private LineRenderer throwLandingRing;
         private Material throwArcMaterial;
+        private bool hasPredictedLanding;
+        private Vector3 predictedLandingPoint;
+        private float predictedRangeGrid;
 
         public bool IsCarrying => carried != null;
         public bool IsDropping => false;
@@ -45,6 +48,13 @@ namespace Polymulator
         public string CarriedObjectName => carried != null ? carried.displayName : string.Empty;
         public float CurrentDropDistanceGrid => placementGhost != null ? placementGhost.forwardDistance : defaultDropDistance;
         public float CurrentHeldYawDegrees => heldYawDegrees;
+
+        public bool TryGetPredictedThrowLanding(out Vector3 landingPoint, out float horizontalRangeGrid)
+        {
+            landingPoint = predictedLandingPoint;
+            horizontalRangeGrid = predictedRangeGrid;
+            return IsCarrying && hasPredictedLanding;
+        }
 
         public event System.Action<InteractableObject> OnPickedUp;
         public event System.Action<InteractableObject> OnDropped;
@@ -278,6 +288,8 @@ namespace Polymulator
             dropping.TriggerPulse(0.10f, 0.18f);
             SimulationVFX.Burst(destination, PaletteSettings.Green, 12, 1.8f);
             SimulationVFX.Ring(destination, dropping.AssignedColor, 1.25f, 0.30f);
+            SimulationVisualBridge.TriggerFloorRipple(destination, dropping.AssignedColor,
+                Mathf.Clamp(3.2f + mass * 1.1f, 3.2f, 6.0f), 0.72f, 0.52f);
             SimulationAudio.PlayDrop(destination, mass);
             RectCameraController.AddImpulse(0.03f);
             OnDropped?.Invoke(dropping);
@@ -459,6 +471,12 @@ namespace Polymulator
                 throwArcLine.SetPosition(i, throwArcBuffer[i]);
             throwArcLine.enabled = hitCount >= 2;
 
+            hasPredictedLanding = hitSurface;
+            predictedLandingPoint = landingPoint;
+            Vector3 flatDelta = landingPoint - transform.position;
+            flatDelta.y = 0f;
+            predictedRangeGrid = GridSettings.ToGrid(flatDelta.magnitude);
+
             if (throwLandingRing != null)
             {
                 throwLandingRing.enabled = hitSurface;
@@ -478,6 +496,7 @@ namespace Polymulator
 
         private void HideThrowPreview()
         {
+            hasPredictedLanding = false;
             if (throwArcLine != null && throwArcLine.enabled) throwArcLine.enabled = false;
             if (throwLandingRing != null && throwLandingRing.enabled) throwLandingRing.enabled = false;
         }

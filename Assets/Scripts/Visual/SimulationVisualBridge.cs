@@ -11,10 +11,40 @@ namespace Polymulator
         private static readonly int PlayerWorldPosId = Shader.PropertyToID("_SimPlayerWorldPos");
         private static readonly int AnchorWorldPosId = Shader.PropertyToID("_SimAnchorWorldPos");
         private static readonly int ModeTintId = Shader.PropertyToID("_SimModeTint");
+        private static readonly int RippleOriginId = Shader.PropertyToID("_SimRippleOrigin");
+        private static readonly int RippleParamsId = Shader.PropertyToID("_SimRippleParams");
+        private static readonly int RippleColorId = Shader.PropertyToID("_SimRippleColor");
+
+        private static SimulationVisualBridge activeBridge;
 
         public Transform playerTransform;
         public Transform anchorTransform;
         public SimulationModeController modeController;
+
+        private Vector3 rippleOrigin;
+        private Color rippleColor;
+        private float rippleMaxRadius;
+        private float ripplePeakStrength;
+        private float rippleElapsed = -1f;
+        private float rippleDuration = 0.72f;
+
+        /// <summary>Emits a GPU floor grid shockwave ripple without mutating per-renderer materials.</summary>
+        public static void TriggerFloorRipple(Vector3 worldPos, Color color, float maxRadiusGrid = 6.5f,
+            float strength = 1.15f, float durationSeconds = 0.72f)
+        {
+            if (activeBridge == null) return;
+            activeBridge.rippleOrigin = worldPos;
+            activeBridge.rippleColor = color;
+            activeBridge.rippleMaxRadius = Mathf.Max(1.5f, maxRadiusGrid);
+            activeBridge.ripplePeakStrength = Mathf.Clamp(strength, 0.1f, 2.2f);
+            activeBridge.rippleDuration = Mathf.Max(0.2f, durationSeconds);
+            activeBridge.rippleElapsed = 0f;
+        }
+
+        private void Awake()
+        {
+            activeBridge = this;
+        }
 
         private void Start()
         {
@@ -59,12 +89,40 @@ namespace Polymulator
             Color modeTint = modeController != null ? modeController.ModeColor : PaletteSettings.Sapphire;
             modeTint.a = 1f;
             Shader.SetGlobalVector(ModeTintId, modeTint);
+
+            UpdateFloorRipple();
+        }
+
+        private void UpdateFloorRipple()
+        {
+            if (rippleElapsed < 0f)
+            {
+                Shader.SetGlobalVector(RippleOriginId, Vector4.zero);
+                Shader.SetGlobalVector(RippleParamsId, Vector4.zero);
+                return;
+            }
+
+            rippleElapsed += Time.deltaTime;
+            float t = Mathf.Clamp01(rippleElapsed / rippleDuration);
+            float eased = 1f - Mathf.Pow(1f - t, 2.6f);
+            float radius = Mathf.Lerp(0.35f, rippleMaxRadius, eased);
+            float width = Mathf.Lerp(0.45f, 1.35f, eased);
+            float fade = (1f - t) * (1f - t) * ripplePeakStrength;
+
+            Shader.SetGlobalVector(RippleOriginId, new Vector4(rippleOrigin.x, rippleOrigin.y, rippleOrigin.z, 1f));
+            Shader.SetGlobalVector(RippleParamsId, new Vector4(radius, width, fade, t));
+            Shader.SetGlobalVector(RippleColorId, rippleColor);
+
+            if (t >= 1f) rippleElapsed = -1f;
         }
 
         private void OnDisable()
         {
+            if (activeBridge == this) activeBridge = null;
             Shader.SetGlobalVector(PlayerWorldPosId, Vector4.zero);
             Shader.SetGlobalVector(AnchorWorldPosId, Vector4.zero);
+            Shader.SetGlobalVector(RippleOriginId, Vector4.zero);
+            Shader.SetGlobalVector(RippleParamsId, Vector4.zero);
         }
     }
 }

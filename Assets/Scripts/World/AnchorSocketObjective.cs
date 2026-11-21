@@ -123,6 +123,9 @@ namespace Polymulator
             core.SetHighlight(false, false);
             core.SetCollidersEnabled(false);
 
+            Transform beacon = core.transform.Find("Core Beacon");
+            if (beacon != null) beacon.gameObject.SetActive(false);
+
             Rigidbody body = core.Body;
             if (body != null)
             {
@@ -145,6 +148,7 @@ namespace Polymulator
             SimulationAudio.PlayAnchorLock(transform.position);
             SimulationVFX.Burst(transform.position + Vector3.up * 0.4f, PaletteSettings.Green, 32, 3.8f);
             SimulationVFX.Ring(transform.position, PaletteSettings.Green, 2.8f, 0.55f);
+            SimulationVisualBridge.TriggerFloorRipple(transform.position, PaletteSettings.Green, 11f, 1.55f, 0.95f);
             RectCameraController.AddImpulse(0.11f);
             OnObjectiveCompleted?.Invoke();
         }

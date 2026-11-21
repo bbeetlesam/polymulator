@@ -1,3 +1,4 @@
+using System.Globalization;
 using UnityEngine;
 using UnityEngine.InputSystem;
 using UnityEngine.SceneManagement;
@@ -19,6 +20,7 @@ namespace Polymulator
         public TelekinesisController telekinesisController;
         public WeightedPressurePlate pressurePlate;
         public AnchorSocketObjective anchorObjective;
+        public SpatialBlueprintVisualizer blueprintVisualizer;
 
         private UIDocument uiDocument;
 
@@ -31,8 +33,12 @@ namespace Polymulator
 
         private VisualElement chamberOverlay;
         private VisualElement modalAccentBar;
+        private VisualElement modalMetrics;
         private Label modalTitle;
         private Label modalSubtitle;
+        private Label metricTranslations;
+        private Label metricRotations;
+        private Label metricTethers;
         private Button btnResume;
         private Button btnReplay;
         private Button btnMainMenu;
@@ -43,6 +49,7 @@ namespace Polymulator
         private Label targetStateLabel;
         private Label targetNameLabel;
         private Label targetMetaLabel;
+        private Label targetVectorLabel;
 
         private VisualElement statusToast;
         private VisualElement statusToastDot;
@@ -75,6 +82,11 @@ namespace Polymulator
         private float clearOverlayDelay = -1f;
         private string levelDisplayName = "WARMING UP";
         private string levelNumberLabel = "1.1";
+        private int translationCount;
+        private int rotationCount;
+        private int throwOrTetherCount;
+        private bool hasShownBlueprintConcept;
+        private int hintStep;
 
         private void Awake()
         {
@@ -128,6 +140,7 @@ namespace Polymulator
             if (telekinesisController == null) telekinesisController = Object.FindFirstObjectByType<TelekinesisController>();
             if (pressurePlate == null) pressurePlate = Object.FindFirstObjectByType<WeightedPressurePlate>();
             if (anchorObjective == null) anchorObjective = Object.FindFirstObjectByType<AnchorSocketObjective>();
+            if (blueprintVisualizer == null) blueprintVisualizer = Object.FindFirstObjectByType<SpatialBlueprintVisualizer>();
         }
 
         private void BindVisualTree()
@@ -144,8 +157,12 @@ namespace Polymulator
 
             chamberOverlay = root.Q<VisualElement>("chamber-overlay");
             modalAccentBar = root.Q<VisualElement>("modal-accent-bar");
+            modalMetrics = root.Q<VisualElement>("modal-metrics");
             modalTitle = root.Q<Label>("modal-title");
             modalSubtitle = root.Q<Label>("modal-subtitle");
+            metricTranslations = root.Q<Label>("metric-translations");
+            metricRotations = root.Q<Label>("metric-rotations");
+            metricTethers = root.Q<Label>("metric-tethers");
             btnResume = root.Q<Button>("btn-resume");
             btnReplay = root.Q<Button>("btn-replay");
             btnMainMenu = root.Q<Button>("btn-mainmenu");
@@ -162,6 +179,7 @@ namespace Polymulator
             targetStateLabel = root.Q<Label>("target-state-label");
             targetNameLabel = root.Q<Label>("target-name-label");
             targetMetaLabel = root.Q<Label>("target-meta-label");
+            targetVectorLabel = root.Q<Label>("target-vector-label");
 
             statusToast = root.Q<VisualElement>("status-toast");
             statusToastDot = root.Q<VisualElement>("status-toast-dot");
@@ -197,14 +215,14 @@ namespace Polymulator
             }
             if (carryController != null)
             {
-                carryController.OnPickedUp += HandleTargetAction;
-                carryController.OnDropped += HandleTargetAction;
-                carryController.OnThrown += HandleTargetAction;
+                carryController.OnPickedUp += HandlePickedUp;
+                carryController.OnDropped += HandleDropped;
+                carryController.OnThrown += HandleThrown;
                 carryController.OnRotated += HandleRotated;
             }
             if (telekinesisController != null)
             {
-                telekinesisController.OnTetherStarted += HandleTargetAction;
+                telekinesisController.OnTetherStarted += HandleTetherStarted;
                 telekinesisController.OnTetherReleased += HandleTargetAction;
             }
             if (pressurePlate != null)
@@ -214,6 +232,8 @@ namespace Polymulator
                 anchorObjective.OnObjectiveCompleted += HandleObjectiveCompleted;
                 anchorObjective.OnObjectiveFeedback += HandleStatusBanner;
             }
+            if (blueprintVisualizer != null)
+                blueprintVisualizer.OnBlueprintToggled += HandleBlueprintToggled;
         }
 
         private void UnsubscribeEvents()
@@ -225,14 +245,14 @@ namespace Polymulator
             }
             if (carryController != null)
             {
-                carryController.OnPickedUp -= HandleTargetAction;
-                carryController.OnDropped -= HandleTargetAction;
-                carryController.OnThrown -= HandleTargetAction;
+                carryController.OnPickedUp -= HandlePickedUp;
+                carryController.OnDropped -= HandleDropped;
+                carryController.OnThrown -= HandleThrown;
                 carryController.OnRotated -= HandleRotated;
             }
             if (telekinesisController != null)
             {
-                telekinesisController.OnTetherStarted -= HandleTargetAction;
+                telekinesisController.OnTetherStarted -= HandleTetherStarted;
                 telekinesisController.OnTetherReleased -= HandleTargetAction;
             }
             if (pressurePlate != null)
@@ -242,9 +262,28 @@ namespace Polymulator
                 anchorObjective.OnObjectiveCompleted -= HandleObjectiveCompleted;
                 anchorObjective.OnObjectiveFeedback -= HandleStatusBanner;
             }
+            if (blueprintVisualizer != null)
+                blueprintVisualizer.OnBlueprintToggled -= HandleBlueprintToggled;
             if (btnResume != null) btnResume.clicked -= TogglePauseMenu;
             if (btnReplay != null) btnReplay.clicked -= ReplayCurrentChamber;
             if (btnMainMenu != null) btnMainMenu.clicked -= ReturnToMainMenu;
+        }
+
+        private void HandlePickedUp(InteractableObject obj) => RefreshTargetAndPrompt(true);
+        private void HandleDropped(InteractableObject obj) { translationCount++; RefreshTargetAndPrompt(true); }
+        private void HandleThrown(InteractableObject obj) { translationCount++; throwOrTetherCount++; RefreshTargetAndPrompt(true); }
+        private void HandleTetherStarted(InteractableObject obj) { throwOrTetherCount++; RefreshTargetAndPrompt(true); }
+        private void HandleBlueprintToggled(bool active)
+        {
+            if (!hasShownBlueprintConcept)
+            {
+                hasShownBlueprintConcept = true;
+                HandleStatusBanner("BLUEPRINT [V] // LOCAL AXES (X,Y,Z) & ANCHOR VECTOR", PaletteSettings.Teal);
+            }
+            else
+            {
+                HandleStatusBanner(active ? "BLUEPRINT LENS: ON" : "BLUEPRINT LENS: OFF", PaletteSettings.Teal);
+            }
         }
 
         private void HandleModeChanged(SimulationMode mode)
@@ -311,7 +350,7 @@ namespace Polymulator
         }
 
         private void HandleTargetAction(InteractableObject obj) => RefreshTargetAndPrompt(true);
-        private void HandleRotated(InteractableObject obj, float yaw) => RefreshTargetAndPrompt(true);
+        private void HandleRotated(InteractableObject obj, float yaw) { rotationCount++; RefreshTargetAndPrompt(true); }
 
         private void RefreshModeVisuals()
         {
@@ -371,6 +410,9 @@ namespace Polymulator
                     controlsCard.EnableInClassList("controls-card--collapsed", !controlsExpanded);
                 }
 
+                if (keyboard.f1Key.wasPressedThisFrame && !isPaused && !chamberCompleted)
+                    ShowContextualSimHint();
+
                 if (isPaused || chamberCompleted)
                 {
                     if (keyboard.rKey.wasPressedThisFrame) ReplayCurrentChamber();
@@ -410,6 +452,32 @@ namespace Polymulator
             else if (chamberOverlay != null) chamberOverlay.AddToClassList("chamber-overlay--hidden");
         }
 
+        private void ShowContextualSimHint()
+        {
+            SimulationAudio.PlayMenuHover();
+            if (chamberCompleted)
+            {
+                HandleStatusBanner("SIM // CALIBRATION VERIFIED — NO FURTHER INPUTS REQUIRED", PaletteSettings.Green);
+                return;
+            }
+
+            if (pressurePlate != null && !pressurePlate.IsActivated)
+            {
+                hintStep = (hintStep + 1) % 2;
+                string msg = hintStep == 0
+                    ? "SIM HINT // CONDUIT PAD NEEDS MASS >= 1.8t (USE CUBE-01 2.0t OR TWO OBJECTS)"
+                    : "SIM HINT // USE [TAB] TELEKINESIS OR LIMITED THROW [F] TO LOAD THE PAD";
+                HandleStatusBanner(msg, PaletteSettings.Peach);
+                return;
+            }
+
+            hintStep = (hintStep + 1) % 2;
+            string bridgeMsg = hintStep == 0
+                ? "SIM HINT // CROSS ENERGY BRIDGE TO PLATFORM HIGH FOR GOLDEN CORE-01"
+                : "SIM HINT // DELIVER CORE-01 INTO ANCHOR-01 CRADLE AT CHAMBER CENTER";
+            HandleStatusBanner(bridgeMsg, PaletteSettings.Teal);
+        }
+
         private void ShowChamberOverlay(bool completed)
         {
             if (chamberOverlay == null) return;
@@ -421,6 +489,14 @@ namespace Polymulator
                 modalSubtitle.text = completed
                     ? levelDisplayName + "  //  ANCHOR-01 LOCKED"
                     : "CHAMBER " + levelNumberLabel + "  //  " + levelDisplayName;
+            if (modalMetrics != null)
+                modalMetrics.EnableInClassList("modal-metrics--hidden", !completed);
+            if (completed)
+            {
+                if (metricTranslations != null) metricTranslations.text = translationCount.ToString();
+                if (metricRotations != null) metricRotations.text = rotationCount.ToString();
+                if (metricTethers != null) metricTethers.text = throwOrTetherCount.ToString();
+            }
             if (btnResume != null)
                 btnResume.EnableInClassList("modal-btn--hidden", completed);
             chamberOverlay.RemoveFromClassList("chamber-overlay--hidden");
@@ -458,6 +534,7 @@ namespace Polymulator
             string stateText = "TARGET";
             string objName = string.Empty;
             string metaText = string.Empty;
+            string vectorText = string.Empty;
             Color swatchColor = PaletteSettings.Surface2;
             Color barColor = PaletteSettings.Overlay0;
 
@@ -471,7 +548,12 @@ namespace Polymulator
                 stateText = "CARRYING";
                 objName = carryController.CarriedObjectName;
                 metaText = "Yaw " + Mathf.RoundToInt(carryController.CurrentHeldYawDegrees) +
-                           " deg  |  Reach " + carryController.CurrentDropDistanceGrid.ToString("0.1") + " GU";
+                           " deg  |  Reach " + carryController.CurrentDropDistanceGrid.ToString("0.0", CultureInfo.InvariantCulture) + " GU";
+                string rangeSuffix = carryController.TryGetPredictedThrowLanding(out _, out float rangeGu)
+                    ? "  |  Throw ~" + rangeGu.ToString("0.0", CultureInfo.InvariantCulture) + " GU"
+                    : string.Empty;
+                vectorText = FormatGridPos(held != null ? held.transform.position : Vector3.zero) +
+                             "  |  Ry(" + Mathf.RoundToInt(carryController.CurrentHeldYawDegrees) + " deg)" + rangeSuffix;
                 swatchColor = held != null ? held.AssignedColor : PaletteSettings.Green;
                 barColor = PaletteSettings.Green;
 
@@ -484,7 +566,9 @@ namespace Polymulator
                 InteractableObject tethered = telekinesisController.TetheredObject;
                 stateText = "TELEKINESIS";
                 objName = tethered != null ? tethered.displayName : "OBJECT";
-                metaText = "Elevation " + telekinesisController.CurrentElevationGrid.ToString("0.1") + " GU";
+                metaText = "Elevation " + telekinesisController.CurrentElevationGrid.ToString("0.0", CultureInfo.InvariantCulture) + " GU";
+                vectorText = FormatGridPos(tethered != null ? tethered.transform.position : Vector3.zero) +
+                             (tethered != null ? "  |  Mass " + (tethered.Body != null ? tethered.Body.mass.ToString("0.0", CultureInfo.InvariantCulture) : "1.0") + "t" : "");
                 swatchColor = tethered != null ? tethered.AssignedColor : PaletteSettings.BeamTelekinesis;
                 barColor = PaletteSettings.BeamTelekinesis;
 
@@ -500,8 +584,10 @@ namespace Polymulator
 
                 if (interactor.TargetCanBePickedUp)
                 {
+                    float mass = target != null && target.Body != null ? target.Body.mass : 1f;
                     stateText = isFlexible ? "IN TETHER RANGE" : "IN REACH";
-                    metaText = isFlexible ? "E or Click to tether" : "E to pick up";
+                    metaText = (isFlexible ? "E or Click to tether" : "E to pick up") + "  |  Mass " + mass.ToString("0.0", CultureInfo.InvariantCulture) + "t";
+                    vectorText = target != null ? FormatGridPos(target.transform.position) : string.Empty;
                     barColor = modeColor;
                     prompt = isFlexible
                         ? "[ E / LMB ]  TELEKINESIS   " + objName
@@ -512,6 +598,7 @@ namespace Polymulator
                 {
                     stateText = "FIXED ANCHOR";
                     metaText = "Stationary socket geometry";
+                    vectorText = target != null ? FormatGridPos(target.transform.position) : string.Empty;
                     barColor = PaletteSettings.Peach;
                     prompt = objName + "  //  FIXED SOCKET";
                     promptColor = PaletteSettings.Peach;
@@ -524,6 +611,7 @@ namespace Polymulator
             targetStateLabel.text = stateText;
             targetNameLabel.text = objName;
             targetMetaLabel.text = metaText;
+            if (targetVectorLabel != null) targetVectorLabel.text = vectorText;
             if (targetSwatch != null) targetSwatch.style.backgroundColor = swatchColor;
             if (targetAccentBar != null) targetAccentBar.style.backgroundColor = barColor;
 
@@ -542,6 +630,16 @@ namespace Polymulator
                     contextPrompt.RemoveFromClassList("context-prompt--hidden");
                 }
             }
+        }
+
+        private static string FormatGridPos(Vector3 worldPos)
+        {
+            float gx = GridSettings.ToGrid(worldPos.x);
+            float gy = GridSettings.ToGrid(worldPos.y);
+            float gz = GridSettings.ToGrid(worldPos.z);
+            return "Pos (" + gx.ToString("0.0", CultureInfo.InvariantCulture) + ", " +
+                   gy.ToString("0.0", CultureInfo.InvariantCulture) + ", " +
+                   gz.ToString("0.0", CultureInfo.InvariantCulture) + ") GU";
         }
     }
 }

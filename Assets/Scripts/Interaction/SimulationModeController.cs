@@ -99,6 +99,7 @@ namespace Polymulator
             SimulationAudio.PlayModeSwitch(IsFlexible);
             SimulationVFX.Ring(transform.position, tint, 1.85f, 0.42f);
             SimulationVFX.Burst(transform.position + Vector3.up * GridSettings.ToWorld(0.6f), tint, 16, 2.2f);
+            SimulationVisualBridge.TriggerFloorRipple(transform.position, tint, 4.8f, 0.95f, 0.58f);
             RectVisualRig.NotifyActionStretch(transform, 0.14f);
 
             OnModeChanged?.Invoke(currentMode);

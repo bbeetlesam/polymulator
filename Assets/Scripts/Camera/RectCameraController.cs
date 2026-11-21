@@ -1,10 +1,11 @@
 using UnityEngine;
+using UnityEngine.InputSystem;
 
 namespace Polymulator
 {
     /// <summary>
-    /// Fixed elevated 2.5D camera. Orientation never changes and the camera only
-    /// tracks the player on the horizontal plane so the whole simulation area stays readable.
+    /// Elevated 2.5D isometric camera with horizontal player tracking, impulse trauma,
+    /// subtle right-drag look-around peek (+/- 24 deg), [C] recenter, and scroll zoom when idle.
     /// </summary>
     [RequireComponent(typeof(Camera))]
     public class RectCameraController : MonoBehaviour
@@ -13,7 +14,7 @@ namespace Polymulator
         public Transform target;
 
         [Header("Fixed Framing (grid units)")]
-        [Min(0.1f)] public float orthographicSize = 3f;
+        [Min(0.1f)] public float orthographicSize = 3.85f;
         public float yaw = 40f;
         [Range(15f, 85f)] public float pitch = 35f;
         [Tooltip("Horizontal distance from the focus point on the XZ plane. Independent of cameraHeight.")]
@@ -22,9 +23,13 @@ namespace Polymulator
         [Min(0f)] public float cameraHeight = 18f;
         public float focusHeight = 0f;
 
-        [Header("Follow")]
+        [Header("Follow & Peek")]
         public bool followTarget = true;
         [Min(0f)] public float followSmoothTime = 0.15f;
+        public float minOrthoSize = 2.8f;
+        public float maxOrthoSize = 5.4f;
+        public float maxPeekYaw = 24f;
+        public float maxPeekPitch = 7f;
 
         private Camera cam;
         private Quaternion fixedRotation;
@@ -32,6 +37,14 @@ namespace Polymulator
         private Vector3 focus;
         private Vector3 focusVelocity;
         private float impulseTrauma;
+        private float targetOrthoSize;
+        private float currentOrthoSize;
+        private float targetPeekYaw;
+        private float currentPeekYaw;
+        private float targetPeekPitch;
+        private float currentPeekPitch;
+        private ObjectCarryController carryController;
+        private TelekinesisController telekinesisController;
         private static RectCameraController activeInstance;
 
         public static void AddImpulse(float strength)
@@ -44,7 +57,8 @@ namespace Polymulator
         {
             activeInstance = this;
             cam = GetComponent<Camera>();
-            ApplyFixedFraming();
+            currentOrthoSize = targetOrthoSize = orthographicSize;
+            ApplyFraming(yaw, pitch, currentOrthoSize);
         }
 
         private void OnDestroy()
@@ -59,6 +73,8 @@ namespace Polymulator
                 RectController rect = Object.FindFirstObjectByType<RectController>();
                 if (rect != null) target = rect.transform;
             }
+            carryController = Object.FindFirstObjectByType<ObjectCarryController>();
+            telekinesisController = Object.FindFirstObjectByType<TelekinesisController>();
 
             SnapToTarget();
         }
@@ -66,6 +82,8 @@ namespace Polymulator
         private void LateUpdate()
         {
             if (!followTarget || target == null) return;
+
+            HandlePeekAndZoomInput();
 
             Vector3 desiredFocus = GetDesiredFocus();
             focus = followSmoothTime > 0f
@@ -83,27 +101,63 @@ namespace Polymulator
                 impulseTrauma = Mathf.MoveTowards(impulseTrauma, 0f, Time.deltaTime * 0.85f);
             }
 
-            // Position follows the player horizontally with decaying impulse shake; rotation is always fixed.
+            float blend = 1f - Mathf.Exp(-12f * Time.deltaTime);
+            currentPeekYaw = Mathf.Lerp(currentPeekYaw, targetPeekYaw, blend);
+            currentPeekPitch = Mathf.Lerp(currentPeekPitch, targetPeekPitch, blend);
+            currentOrthoSize = Mathf.Lerp(currentOrthoSize, targetOrthoSize, blend);
+            ApplyFraming(yaw + currentPeekYaw, pitch + currentPeekPitch, currentOrthoSize);
+
             transform.SetPositionAndRotation(focus + positionOffset + shakeOffset, fixedRotation);
         }
 
-        private void ApplyFixedFraming()
+        private void HandlePeekAndZoomInput()
+        {
+            if (Time.timeScale <= 0f) return;
+
+            Mouse mouse = Mouse.current;
+            Keyboard keyboard = Keyboard.current;
+
+            if (mouse != null && mouse.rightButton.isPressed)
+            {
+                Vector2 delta = mouse.delta.ReadValue();
+                targetPeekYaw = Mathf.Clamp(targetPeekYaw + delta.x * 0.16f, -maxPeekYaw, maxPeekYaw);
+                targetPeekPitch = Mathf.Clamp(targetPeekPitch - delta.y * 0.08f, -maxPeekPitch, maxPeekPitch);
+            }
+
+            bool manipulatingObject = (carryController != null && carryController.IsCarrying) ||
+                                      (telekinesisController != null && telekinesisController.HasTether);
+            if (!manipulatingObject && mouse != null)
+            {
+                float scrollY = mouse.scroll.ReadValue().y;
+                if (Mathf.Abs(scrollY) > 0.01f)
+                    targetOrthoSize = Mathf.Clamp(targetOrthoSize - Mathf.Sign(scrollY) * 0.28f, minOrthoSize, maxOrthoSize);
+            }
+
+            if (keyboard != null && keyboard.cKey.wasPressedThisFrame)
+            {
+                targetPeekYaw = 0f;
+                targetPeekPitch = 0f;
+                targetOrthoSize = orthographicSize;
+            }
+        }
+
+        private void ApplyFraming(float activeYaw, float activePitch, float activeOrthoGrid)
         {
             if (cam == null) cam = GetComponent<Camera>();
 
             cam.orthographic = true;
-            cam.orthographicSize = GridSettings.ToWorld(orthographicSize);
+            cam.orthographicSize = GridSettings.ToWorld(activeOrthoGrid);
             cam.nearClipPlane = GridSettings.ToWorld(0.1f);
             cam.farClipPlane = Mathf.Max(cam.nearClipPlane + 1f, GridSettings.ToWorld(250f));
 
-            fixedRotation = Quaternion.Euler(pitch, yaw, 0f);
+            fixedRotation = Quaternion.Euler(activePitch, activeYaw, 0f);
 
-            // Height and horizontal distance are deliberately separate so either can be
-            // adjusted in the Inspector without changing the other or the view angle.
-            Vector3 horizontal = Quaternion.Euler(0f, yaw, 0f) * Vector3.back * GridSettings.ToWorld(cameraDistance);
+            Vector3 horizontal = Quaternion.Euler(0f, activeYaw, 0f) * Vector3.back * GridSettings.ToWorld(cameraDistance);
             positionOffset = horizontal + Vector3.up * GridSettings.ToWorld(cameraHeight);
             transform.rotation = fixedRotation;
         }
+
+        private void ApplyFixedFraming() => ApplyFraming(yaw, pitch, orthographicSize);
 
         private void SnapToTarget()
         {
