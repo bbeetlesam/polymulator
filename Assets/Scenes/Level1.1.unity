@@ -6307,7 +6307,6 @@ MonoBehaviour:
   carryAnchor: {fileID: 2019482237}
   fallbackCarryHeight: 1.7
   fallbackCarryForward: 0
-  dropDuration: 0.35
   placementGhost: {fileID: 0}
 --- !u!114 &2132188764
 MonoBehaviour:

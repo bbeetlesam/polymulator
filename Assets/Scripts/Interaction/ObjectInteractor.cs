@@ -44,7 +44,7 @@ namespace Polymulator
             if (carryController != null && carryController.IsCarrying)
             {
                 SetTarget(null);
-                if (interactPressed) carryController.BeginDrop();
+                if (interactPressed) carryController.DropInFront();
                 return;
             }
 
