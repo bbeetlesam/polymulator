@@ -56,13 +56,9 @@ namespace Polymulator.EditorTools
             BuildProps(environment, mats);
             ConfigureLighting(environment);
 
-            ObjectInteractor interactor;
-            ObjectCarryController carry;
-            GameObject player = BuildPlayer(root.transform, mats, out interactor, out carry);
+            GameObject player = BuildPlayer(root.transform, mats, out _, out _);
             GameObject cameraObject = BuildCamera(player.transform);
             player.GetComponent<RectController>().cameraTransform = cameraObject.transform;
-            BuildUI(root.transform, interactor, carry);
-
             GridSettings.ClearCache();
             EditorSceneManager.MarkSceneDirty(scene);
             EditorSceneManager.SaveScene(scene, scene.path);
@@ -331,15 +327,6 @@ namespace Polymulator.EditorTools
 
             // Every object carrying InteractableObject gets a stable palette colour.
             InteractivePaletteAssigner.AssignAll(PaletteSettings.InteractivePalette, m.interactivePalette);
-        }
-
-        private static void BuildUI(Transform parent, ObjectInteractor interactor, ObjectCarryController carry)
-        {
-            GameObject uiObject = new GameObject("Prototype UI");
-            uiObject.transform.SetParent(parent, false);
-            InteractionUI ui = uiObject.AddComponent<InteractionUI>();
-            ui.interactor = interactor;
-            ui.carryController = carry;
         }
 
         private static GameObject BuildPlayer(Transform parent, Mats m, out ObjectInteractor interactor,
