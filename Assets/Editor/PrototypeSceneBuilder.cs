@@ -324,9 +324,10 @@ namespace Polymulator.EditorTools
                 stairFront += depth;
             }
 
-            // Weighted Conduit Pressure Plate (triggers Steps 3 & 4 Energy Bridge)
+            // Weighted Conduit Pressure Plate + orthogonal floor circuit to Energy Bridge
             pressurePlate = BuildPressurePlate(env, m, new Vector3(-3.2f, 0f, -1.6f));
             BuildEnergyBridge(env, m, pressurePlate, stairFront);
+            BuildConduitCircuit(env, m, pressurePlate);
 
             // Spawn Pad & Anchor Socket Pad
             Primitive("Spawn Pad Plinth", PrimitiveType.Cylinder, new Vector3(0f, 0.012f, -6.5f),
@@ -363,6 +364,11 @@ namespace Polymulator.EditorTools
             GameObject rimW = Primitive("Plate Rim W", PrimitiveType.Cube, new Vector3(-1.08f, 0.095f, 0f),
                 new Vector3(0.08f, 0.05f, 2.08f), m.accentPeach, plateGo.transform, false, false);
 
+            GameObject pip1 = Primitive("Weight Pip 1", PrimitiveType.Cube, new Vector3(1.24f, 0.06f, -0.38f),
+                new Vector3(0.14f, 0.08f, 0.56f), m.accentPeach, plateGo.transform, false, false);
+            GameObject pip2 = Primitive("Weight Pip 2", PrimitiveType.Cube, new Vector3(1.24f, 0.06f, 0.38f),
+                new Vector3(0.14f, 0.08f, 0.56f), m.accentPeach, plateGo.transform, false, false);
+
             GameObject lightGo = new GameObject("Plate Glow Light");
             lightGo.transform.SetParent(plateGo.transform, false);
             lightGo.transform.localPosition = new Vector3(0f, W(0.45f), 0f);
@@ -382,8 +388,14 @@ namespace Polymulator.EditorTools
             plate.requiredMass = 1.8f;
             plate.movingDeck = deck.transform;
             plate.idleAccentMaterial = m.accentPeach;
+            plate.partialAccentMaterial = m.accentYellow;
             plate.activeAccentMaterial = m.accentGreen;
             plate.plateLight = plateLight;
+            plate.weightPipRenderers = new[]
+            {
+                pip1.GetComponent<Renderer>(),
+                pip2.GetComponent<Renderer>()
+            };
             plate.stateRenderers = new[]
             {
                 rimN.GetComponent<Renderer>(),
@@ -392,6 +404,49 @@ namespace Polymulator.EditorTools
                 rimW.GetComponent<Renderer>()
             };
             return plate;
+        }
+
+        private static void BuildConduitCircuit(Transform env, Mats m, WeightedPressurePlate triggerPlate)
+        {
+            GameObject circuitGo = new GameObject("Conduit Floor Circuit");
+            circuitGo.transform.SetParent(env, false);
+
+            // Orthogonal floor trace along grid lanes from (-3.2, -0.45) to Energy Bridge west side (-1.1, 7.0)
+            Vector4[] spans =
+            {
+                new Vector4(-3.20f, -0.45f, -3.20f, 1.80f),
+                new Vector4(-3.20f,  1.80f, -3.20f, 4.45f),
+                new Vector4(-3.20f,  4.45f, -1.95f, 4.45f),
+                new Vector4(-1.95f,  4.45f, -1.10f, 4.45f),
+                new Vector4(-1.10f,  4.45f, -1.10f, 7.05f)
+            };
+
+            Renderer[] segments = new Renderer[spans.Length];
+            for (int i = 0; i < spans.Length; i++)
+            {
+                float x0 = spans[i].x, z0 = spans[i].y;
+                float x1 = spans[i].z, z1 = spans[i].w;
+                float cx = (x0 + x1) * 0.5f;
+                float cz = (z0 + z1) * 0.5f;
+                float lenX = Mathf.Abs(x1 - x0);
+                float lenZ = Mathf.Abs(z1 - z0);
+                bool horiz = lenX > lenZ;
+                float sx = horiz ? lenX + 0.14f : 0.14f;
+                float sz = horiz ? 0.14f : lenZ + 0.14f;
+
+                Primitive("Circuit Channel " + (i + 1), PrimitiveType.Cube, new Vector3(cx, 0.008f, cz),
+                    new Vector3(sx + 0.10f, 0.016f, sz + 0.10f), m.plinth, circuitGo.transform, false, true);
+
+                GameObject trace = Primitive("Circuit Trace " + (i + 1), PrimitiveType.Cube, new Vector3(cx, 0.019f, cz),
+                    new Vector3(sx, 0.012f, sz), m.accentPeach, circuitGo.transform, false, false);
+                segments[i] = trace.GetComponent<Renderer>();
+            }
+
+            ConduitCircuit circuit = circuitGo.AddComponent<ConduitCircuit>();
+            circuit.triggerPlate = triggerPlate;
+            circuit.traceSegments = segments;
+            circuit.dormantMaterial = m.accentPeach;
+            circuit.activeMaterial = m.accentTeal;
         }
 
         private static void BuildEnergyBridge(Transform env, Mats m, WeightedPressurePlate triggerPlate, float stairFront)
@@ -417,12 +472,12 @@ namespace Polymulator.EditorTools
                     new Vector3(0f, top * 0.5f, z), new Vector3(2.4f, top, depth),
                     m.platformHigh, bridgeGo.transform, true, false);
 
-                // Attach thin glowing lip as a child (unscaled Y fraction inside step cube) so it rises with step
+                // Attach thin glowing lip slightly proud of front top edge to avoid coplanar z-fighting
                 GameObject lipGo = GameObject.CreatePrimitive(PrimitiveType.Cube);
                 lipGo.name = "Bridge Lip " + stepNumber;
                 lipGo.transform.SetParent(stepGo.transform, false);
-                lipGo.transform.localPosition = new Vector3(0f, 0.485f - 0.025f / top, -0.5f + 0.025f / depth);
-                lipGo.transform.localScale = new Vector3(0.94f, 0.045f / top, 0.06f / depth);
+                lipGo.transform.localPosition = new Vector3(0f, 0.5f - 0.028f / top, -0.506f - 0.02f / depth);
+                lipGo.transform.localScale = new Vector3(0.94f, 0.038f / top, 0.055f / depth);
                 Collider lipCol = lipGo.GetComponent<Collider>();
                 if (lipCol != null) Object.DestroyImmediate(lipCol);
                 lipGo.GetComponent<Renderer>().sharedMaterial = m.accentPeach;
@@ -531,6 +586,25 @@ namespace Polymulator.EditorTools
                 new Vector3(0.92f, 0.92f, 0.92f), m.coreGold, m, props, 1.2f);
             CreateUnscaledChildTrim("Core Halo", PrimitiveType.Cylinder, Vector3.zero,
                 new Vector3(1.18f, 0.08f, 1.18f), m.accentYellow, coreGo.transform);
+
+            GameObject beaconGo = CreateUnscaledChildTrim("Core Beacon", PrimitiveType.Cylinder,
+                new Vector3(0f, 1.15f, 0f), new Vector3(0.048f, 2.2f, 0.048f), null, coreGo.transform);
+            Material beaconMat = CreateResourceMaterial(MaterialFolder + "/Sim_CoreBeacon.mat", "Universal Render Pipeline/Unlit");
+            if (beaconMat != null)
+            {
+                if (beaconMat.HasProperty("_Surface")) beaconMat.SetFloat("_Surface", 1f);
+                beaconMat.EnableKeyword("_SURFACE_TYPE_TRANSPARENT");
+                beaconMat.SetOverrideTag("RenderType", "Transparent");
+                beaconMat.renderQueue = (int)UnityEngine.Rendering.RenderQueue.Transparent;
+                if (beaconMat.HasProperty("_SrcBlend")) beaconMat.SetFloat("_SrcBlend", (float)UnityEngine.Rendering.BlendMode.SrcAlpha);
+                if (beaconMat.HasProperty("_DstBlend")) beaconMat.SetFloat("_DstBlend", (float)UnityEngine.Rendering.BlendMode.OneMinusSrcAlpha);
+                if (beaconMat.HasProperty("_ZWrite")) beaconMat.SetFloat("_ZWrite", 0f);
+                Color bc = PaletteSettings.Yellow * 1.15f;
+                bc.a = 0.28f;
+                beaconMat.SetColor("_BaseColor", bc);
+                EditorUtility.SetDirty(beaconMat);
+                beaconGo.GetComponent<Renderer>().sharedMaterial = beaconMat;
+            }
 
             AnchorSocketObjective objective = anchor.GetComponent<AnchorSocketObjective>();
             if (objective != null)
@@ -922,6 +996,13 @@ namespace Polymulator.EditorTools
             bridge.anchorTransform = anchorTransform;
             bridge.modeController = modeCtrl;
 
+            SpatialBlueprintVisualizer blueprint = services.AddComponent<SpatialBlueprintVisualizer>();
+            blueprint.modeController = modeCtrl;
+            blueprint.interactor = interactor;
+            blueprint.carryController = carry;
+            blueprint.telekinesisController = telekinesis;
+            blueprint.anchorTransform = anchorTransform;
+
             PanelSettings panelSettings = EnsurePanelSettings();
             VisualTreeAsset uxml = AssetDatabase.LoadAssetAtPath<VisualTreeAsset>(HudUxmlPath);
 
@@ -938,6 +1019,7 @@ namespace Polymulator.EditorTools
             hudCtrl.telekinesisController = telekinesis;
             hudCtrl.pressurePlate = plate;
             hudCtrl.anchorObjective = anchorObjective;
+            hudCtrl.blueprintVisualizer = blueprint;
         }
 
         private static PanelSettings EnsurePanelSettings()
@@ -1148,7 +1230,7 @@ namespace Polymulator.EditorTools
             return go;
         }
 
-        private static void CreateUnscaledChildTrim(string name, PrimitiveType type, Vector3 localPos,
+        private static GameObject CreateUnscaledChildTrim(string name, PrimitiveType type, Vector3 localPos,
             Vector3 localScale, Material mat, Transform parent)
         {
             GameObject go = GameObject.CreatePrimitive(type);
@@ -1165,6 +1247,7 @@ namespace Polymulator.EditorTools
             Renderer r = go.GetComponent<Renderer>();
             if (r != null && mat != null) r.sharedMaterial = mat;
             go.AddComponent<ObjectTrim>();
+            return go;
         }
 
         private static Material LoadOrCreateMat(string name, Shader shader)

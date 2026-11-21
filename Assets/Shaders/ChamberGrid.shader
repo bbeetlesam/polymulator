@@ -78,6 +78,9 @@ Shader "POLYMULATOR/Chamber Grid"
             float4 _SimPlayerWorldPos;
             float4 _SimAnchorWorldPos;
             float4 _SimModeTint;
+            float4 _SimRippleOrigin;
+            float4 _SimRippleParams;
+            float4 _SimRippleColor;
 
             struct Attributes
             {
@@ -168,10 +171,16 @@ Shader "POLYMULATOR/Chamber Grid"
                 float anchorRing = (1.0 - smoothstep(0.02, 0.10, abs(anchorDist - pulseRadius))) * smoothstep(0.01, 0.5, _SimAnchorWorldPos.w) * topMask;
                 float anchorGridBoost = (minorLine * 0.35 + majorLine * 0.65) * exp(-anchorDist * 0.35) * smoothstep(0.01, 0.5, _SimAnchorWorldPos.w);
 
+                // Radial GPU shockwave ripple emitted on heavy impacts, conduit lock & anchor completion
+                float rippleDist = length(input.positionWS.xz - _SimRippleOrigin.xz) / unit;
+                float rippleBand = 1.0 - smoothstep(0.04, max(0.18, _SimRippleParams.y), abs(rippleDist - _SimRippleParams.x));
+                float rippleMask = rippleBand * _SimRippleParams.z * _SimRippleOrigin.w * (minorLine * 0.55 + majorLine * 0.85 + 0.28) * topMask;
+
                 half3 emission = 0;
                 emission += _MajorLineColor.rgb * majorLine * (0.12 * _EmissionStrength);
                 emission += activeTint * (nodeGlow * 0.35 + playerRing * 1.35 + playerHalo) * _EmissionStrength;
                 emission += _PulseColor.rgb * (anchorRing * 1.45 + anchorGridBoost * 0.9) * _EmissionStrength;
+                emission += _SimRippleColor.rgb * rippleMask * _EmissionStrength;
                 emission += _BorderColor.rgb * borderBand * (0.9 * _EmissionStrength);
 
                 InputData inputData = (InputData)0;
