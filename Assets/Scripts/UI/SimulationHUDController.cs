@@ -1,3 +1,4 @@
+using System.Collections.Generic;
 using System.Globalization;
 using UnityEngine;
 using UnityEngine.InputSystem;
@@ -36,12 +37,18 @@ namespace Polymulator
         private VisualElement modalMetrics;
         private Label modalTitle;
         private Label modalSubtitle;
+        private Label modalRankLabel;
         private Label metricTranslations;
         private Label metricRotations;
         private Label metricTethers;
+        private Button btnNext;
         private Button btnResume;
         private Button btnReplay;
         private Button btnMainMenu;
+
+        private VisualElement storyFeed;
+        private Label storySpeakerLabel;
+        private Label storyTextLabel;
 
         private VisualElement targetCard;
         private VisualElement targetAccentBar;
@@ -82,6 +89,12 @@ namespace Polymulator
         private float clearOverlayDelay = -1f;
         private string levelDisplayName = "WARMING UP";
         private string levelNumberLabel = "1.1";
+        private string nextSceneName = string.Empty;
+        private LevelInfo activeLevelInfo;
+        private int lastClearStars = 1;
+        private bool fragmentCollectedThisRun;
+        private readonly Queue<LevelInfo.StoryLine> storyQueue = new Queue<LevelInfo.StoryLine>();
+        private float storyTimer;
         private int translationCount;
         private int rotationCount;
         private int throwOrTetherCount;
@@ -97,8 +110,10 @@ namespace Polymulator
 
         private void Start()
         {
-            HandleStatusBanner("SIM // CHAMBER " + levelNumberLabel + " — PLACE WEIGHT ON CONDUIT PAD", PaletteSettings.Sapphire);
+            HandleStatusBanner("SIM // CHAMBER " + levelNumberLabel + " — " + levelDisplayName, PaletteSettings.Sapphire);
             RefreshObjectiveText();
+            if (activeLevelInfo != null && activeLevelInfo.OpeningDialogue != null && activeLevelInfo.OpeningDialogue.Length > 0)
+                EnqueueStoryLines(activeLevelInfo.OpeningDialogue);
         }
 
         private void ResolveLevelMetadata()
@@ -107,9 +122,10 @@ namespace Polymulator
             if (sceneName.StartsWith("Level") && sceneName.Length > 5)
                 levelNumberLabel = sceneName.Substring(5);
 
-            LevelInfo info = Resources.Load<LevelInfo>("Levels/" + sceneName);
-            if (info != null && !string.IsNullOrEmpty(info.Title))
-                levelDisplayName = info.Title.ToUpperInvariant();
+            nextSceneName = SimulationProgress.GetNextSceneName(sceneName);
+            activeLevelInfo = Resources.Load<LevelInfo>("Levels/" + sceneName);
+            if (activeLevelInfo != null && !string.IsNullOrEmpty(activeLevelInfo.Title))
+                levelDisplayName = activeLevelInfo.Title.ToUpperInvariant();
         }
 
         private void OnEnable()
@@ -160,15 +176,28 @@ namespace Polymulator
             modalMetrics = root.Q<VisualElement>("modal-metrics");
             modalTitle = root.Q<Label>("modal-title");
             modalSubtitle = root.Q<Label>("modal-subtitle");
+            modalRankLabel = root.Q<Label>("modal-rank-label");
             metricTranslations = root.Q<Label>("metric-translations");
             metricRotations = root.Q<Label>("metric-rotations");
             metricTethers = root.Q<Label>("metric-tethers");
+            btnNext = root.Q<Button>("btn-next");
             btnResume = root.Q<Button>("btn-resume");
             btnReplay = root.Q<Button>("btn-replay");
             btnMainMenu = root.Q<Button>("btn-mainmenu");
 
+            storyFeed = root.Q<VisualElement>("story-feed");
+            storySpeakerLabel = root.Q<Label>("story-speaker-label");
+            storyTextLabel = root.Q<Label>("story-text-label");
+
             if (chamberSubtitleLabel != null)
-                chamberSubtitleLabel.text = "CHAMBER " + levelNumberLabel + "  //  " + levelDisplayName;
+                chamberSubtitleLabel.text = "CHAMBER " + levelNumberLabel + "  //  " + levelDisplayName +
+                    "  //  ITER #" + SimulationProgress.IterationNumber;
+            if (btnNext != null)
+            {
+                btnNext.clicked += LoadNextChamber;
+                if (!string.IsNullOrEmpty(nextSceneName))
+                    btnNext.text = "NEXT CHAMBER " + nextSceneName.Replace("Level", "") + "   [ ENTER ]";
+            }
             if (btnResume != null) btnResume.clicked += TogglePauseMenu;
             if (btnReplay != null) btnReplay.clicked += ReplayCurrentChamber;
             if (btnMainMenu != null) btnMainMenu.clicked += ReturnToMainMenu;
@@ -234,6 +263,7 @@ namespace Polymulator
             }
             if (blueprintVisualizer != null)
                 blueprintVisualizer.OnBlueprintToggled += HandleBlueprintToggled;
+            MemoryFragment.OnCollected += HandleFragmentCollected;
         }
 
         private void UnsubscribeEvents()
@@ -264,6 +294,8 @@ namespace Polymulator
             }
             if (blueprintVisualizer != null)
                 blueprintVisualizer.OnBlueprintToggled -= HandleBlueprintToggled;
+            MemoryFragment.OnCollected -= HandleFragmentCollected;
+            if (btnNext != null) btnNext.clicked -= LoadNextChamber;
             if (btnResume != null) btnResume.clicked -= TogglePauseMenu;
             if (btnReplay != null) btnReplay.clicked -= ReplayCurrentChamber;
             if (btnMainMenu != null) btnMainMenu.clicked -= ReturnToMainMenu;
@@ -306,12 +338,87 @@ namespace Polymulator
                 active ? PaletteSettings.Green : PaletteSettings.Peach);
         }
 
+        private void HandleFragmentCollected(string fragTitle, string speaker, string line, string replySpeaker, string replyLine)
+        {
+            fragmentCollectedThisRun = true;
+            HandleStatusBanner("MEMORY SAVED // " + fragTitle.ToUpperInvariant(), PaletteSettings.Rosewater);
+            storyQueue.Clear();
+            storyTimer = 0f;
+            if (!string.IsNullOrEmpty(line))
+                storyQueue.Enqueue(new LevelInfo.StoryLine { speaker = speaker, text = line });
+            if (!string.IsNullOrEmpty(replyLine))
+                storyQueue.Enqueue(new LevelInfo.StoryLine { speaker = replySpeaker, text = replyLine });
+            AdvanceStoryQueue();
+        }
+
+        private void EnqueueStoryLines(LevelInfo.StoryLine[] lines)
+        {
+            for (int i = 0; i < lines.Length; i++)
+            {
+                if (!string.IsNullOrEmpty(lines[i].text))
+                    storyQueue.Enqueue(lines[i]);
+            }
+            if (storyTimer <= 0f) AdvanceStoryQueue();
+        }
+
+        private void AdvanceStoryQueue()
+        {
+            if (storyFeed == null || storySpeakerLabel == null || storyTextLabel == null) return;
+            if (storyQueue.Count == 0)
+            {
+                storyTimer = 0f;
+                storyFeed.AddToClassList("story-feed--hidden");
+                return;
+            }
+
+            LevelInfo.StoryLine next = storyQueue.Dequeue();
+            string sp = string.IsNullOrEmpty(next.speaker) ? "SIM" : next.speaker.ToUpperInvariant();
+            storySpeakerLabel.text = sp;
+            storyTextLabel.text = next.text;
+            Color spColor = SpeakerColor(sp);
+            storySpeakerLabel.style.color = spColor;
+            storyFeed.style.borderLeftColor = spColor;
+            storyFeed.RemoveFromClassList("story-feed--hidden");
+            storyTimer = Mathf.Clamp(2.8f + next.text.Length * 0.045f, 3.2f, 6.2f);
+            SimulationAudio.PlayDialogBlip(sp != "SIM");
+        }
+
+        private static Color SpeakerColor(string speaker)
+        {
+            if (speaker.Contains("MIRA")) return PaletteSettings.Peach;
+            if (speaker.Contains("RECT")) return PaletteSettings.Lavender;
+            if (speaker.Contains("DANU")) return PaletteSettings.Yellow;
+            if (speaker.Contains("SIGNAL")) return PaletteSettings.Red;
+            return PaletteSettings.Sapphire;
+        }
+
         private void HandleObjectiveCompleted()
         {
             chamberCompleted = true;
             RefreshObjectiveText();
+
+            int totalActions = translationCount + rotationCount + throwOrTetherCount;
+            int par = activeLevelInfo != null ? activeLevelInfo.ParActions : 8;
+            lastClearStars = SimulationProgress.RecordClear(SceneManager.GetActiveScene().name, totalActions, par);
+
             HandleStatusBanner("CHAMBER " + levelNumberLabel + " CALIBRATED — ANCHOR LOCKED", PaletteSettings.Green);
-            clearOverlayDelay = 0.9f;
+
+            if (activeLevelInfo != null)
+            {
+                if (activeLevelInfo.TriggerGlitchOnClear)
+                {
+                    SimulationAudio.PlaySignalGlitch();
+                    SimulationVisualBridge.TriggerFloorRipple(Vector3.zero, PaletteSettings.Red, 14f, 1.4f, 0.9f);
+                }
+                if (activeLevelInfo.PlayPianoOnClear)
+                    SimulationAudio.TriggerAdiPianoMotif();
+                if (activeLevelInfo.ClearDialogue != null && activeLevelInfo.ClearDialogue.Length > 0)
+                    EnqueueStoryLines(activeLevelInfo.ClearDialogue);
+            }
+
+            clearOverlayDelay = activeLevelInfo != null && activeLevelInfo.ClearDialogue != null && activeLevelInfo.ClearDialogue.Length > 0
+                ? 2.2f
+                : 0.9f;
         }
 
         private void RefreshObjectiveText()
@@ -415,9 +522,18 @@ namespace Polymulator
 
                 if (isPaused || chamberCompleted)
                 {
-                    if (keyboard.rKey.wasPressedThisFrame) ReplayCurrentChamber();
+                    if (chamberCompleted && !string.IsNullOrEmpty(nextSceneName) &&
+                        (keyboard.enterKey.wasPressedThisFrame || keyboard.numpadEnterKey.wasPressedThisFrame))
+                        LoadNextChamber();
+                    else if (keyboard.rKey.wasPressedThisFrame) ReplayCurrentChamber();
                     else if (keyboard.mKey.wasPressedThisFrame) ReturnToMainMenu();
                 }
+            }
+
+            if (storyTimer > 0f)
+            {
+                storyTimer -= Time.unscaledDeltaTime;
+                if (storyTimer <= 0f) AdvanceStoryQueue();
             }
 
             if (clearOverlayDelay > 0f)
@@ -461,6 +577,14 @@ namespace Polymulator
                 return;
             }
 
+            if (activeLevelInfo != null && activeLevelInfo.Hints != null && activeLevelInfo.Hints.Length > 0)
+            {
+                string customHint = activeLevelInfo.Hints[hintStep % activeLevelInfo.Hints.Length];
+                hintStep++;
+                HandleStatusBanner("SIM HINT // " + customHint, PaletteSettings.Sky);
+                return;
+            }
+
             if (pressurePlate != null && !pressurePlate.IsActivated)
             {
                 hintStep = (hintStep + 1) % 2;
@@ -489,6 +613,18 @@ namespace Polymulator
                 modalSubtitle.text = completed
                     ? levelDisplayName + "  //  ANCHOR-01 LOCKED"
                     : "CHAMBER " + levelNumberLabel + "  //  " + levelDisplayName;
+            if (modalRankLabel != null)
+            {
+                modalRankLabel.EnableInClassList("modal-rank--hidden", !completed);
+                if (completed)
+                {
+                    string stars = new string('★', lastClearStars) + new string('☆', 3 - lastClearStars);
+                    string fragTag = fragmentCollectedThisRun || SimulationProgress.HasFragment(SceneManager.GetActiveScene().name)
+                        ? "   •   MEMORY RECORDED"
+                        : string.Empty;
+                    modalRankLabel.text = stars + fragTag;
+                }
+            }
             if (modalMetrics != null)
                 modalMetrics.EnableInClassList("modal-metrics--hidden", !completed);
             if (completed)
@@ -497,14 +633,25 @@ namespace Polymulator
                 if (metricRotations != null) metricRotations.text = rotationCount.ToString();
                 if (metricTethers != null) metricTethers.text = throwOrTetherCount.ToString();
             }
+            if (btnNext != null)
+                btnNext.EnableInClassList("modal-btn--hidden", !completed || string.IsNullOrEmpty(nextSceneName));
             if (btnResume != null)
                 btnResume.EnableInClassList("modal-btn--hidden", completed);
             chamberOverlay.RemoveFromClassList("chamber-overlay--hidden");
         }
 
+        public void LoadNextChamber()
+        {
+            if (string.IsNullOrEmpty(nextSceneName)) return;
+            SimulationAudio.PlayMenuClick();
+            Time.timeScale = 1f;
+            SceneTransition.Begin(nextSceneName, 0.05f, 0.40f);
+        }
+
         public void ReplayCurrentChamber()
         {
             SimulationAudio.PlayMenuClick();
+            SimulationProgress.IncrementIterationOnRetry();
             Time.timeScale = 1f;
             SceneTransition.Begin(SceneManager.GetActiveScene().name, 0.05f, 0.35f);
         }

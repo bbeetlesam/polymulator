@@ -279,6 +279,41 @@
     align-items: center;
 }
 
+.story-feed {
+    flex-direction: row;
+    align-items: center;
+    max-width: 680px;
+    background-color: rgba(17, 17, 27, 0.92);
+    border-color: #45475A;
+    border-width: 1px;
+    border-left-width: 4px;
+    border-left-color: #74C7EC;
+    border-radius: 6px;
+    padding: 8px 14px;
+    margin-bottom: 8px;
+    transition-property: opacity;
+    transition-duration: 0.22s;
+}
+
+.story-feed--hidden {
+    opacity: 0;
+}
+
+.story-speaker {
+    -unity-font-definition: url("/Assets/UI/Fonts/Font_RobotoMono.asset");
+    font-size: 12px;
+    color: #74C7EC;
+    margin-right: 10px;
+    min-width: 48px;
+}
+
+.story-text {
+    -unity-font-definition: url("/Assets/UI/Fonts/Font_InterRegular.asset");
+    font-size: 13px;
+    color: #CDD6F4;
+    white-space: normal;
+}
+
 .context-prompt {
     flex-direction: row;
     align-items: center;
@@ -437,8 +472,21 @@
     -unity-font-definition: url("/Assets/UI/Fonts/Font_InterSemiBold.asset");
     font-size: 13px;
     color: #A6ADC8;
-    margin-bottom: 18px;
+    margin-bottom: 10px;
     -unity-text-align: middle-center;
+}
+
+.modal-rank {
+    -unity-font-definition: url("/Assets/UI/Fonts/Font_InterSemiBold.asset");
+    font-size: 15px;
+    color: #F9E2AF;
+    letter-spacing: 2px;
+    margin-bottom: 12px;
+    -unity-text-align: middle-center;
+}
+
+.modal-rank--hidden {
+    display: none;
 }
 
 .modal-actions {
@@ -523,6 +571,9 @@
     font-size: 12px;
     color: #94E2D5;
     -unity-text-align: middle-center;
+    white-space: normal;
+    margin-left: 4px;
+    margin-right: 4px;
     border-top-color: #313244;
     border-top-width: 1px;
     padding-top: 7px;

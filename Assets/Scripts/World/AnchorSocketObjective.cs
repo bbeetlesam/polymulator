@@ -14,14 +14,27 @@ namespace Polymulator
         public Transform cradleSeatPoint;
         public Vector3 coreRespawnGridPos = new Vector3(0f, 2.55f, 11f);
 
+        [Header("Orientation Lock")]
+        public bool requireFacingAngle;
+        public float requiredFacingYaw;
+        [Range(10f, 45f)] public float yawToleranceDegrees = 32f;
+
         private bool completed;
         private InteractableObject awaitingReleaseCore;
         private float rejectCooldownUntil;
         private Vector3 lockStartPos;
         private Quaternion lockStartRot;
         private float lockBlend;
+        private TelekinesisController cachedTelekinesis;
 
         public bool IsCompleted => completed;
+
+        private TelekinesisController GetTelekinesis()
+        {
+            if (cachedTelekinesis == null)
+                cachedTelekinesis = Object.FindFirstObjectByType<TelekinesisController>();
+            return cachedTelekinesis;
+        }
 
         public event System.Action OnObjectiveCompleted;
         public event System.Action<string, Color> OnObjectiveFeedback;
@@ -55,16 +68,48 @@ namespace Polymulator
             {
                 float seatDist = Vector3.Distance(awaitingReleaseCore.transform.position, GetCradleSeatPosition());
                 bool releasedFromCarry = awaitingReleaseCore.Body != null && !awaitingReleaseCore.Body.isKinematic;
-                TelekinesisController tk = Object.FindFirstObjectByType<TelekinesisController>();
+                TelekinesisController tk = GetTelekinesis();
                 bool isTetheredNow = tk != null && tk.TetheredObject == awaitingReleaseCore;
 
                 if ((releasedFromCarry && !isTetheredNow) || (isTetheredNow && seatDist <= GridSettings.ToWorld(0.75f)))
                 {
                     if (isTetheredNow) tk.Release(false);
-                    LockCore(awaitingReleaseCore);
+                    TryAcceptCore(awaitingReleaseCore);
                     awaitingReleaseCore = null;
                 }
             }
+        }
+
+        private bool IsOrientationMatched(InteractableObject core)
+        {
+            if (!requireFacingAngle || core == null) return true;
+            float delta = Mathf.Abs(Mathf.DeltaAngle(core.transform.eulerAngles.y, requiredFacingYaw));
+            return delta <= yawToleranceDegrees;
+        }
+
+        private void TryAcceptCore(InteractableObject core)
+        {
+            if (IsOrientationMatched(core))
+            {
+                LockCore(core);
+                return;
+            }
+
+            if (Time.time < rejectCooldownUntil) return;
+            rejectCooldownUntil = Time.time + 1.4f;
+            SimulationAudio.PlayAnchorReject(transform.position);
+            SimulationVFX.Ring(transform.position, PaletteSettings.Peach, 1.75f, 0.35f);
+            if (core.Body != null)
+            {
+                Vector3 kick = (core.transform.position - transform.position);
+                kick.y = 0f;
+                if (kick.sqrMagnitude < 0.01f) kick = Vector3.back;
+                core.Body.linearVelocity = kick.normalized * GridSettings.ToWorld(2.2f) + Vector3.up * GridSettings.ToWorld(1.8f);
+            }
+            OnObjectiveFeedback?.Invoke(
+                "ROTATION MISMATCH (" + Mathf.RoundToInt(core.transform.eulerAngles.y) +
+                " deg) — ALIGN TO " + Mathf.RoundToInt(Mathf.Repeat(requiredFacingYaw, 360f)) + " deg [R]",
+                PaletteSettings.Peach);
         }
 
         private Vector3 GetCradleSeatPosition()
@@ -82,17 +127,7 @@ namespace Polymulator
 
             if (obj == targetCore)
             {
-                TelekinesisController tk = Object.FindFirstObjectByType<TelekinesisController>();
-                bool isTetheredNow = tk != null && tk.TetheredObject == obj;
-                if (obj.Body != null && !obj.Body.isKinematic && !isTetheredNow)
-                {
-                    LockCore(obj);
-                }
-                else
-                {
-                    awaitingReleaseCore = obj;
-                    OnObjectiveFeedback?.Invoke("ALIGNED WITH ANCHOR — RELEASE TO LOCK CORE-01", PaletteSettings.Green);
-                }
+                EvaluateCoreInsideTrigger(obj, true);
                 return;
             }
 
@@ -102,6 +137,36 @@ namespace Polymulator
                 SimulationAudio.PlayAnchorReject(transform.position);
                 SimulationVFX.Ring(transform.position, PaletteSettings.Peach, 1.55f, 0.35f);
                 OnObjectiveFeedback?.Invoke("ANCHOR REQUIRES CORE-01 (PLATFORM HIGH)", PaletteSettings.Peach);
+            }
+        }
+
+        private void OnTriggerStay(Collider other)
+        {
+            if (completed || targetCore == null) return;
+            InteractableObject obj = other.GetComponentInParent<InteractableObject>();
+            if (obj == targetCore)
+                EvaluateCoreInsideTrigger(obj, false);
+        }
+
+        private void EvaluateCoreInsideTrigger(InteractableObject obj, bool emitHoldGuidance)
+        {
+            TelekinesisController tk = GetTelekinesis();
+            bool isTetheredNow = tk != null && tk.TetheredObject == obj;
+            if (obj.Body != null && !obj.Body.isKinematic && !isTetheredNow)
+            {
+                awaitingReleaseCore = null;
+                TryAcceptCore(obj);
+            }
+            else if (emitHoldGuidance)
+            {
+                awaitingReleaseCore = obj;
+                string orientHint = requireFacingAngle && !IsOrientationMatched(obj)
+                    ? "ALIGN CORE [R] TO " + Mathf.RoundToInt(Mathf.Repeat(requiredFacingYaw, 360f)) + " deg FIRST"
+                    : "ALIGNED WITH ANCHOR — RELEASE TO LOCK CORE-01";
+                Color hintCol = requireFacingAngle && !IsOrientationMatched(obj)
+                    ? PaletteSettings.Yellow
+                    : PaletteSettings.Green;
+                OnObjectiveFeedback?.Invoke(orientHint, hintCol);
             }
         }
 

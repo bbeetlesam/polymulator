@@ -10,6 +10,7 @@ namespace Polymulator
     {
         [Header("Links")]
         public WeightedPressurePlate triggerPlate;
+        public WeightedPressurePlate[] requiredPlates;
         public Collider[] stepColliders;
         public Transform[] animatedSegments;
         public Renderer[] hologramRenderers;
@@ -38,24 +39,53 @@ namespace Polymulator
 
         private void OnEnable()
         {
-            if (triggerPlate != null)
-                triggerPlate.OnActivatedChanged += HandlePlateChanged;
+            SubscribePlates(true);
         }
 
         private void OnDisable()
         {
-            if (triggerPlate != null)
-                triggerPlate.OnActivatedChanged -= HandlePlateChanged;
+            SubscribePlates(false);
         }
 
         private void Start()
         {
-            SetPowered(triggerPlate != null && triggerPlate.IsActivated, true);
+            SetPowered(AreAllPlatesActive(), true);
         }
 
-        private void HandlePlateChanged(bool active)
+        private void HandlePlateChanged(bool _)
         {
-            SetPowered(active, false);
+            SetPowered(AreAllPlatesActive(), false);
+        }
+
+        private void SubscribePlates(bool subscribe)
+        {
+            if (requiredPlates != null && requiredPlates.Length > 0)
+            {
+                for (int i = 0; i < requiredPlates.Length; i++)
+                {
+                    if (requiredPlates[i] == null) continue;
+                    if (subscribe) requiredPlates[i].OnActivatedChanged += HandlePlateChanged;
+                    else requiredPlates[i].OnActivatedChanged -= HandlePlateChanged;
+                }
+            }
+            if (triggerPlate != null)
+            {
+                if (subscribe) triggerPlate.OnActivatedChanged += HandlePlateChanged;
+                else triggerPlate.OnActivatedChanged -= HandlePlateChanged;
+            }
+        }
+
+        private bool AreAllPlatesActive()
+        {
+            if (requiredPlates != null && requiredPlates.Length > 0)
+            {
+                for (int i = 0; i < requiredPlates.Length; i++)
+                {
+                    if (requiredPlates[i] == null || !requiredPlates[i].IsActivated) return false;
+                }
+                return true;
+            }
+            return triggerPlate != null && triggerPlate.IsActivated;
         }
 
         public void SetPowered(bool powered, bool instant)

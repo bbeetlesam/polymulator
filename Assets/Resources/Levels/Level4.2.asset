@@ -1,0 +1,39 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 2763873eddf04f878f13270a059f332a, type: 3}
+  m_Name: Level4.2
+  m_EditorClassIdentifier: Assembly-CSharp::Polymulator.LevelInfo
+  levelTitle: Ambang Badai
+  chapterSubtitle: REKONSTRUKSI
+  districtLabel: AMBANG BADAI // TEPI
+  parActions: 13
+  requireFacingAngle: 1
+  requiredFacingYaw: 90
+  fragmentTitle: Rekaman RECT-126
+  triggerGlitchOnClear: 1
+  playPianoOnClear: 1
+  openingDialogue:
+  - speaker: SIM
+    text: Ujian Akhir Badai. Bebaskan material tanggul, aktifkan jembatan menara,
+      dan kunci CORE pada 90 deg.
+  - speaker: MIRA
+    text: Semua bergantung pada kalibrasi terakhirmu!
+  clearDialogue:
+  - speaker: SIM
+    text: 'Objektif tercapai: selamatkan mereka.'
+  - speaker: RECT
+    text: Ruang untuk pulang terbuka.
+  hints:
+  - 1) Taruh CUBE-02 (1.5t) di Pad Barat Daya untuk membebaskan CUBE-01 & CUBE-06
+    (2.0t).
+  - 2) Bawa keduanya ke Pad Barat & Pad Timur (masing-masing 2.0t), lalu ambil CORE-01
+    & putar [R] dari 270 deg -> 90 deg!
