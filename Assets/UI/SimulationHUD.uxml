@@ -87,8 +87,13 @@
                 </ui:VisualElement>
             </ui:VisualElement>
 
-            <!-- Bottom-Center: Context Prompt + 6-Slot Ability Dock -->
+            <!-- Bottom-Center: Story Feed + Context Prompt + 6-Slot Ability Dock -->
             <ui:VisualElement class="bottom-center-stack" picking-mode="Ignore">
+                <ui:VisualElement name="story-feed" class="story-feed story-feed--hidden" picking-mode="Ignore">
+                    <ui:Label name="story-speaker-label" text="SIM" class="story-speaker" picking-mode="Ignore" />
+                    <ui:Label name="story-text-label" text="..." class="story-text" picking-mode="Ignore" />
+                </ui:VisualElement>
+
                 <ui:VisualElement name="context-prompt" class="context-prompt context-prompt--hidden" picking-mode="Ignore">
                     <ui:VisualElement name="context-prompt-accent" class="context-prompt-accent" picking-mode="Ignore" />
                     <ui:Label name="context-prompt-label" text="[ E ]  PICK UP  CUBE-01" class="context-prompt-label" picking-mode="Ignore" />
@@ -145,6 +150,7 @@
                 <ui:VisualElement name="modal-accent-bar" class="modal-top-bar" />
                 <ui:Label name="modal-title" text="CHAMBER PAUSED" class="modal-title" />
                 <ui:Label name="modal-subtitle" text="CHAMBER 1.1  //  WARMING UP" class="modal-subtitle" />
+                <ui:Label name="modal-rank-label" text="" class="modal-rank modal-rank--hidden" />
                 <ui:VisualElement name="modal-metrics" class="modal-metrics modal-metrics--hidden">
                     <ui:VisualElement class="modal-metric-row">
                         <ui:VisualElement class="modal-metric-cell">
@@ -163,6 +169,7 @@
                     <ui:Label name="metric-concept-note" text="CONCEPTS // TRANSLATION (X,Y,Z) • ROTATION Ry • MASS CONDUIT" class="metric-concept-note" />
                 </ui:VisualElement>
                 <ui:VisualElement class="modal-actions">
+                    <ui:Button name="btn-next" text="NEXT CHAMBER   [ ENTER ]" class="modal-btn modal-btn--primary modal-btn--hidden" />
                     <ui:Button name="btn-resume" text="RESUME   [ ESC ]" class="modal-btn modal-btn--primary" />
                     <ui:Button name="btn-replay" text="REPLAY CHAMBER   [ R ]" class="modal-btn" />
                     <ui:Button name="btn-mainmenu" text="MAIN MENU   [ M ]" class="modal-btn" />

@@ -1,0 +1,39 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 2763873eddf04f878f13270a059f332a, type: 3}
+  m_Name: Level2.1
+  m_EditorClassIdentifier: Assembly-CSharp::Polymulator.LevelInfo
+  levelTitle: Angkat
+  chapterSubtitle: ELEVASI
+  districtLabel: RUSUN MATAHARI // L1
+  parActions: 7
+  requireFacingAngle: 0
+  requiredFacingYaw: 0
+  fragmentTitle: 
+  triggerGlitchOnClear: 0
+  playPianoOnClear: 0
+  openingDialogue:
+  - speaker: SIM
+    text: ELEVASI. Ketinggian mengubah cara ruang terbaca.
+  - speaker: RECT
+    text: Angka iterasi di memori terus tercatat.
+  - speaker: SIM
+    text: Fokus pada atap Rusun Matahari.
+  clearDialogue:
+  - speaker: MIRA
+    text: Satu platform logistik berhasil diangkat! Masih ada warga di atap blok
+      sebelah.
+  hints:
+  - Pad terletak di atas Balkon Timur (+1.0 GU). Bawa CUBE-01 menaiki tangga selatan
+    Balkon Timur.
+  - Gunakan Telekinesis [Tab] jika ingin mengangkat beban dari lantai langsung ke
+    atas.

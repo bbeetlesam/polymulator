@@ -1,5 +1,6 @@
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.InputSystem;
 
 namespace Polymulator
 {
@@ -18,11 +19,12 @@ namespace Polymulator
         private const int EnterButton = 0;
         private const int ShutdownButton = 1;
         private const int ChapterCount = 4;
-        private const int LevelsPerChapter = 4;
-        private const int CurrentChapter = 1;
-        private const int CurrentLevel = 1;
+        private const int MaxLevelsPerChapter = 4;
         private const float ChapterNodeSize = 96f;
         private const float ScrollResponsiveness = 14f;
+
+        private int currentChapter = 1;
+        private int currentLevel = 1;
 
         [SerializeField] private string levelSceneFormat = "Level{0}.{1}";
 
@@ -64,6 +66,7 @@ namespace Polymulator
         private Texture2D chapterBlueTexture;
         private Texture2D dotDarkTexture;
         private Texture2D dotBlueTexture;
+        private Texture2D dotGreenTexture;
         private Texture2D lineDarkTexture;
         private Texture2D lineBlueTexture;
 
@@ -74,7 +77,7 @@ namespace Polymulator
         private GUIStyle tooltipStyle;
         private GUIStyle hintStyle;
 
-        private readonly string[,] levelTitles = new string[ChapterCount + 1, LevelsPerChapter + 1];
+        private readonly string[,] levelTitles = new string[ChapterCount + 1, MaxLevelsPerChapter + 1];
         private int hoveredChapter;
         private int hoveredLevel;
         private Rect hoveredDotRect;
@@ -104,6 +107,8 @@ namespace Polymulator
         private void Awake()
         {
             SimulationAudio.EnsureInstance();
+            RefreshCurrentProgress();
+
             backgroundTexture = SolidTexture(PaletteSettings.Mantle);
             buttonNormalTexture = SolidTexture(PaletteSettings.BaseSurface);
             buttonHoverTexture = SolidTexture(PaletteSettings.Surface1);
@@ -114,22 +119,47 @@ namespace Polymulator
             chapterBlueTexture = RoundedTexture(PaletteSettings.Blue, 128, 24f);
             dotDarkTexture = RoundedTexture(PaletteSettings.BaseSurface, 32, 16f);
             dotBlueTexture = RoundedTexture(PaletteSettings.Blue, 32, 16f);
+            dotGreenTexture = RoundedTexture(PaletteSettings.Green, 32, 16f);
             lineDarkTexture = SolidTexture(PaletteSettings.Surface0);
             lineBlueTexture = SolidTexture(PaletteSettings.Blue);
 
             for (int chapter = 1; chapter <= ChapterCount; chapter++)
             {
-                for (int level = 1; level <= LevelsPerChapter; level++)
+                int count = SimulationProgress.GetLevelsInChapter(chapter);
+                for (int level = 1; level <= count; level++)
                 {
-                    LevelInfo info = Resources.Load<LevelInfo>("Levels/" + LevelSceneName(chapter, level));
-                    if (info != null)
+                    string scene = LevelSceneName(chapter, level);
+                    LevelInfo info = Resources.Load<LevelInfo>("Levels/" + scene);
+                    if (info != null && !string.IsNullOrEmpty(info.Title))
+                    {
                         levelTitles[chapter, level] = info.Title;
+                    }
+                    else
+                    {
+                        for (int k = 0; k < SimulationProgress.Catalog.Length; k++)
+                        {
+                            if (SimulationProgress.Catalog[k].chapter == chapter &&
+                                SimulationProgress.Catalog[k].level == level)
+                            {
+                                levelTitles[chapter, level] = SimulationProgress.Catalog[k].fallbackTitle;
+                                break;
+                            }
+                        }
+                    }
                 }
             }
         }
 
+        private void RefreshCurrentProgress()
+        {
+            var highest = SimulationProgress.GetHighestUnlocked();
+            currentChapter = highest.chapter;
+            currentLevel = highest.level;
+        }
+
         private void Update()
         {
+            HandleKeyboardNavigation();
             float dt = Time.unscaledDeltaTime;
             for (int i = pieces.Count - 1; i >= 0; i--)
             {
@@ -189,7 +219,7 @@ namespace Polymulator
 
             GUI.Label(new Rect(0f, enterRect.y - 126f, Screen.width, 64f), "POLYMULATOR", TitleStyle);
             GUI.Label(new Rect(0f, enterRect.y - 56f, Screen.width, 28f),
-                "SIMULATION SANDBOX  //  SPATIAL CALIBRATION", SubtitleStyle);
+                "SIMULATION SANDBOX  //  ITERATION #" + SimulationProgress.IterationNumber, SubtitleStyle);
 
             Vector2 mousePos = Event.current.mousePosition;
             int hoveredBtn = enterRect.Contains(mousePos) ? EnterButton
@@ -201,17 +231,57 @@ namespace Polymulator
             DrawFrameBorder(enterRect, 2f, borderAccentTexture);
             DrawFrameBorder(shutdownRect, 1.5f, borderMutedTexture);
 
-            if (GUI.Button(enterRect, "ENTER", ButtonStyle) ||
-                (Event.current.type == EventType.KeyDown &&
-                 (Event.current.keyCode == KeyCode.Return || Event.current.keyCode == KeyCode.KeypadEnter)))
-            {
-                if (Event.current.type == EventType.KeyDown) Event.current.Use();
+            string enterText = GetEnterButtonText();
+            if (GUI.Button(enterRect, enterText, ButtonStyle))
                 Select(EnterButton);
-            }
             if (GUI.Button(shutdownRect, "SHUTDOWN", ButtonStyle)) Select(ShutdownButton);
 
             GUI.Label(new Rect(0f, shutdownRect.yMax + 28f, Screen.width, 24f),
                 "[ ENTER ]  LAUNCH CHAPTER INDEX", HintStyle);
+        }
+
+        private string GetEnterButtonText()
+        {
+            return currentChapter > 1 || currentLevel > 1
+                ? string.Format("CONTINUE  {0}.{1}", currentChapter, currentLevel)
+                : "ENTER";
+        }
+
+        private void HandleKeyboardNavigation()
+        {
+            Keyboard kb = Keyboard.current;
+            if (kb == null) return;
+
+            if (state == MenuState.Title)
+            {
+                if (kb.enterKey.wasPressedThisFrame || kb.numpadEnterKey.wasPressedThisFrame)
+                    Select(EnterButton);
+                return;
+            }
+
+            if (state != MenuState.LevelMenu) return;
+
+            if (kb.leftArrowKey.wasPressedThisFrame || kb.aKey.wasPressedThisFrame)
+                targetScroll = Mathf.Clamp(targetScroll - 160f, minScroll, maxScroll);
+            else if (kb.rightArrowKey.wasPressedThisFrame || kb.dKey.wasPressedThisFrame)
+                targetScroll = Mathf.Clamp(targetScroll + 160f, minScroll, maxScroll);
+            else if (kb.f2Key.wasPressedThisFrame)
+            {
+                SimulationProgress.IsDemoUnlocked = !SimulationProgress.IsDemoUnlocked;
+                RefreshCurrentProgress();
+                SimulationAudio.PlayMenuClick();
+            }
+            else if (kb.f9Key.wasPressedThisFrame)
+            {
+                SimulationProgress.ResetAll();
+                RefreshCurrentProgress();
+                SimulationAudio.PlayMenuSmash();
+            }
+            else if (kb.escapeKey.wasPressedThisFrame)
+            {
+                state = MenuState.Title;
+                SimulationAudio.PlayMenuHover();
+            }
         }
 
         private void DrawFrameBorder(Rect rect, float thickness, Texture2D tex)
@@ -313,12 +383,12 @@ namespace Polymulator
             }
 
             if (!buttonBroken)
-                GUI.Label(enterMoved, "ENTER", ButtonStyle);
+                GUI.Label(enterMoved, GetEnterButtonText(), ButtonStyle);
 
             Rect fallingRect = new Rect(squareX, squareY, squareSize, squareSize);
             GUI.DrawTexture(fallingRect, chapterBlueTexture, ScaleMode.StretchToFill);
             ChapterLabelStyle.normal.textColor = PaletteSettings.Mantle;
-            GUI.Label(fallingRect, CurrentChapter.ToString(), ChapterLabelStyle);
+            GUI.Label(fallingRect, currentChapter.ToString(), ChapterLabelStyle);
 
             if (t < 1f) return;
 
@@ -334,8 +404,17 @@ namespace Polymulator
         {
             HandleLevelMenuInput();
             DrawRibbon(GetLayout());
+
+            string headerLeft = string.Format("ITERATION #{0}   •   MEMORIES {1} / 5",
+                SimulationProgress.IterationNumber, SimulationProgress.GetCollectedFragmentCount());
+            GUI.Label(new Rect(28f, 22f, 440f, 26f), headerLeft, LeftMetaStyle);
+
+            string demoLabel = SimulationProgress.IsDemoUnlocked ? "[ F2 ]  DEMO ACCESS: ALL ON" : "[ F2 ]  DEMO ACCESS: OFF";
+            GUI.Label(new Rect(Screen.width - 300f, 22f, 272f, 26f), demoLabel, RightMetaStyle);
+
             GUI.Label(new Rect(0f, Screen.height - 54f, Screen.width, 28f),
-                "DRAG  OR  SCROLL / A-D  TO BROWSE CHAPTERS   •   CLICK  NODE 1.1  TO CALIBRATE", HintStyle);
+                string.Format("DRAG OR SCROLL / A-D  BROWSE   •   CLICK {0}.{1} TO CALIBRATE   •   [ ESC ] BACK",
+                    currentChapter, currentLevel), HintStyle);
         }
 
         private void DrawRibbon(Layout layout, bool skipCurrentNode = false)
@@ -345,18 +424,19 @@ namespace Polymulator
 
             for (int chapter = 1; chapter <= ChapterCount; chapter++)
             {
+                int count = SimulationProgress.GetLevelsInChapter(chapter);
                 Rect node = GetChapterNodeRect(chapter, layout);
                 float segmentX = node.xMax;
                 float segmentY = node.center.y - layout.lineHeight * 0.5f;
 
-                if (chapter < CurrentChapter)
+                if (chapter < currentChapter)
                 {
                     GUI.DrawTexture(new Rect(segmentX, segmentY, layout.segmentLength,
                         layout.lineHeight), lineBlueTexture, ScaleMode.StretchToFill);
                 }
-                else if (chapter == CurrentChapter)
+                else if (chapter == currentChapter)
                 {
-                    Rect currentDot = GetLevelDotRect(chapter, CurrentLevel, layout);
+                    Rect currentDot = GetLevelDotRect(chapter, currentLevel, layout);
                     float blueWidth = Mathf.Max(0f, currentDot.center.x - segmentX);
                     GUI.DrawTexture(new Rect(segmentX, segmentY, blueWidth,
                         layout.lineHeight), lineBlueTexture, ScaleMode.StretchToFill);
@@ -370,12 +450,35 @@ namespace Polymulator
                         layout.lineHeight), lineDarkTexture, ScaleMode.StretchToFill);
                 }
 
-                for (int level = 1; level <= LevelsPerChapter; level++)
+                for (int level = 1; level <= count; level++)
                 {
                     Rect dot = GetLevelDotRect(chapter, level, layout);
-                    bool unlocked = IsLevelUnlocked(chapter, level);
-                    Texture2D dotTexture = unlocked ? dotBlueTexture : dotDarkTexture;
-                    GUI.DrawTexture(dot, dotTexture, ScaleMode.StretchToFill);
+                    string sceneName = LevelSceneName(chapter, level);
+                    bool unlocked = SimulationProgress.IsUnlocked(chapter, level);
+                    bool cleared = SimulationProgress.IsCleared(sceneName);
+                    bool isCurrentTarget = chapter == currentChapter && level == currentLevel && !cleared;
+
+                    Rect drawDot = dot;
+                    if (isCurrentTarget)
+                    {
+                        float pulse = 2.5f * Mathf.Sin(Time.unscaledTime * 4.2f);
+                        drawDot = new Rect(dot.x - pulse, dot.y - pulse, dot.width + pulse * 2f, dot.height + pulse * 2f);
+                    }
+
+                    Texture2D dotTexture = cleared ? dotGreenTexture : (unlocked ? dotBlueTexture : dotDarkTexture);
+                    GUI.DrawTexture(drawDot, dotTexture, ScaleMode.StretchToFill);
+
+                    if (cleared)
+                    {
+                        int stars = SimulationProgress.GetStars(sceneName);
+                        string starStr = new string('★', stars);
+                        GUI.Label(new Rect(dot.center.x - 32f, dot.yMax + 4f, 64f, 18f), starStr, HintStyle);
+                    }
+                    else
+                    {
+                        GUI.Label(new Rect(dot.center.x - 24f, dot.y - 22f, 48f, 18f),
+                            chapter + "." + level, HintStyle);
+                    }
 
                     Event current = Event.current;
                     if (state == MenuState.LevelMenu && dot.Contains(current.mousePosition))
@@ -393,16 +496,21 @@ namespace Polymulator
                     dragging = false;
                     SimulationAudio.PlayMenuClick();
                     state = MenuState.Done;
-                    SceneTransition.Begin(LevelSceneName(chapter, level), transitionDelay, fadeDuration);
+                    SceneTransition.Begin(sceneName, transitionDelay, fadeDuration);
                 }
             }
 
             for (int chapter = 1; chapter <= ChapterCount; chapter++)
             {
-                if (skipCurrentNode && chapter == CurrentChapter) continue;
-
                 Rect node = GetChapterNodeRect(chapter, layout);
-                bool reached = chapter <= CurrentChapter;
+                string chapterSub = chapter < SimulationProgress.ChapterNames.Length
+                    ? SimulationProgress.ChapterNames[chapter] : string.Empty;
+                if (!string.IsNullOrEmpty(chapterSub))
+                    GUI.Label(new Rect(node.center.x - 80f, node.y - 26f, 160f, 20f), chapterSub, HintStyle);
+
+                if (skipCurrentNode && chapter == currentChapter) continue;
+
+                bool reached = chapter <= currentChapter || SimulationProgress.IsDemoUnlocked;
                 Texture2D nodeTexture = reached ? chapterBlueTexture : chapterDarkTexture;
                 GUI.DrawTexture(node, nodeTexture, ScaleMode.StretchToFill);
 
@@ -413,6 +521,7 @@ namespace Polymulator
             }
 
             Rect endNode = GetChapterNodeRect(ChapterCount + 1, layout);
+            GUI.Label(new Rect(endNode.center.x - 70f, endNode.y - 26f, 140f, 20f), "EPILOG", HintStyle);
             GUI.DrawTexture(endNode, chapterDarkTexture, ScaleMode.StretchToFill);
             ChapterLabelStyle.normal.textColor = PaletteSettings.TextPrimary;
             GUI.Label(endNode, "N", ChapterLabelStyle);
@@ -425,11 +534,24 @@ namespace Polymulator
                     lastHoveredChapter = hoveredChapter;
                     lastHoveredLevel = hoveredLevel;
                 }
+                string sceneName = LevelSceneName(hoveredChapter, hoveredLevel);
+                bool unlocked = SimulationProgress.IsUnlocked(hoveredChapter, hoveredLevel);
                 string labelTitle = levelTitles[hoveredChapter, hoveredLevel];
-                string formatted = string.IsNullOrEmpty(labelTitle)
-                    ? string.Format("{0}.{1}  //  LOCKED", hoveredChapter, hoveredLevel)
-                    : string.Format("{0}.{1}  //  {2}", hoveredChapter, hoveredLevel, labelTitle.ToUpperInvariant());
-                DrawTooltip(hoveredDotRect, formatted, IsLevelUnlocked(hoveredChapter, hoveredLevel));
+                string formatted;
+                if (!unlocked)
+                {
+                    formatted = string.Format("{0}.{1}  //  LOCKED ({2})", hoveredChapter, hoveredLevel,
+                        string.IsNullOrEmpty(labelTitle) ? "SECTOR" : labelTitle.ToUpperInvariant());
+                }
+                else
+                {
+                    int stars = SimulationProgress.GetStars(sceneName);
+                    string rankSuffix = stars > 0 ? "  [" + new string('★', stars) + new string('☆', 3 - stars) + "]" : "";
+                    string fragSuffix = SimulationProgress.HasFragment(sceneName) ? "  •  MEMORY" : "";
+                    formatted = string.Format("{0}.{1}  //  {2}{3}{4}", hoveredChapter, hoveredLevel,
+                        (labelTitle ?? "SECTOR").ToUpperInvariant(), rankSuffix, fragSuffix);
+                }
+                DrawTooltip(hoveredDotRect, formatted, unlocked);
             }
             else
             {
@@ -520,10 +642,10 @@ namespace Polymulator
                 Layout raw = BuildLayout();
                 float baseX = Mathf.Max(16f, (Screen.width - raw.contentWidth) * 0.5f);
                 float alignScroll = baseX + raw.padding +
-                    (CurrentChapter - 1) * raw.pitch + raw.nodeSize * 0.5f - enterRect.center.x;
+                    (currentChapter - 1) * raw.pitch + raw.nodeSize * 0.5f - enterRect.center.x;
                 horizontalScroll = targetScroll = alignScroll;
 
-                fallTargetRect = GetChapterNodeRect(CurrentChapter, GetLayout());
+                fallTargetRect = GetChapterNodeRect(currentChapter, GetLayout());
                 state = MenuState.Falling;
             }
             else
@@ -571,15 +693,6 @@ namespace Polymulator
                     }
                     current.Use();
                     break;
-
-                case EventType.KeyDown:
-                    if (current.keyCode == KeyCode.LeftArrow || current.keyCode == KeyCode.A)
-                        targetScroll = Mathf.Clamp(targetScroll - 160f, minScroll, maxScroll);
-                    else if (current.keyCode == KeyCode.RightArrow || current.keyCode == KeyCode.D)
-                        targetScroll = Mathf.Clamp(targetScroll + 160f, minScroll, maxScroll);
-                    else break;
-                    current.Use();
-                    break;
             }
         }
 
@@ -587,7 +700,8 @@ namespace Polymulator
         {
             for (int chapter = 1; chapter <= ChapterCount; chapter++)
             {
-                for (int level = 1; level <= LevelsPerChapter; level++)
+                int count = SimulationProgress.GetLevelsInChapter(chapter);
+                for (int level = 1; level <= count; level++)
                 {
                     if (GetLevelDotRect(chapter, level, layout).Contains(point)) return true;
                 }
@@ -619,7 +733,7 @@ namespace Polymulator
             // The scroll range has to include the landing scroll so the LevelMenu
             // doesn't jump the moment the user starts scrolling after the fall.
             float alignCurrent = baseX + layout.padding +
-                (CurrentChapter - 1) * layout.pitch + layout.nodeSize * 0.5f - EnterCenterX;
+                (currentChapter - 1) * layout.pitch + layout.nodeSize * 0.5f - EnterCenterX;
             float normalMax = Mathf.Max(0f, layout.contentWidth - Screen.width + layout.padding);
             minScroll = Mathf.Min(0f, alignCurrent);
             maxScroll = Mathf.Max(normalMax, alignCurrent);
@@ -640,16 +754,11 @@ namespace Polymulator
         private static Rect GetLevelDotRect(int chapter, int level, Layout layout)
         {
             Rect node = GetChapterNodeRect(chapter, layout);
-            float spacing = layout.segmentLength / (LevelsPerChapter + 1);
+            int count = Mathf.Max(1, SimulationProgress.GetLevelsInChapter(chapter));
+            float spacing = layout.segmentLength / (count + 1);
             float centreX = node.xMax + spacing * level;
             return new Rect(centreX - layout.dotSize * 0.5f,
                 node.center.y - layout.dotSize * 0.5f, layout.dotSize, layout.dotSize);
-        }
-
-        private static bool IsLevelUnlocked(int chapter, int level)
-        {
-            return chapter < CurrentChapter ||
-                (chapter == CurrentChapter && level <= CurrentLevel);
         }
 
         private string LevelSceneName(int chapter, int level)
@@ -711,6 +820,35 @@ namespace Polymulator
                 subtitleStyle.font = GUI.skin.font;
                 subtitleStyle.normal.textColor = PaletteSettings.TextSecondary;
                 return subtitleStyle;
+            }
+        }
+
+        private GUIStyle leftMetaStyle;
+        private GUIStyle rightMetaStyle;
+
+        private GUIStyle LeftMetaStyle
+        {
+            get
+            {
+                if (leftMetaStyle == null)
+                {
+                    leftMetaStyle = new GUIStyle(HintStyle) { alignment = TextAnchor.MiddleLeft };
+                    leftMetaStyle.normal.textColor = PaletteSettings.Teal;
+                }
+                return leftMetaStyle;
+            }
+        }
+
+        private GUIStyle RightMetaStyle
+        {
+            get
+            {
+                if (rightMetaStyle == null)
+                    rightMetaStyle = new GUIStyle(HintStyle) { alignment = TextAnchor.MiddleRight };
+                rightMetaStyle.normal.textColor = SimulationProgress.IsDemoUnlocked
+                    ? PaletteSettings.Green
+                    : PaletteSettings.Overlay2;
+                return rightMetaStyle;
             }
         }
 
@@ -848,6 +986,7 @@ namespace Polymulator
             Destroy(chapterBlueTexture);
             Destroy(dotDarkTexture);
             Destroy(dotBlueTexture);
+            Destroy(dotGreenTexture);
             Destroy(lineDarkTexture);
             Destroy(lineBlueTexture);
         }

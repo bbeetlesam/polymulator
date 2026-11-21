@@ -1,0 +1,35 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 2763873eddf04f878f13270a059f332a, type: 3}
+  m_Name: Level2.2
+  m_EditorClassIdentifier: Assembly-CSharp::Polymulator.LevelInfo
+  levelTitle: Susun
+  chapterSubtitle: ELEVASI
+  districtLabel: RUSUN MATAHARI // L2
+  parActions: 9
+  requireFacingAngle: 0
+  requiredFacingYaw: 0
+  fragmentTitle: 
+  triggerGlitchOnClear: 0
+  playPianoOnClear: 0
+  openingDialogue:
+  - speaker: DANU
+    text: Tepi makin krisis daya, Mira. Jangan paksakan menara kalau belum seimbang.
+  - speaker: SIM
+    text: Seimbangkan Sayap Barat (1.4t) dan Sayap Timur (1.8t) untuk akses atap.
+  clearDialogue:
+  - speaker: SIM
+    text: Keseimbangan tercapai. Bersiap menghadapi getaran menara pada Sektor 2.3.
+  hints:
+  - Pad Barat membuka perisai energi atap, sedangkan Pad Timur menyalakan Energy
+    Bridge.
+  - Letakkan CUBE-02 / CYL-01 (1.5t) di Sayap Barat dan CUBE-01 (2.0t) di Sayap Timur.

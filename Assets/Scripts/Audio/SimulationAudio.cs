@@ -1,3 +1,4 @@
+using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
@@ -40,6 +41,10 @@ namespace Polymulator
         private AudioClip clipAnchorReject;
         private AudioClip clipAnchorLock;
         private AudioClip clipImpact;
+        private AudioClip clipFragment;
+        private AudioClip clipGlitch;
+        private AudioClip clipDialog;
+        private readonly AudioClip[] adiPianoNotes = new AudioClip[5];
 
         private readonly List<AudioClip> ownedClips = new List<AudioClip>(20);
 
@@ -157,6 +162,26 @@ namespace Polymulator
             clipImpact = RegisterClip("SFX_Impact", 0.11f,
                 t => Env(t, 0.002f, 0.11f) * 0.34f *
                      (0.70f * Sine(t, Mathf.Lerp(180f, 70f, t / 0.11f)) + 0.30f * SoftNoise(t, 21f) * (1f - t / 0.11f)));
+
+            clipFragment = RegisterClip("SFX_Fragment", 0.45f,
+                t => Env(t, 0.01f, 0.45f) * 0.34f *
+                     (0.45f * Sine(t, 659.25f) + 0.35f * Sine(t, 987.77f) * StepRatio(t, 0.06f) + 0.25f * Sine(t, 1318.51f) * StepRatio(t, 0.14f)));
+
+            clipGlitch = RegisterClip("SFX_Glitch", 0.42f,
+                t => Env(t, 0.01f, 0.42f) * 0.28f * (0.65f * SoftNoise(t, 77f) + 0.35f * Sine(t, 110f + 90f * SoftNoise(t, 3f))));
+
+            clipDialog = RegisterClip("SFX_Dialog", 0.045f,
+                t => Env(t, 0.004f, 0.045f) * 0.14f * Sine(t, 520f));
+
+            // Adi's 5-note warm piano motif (C5 -> E5 -> G5 -> F5 -> D5)
+            float[] noteFreqs = { 523.25f, 659.25f, 783.99f, 698.46f, 587.33f };
+            for (int i = 0; i < noteFreqs.Length; i++)
+            {
+                float hz = noteFreqs[i];
+                adiPianoNotes[i] = RegisterClip("SFX_AdiNote_" + i, 0.75f,
+                    t => Env(t, 0.008f, 0.75f) * 0.30f *
+                         (0.70f * Sine(t, hz) + 0.22f * Sine(t, hz * 2f) * Mathf.Exp(-t * 6f) + 0.08f * Sine(t, hz * 3f) * Mathf.Exp(-t * 9f)));
+            }
         }
 
         private AudioClip RegisterClip(string clipName, float durationSeconds, System.Func<float, float> generator)
@@ -215,6 +240,33 @@ namespace Polymulator
         }
         public static void PlayAnchorReject(Vector3 pos) => EnsureInstance().PlaySpatial("reject", Instance.clipAnchorReject, pos, 0.85f, 0.35f, 0.03f);
         public static void PlayAnchorLock(Vector3 pos) => EnsureInstance().PlaySpatial("anchor_lock", Instance.clipAnchorLock, pos, 1.0f, 0.5f, 0f);
+        public static void PlayFragmentPickup(Vector3 pos, bool playPiano = false)
+        {
+            SimulationAudio a = EnsureInstance();
+            a.PlaySpatial("frag", a.clipFragment, pos, 0.92f, 0.25f, 0.02f);
+            if (playPiano) a.PlayAdiPianoMotif();
+        }
+        public static void PlaySignalGlitch() => EnsureInstance().PlayUI("glitch", Instance.clipGlitch, 0.72f, 0.4f, 0.05f);
+        public static void PlayDialogBlip(bool isHuman) => EnsureInstance().PlayUI("dialog", Instance.clipDialog, 0.6f, 0.08f, isHuman ? 0.08f : 0.02f);
+        public static void TriggerAdiPianoMotif() => EnsureInstance().PlayAdiPianoMotif();
+
+        public void PlayAdiPianoMotif()
+        {
+            StartCoroutine(AdiPianoRoutine());
+        }
+
+        private IEnumerator AdiPianoRoutine()
+        {
+            for (int i = 0; i < adiPianoNotes.Length; i++)
+            {
+                if (adiPianoNotes[i] != null && uiSource != null)
+                {
+                    uiSource.pitch = 1f;
+                    uiSource.PlayOneShot(adiPianoNotes[i], Mathf.Clamp01(uiVolume * 0.88f));
+                }
+                yield return new WaitForSecondsRealtime(0.28f);
+            }
+        }
 
         public static void PlayImpact(Vector3 pos, float relativeSpeed, float mass)
         {
