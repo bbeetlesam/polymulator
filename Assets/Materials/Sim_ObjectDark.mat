@@ -114,7 +114,10 @@ Material:
     - _GlossMapScale: 0
     - _Glossiness: 0
     - _GlossyReflections: 0
+    - _GrainStrength: 0.28
     - _GridUnitSize: 1
+    - _HeightFogEnd: -13
+    - _HeightFogStart: -1.2
     - _Metallic: 0.06
     - _OcclusionStrength: 1
     - _Parallax: 0.005
@@ -139,6 +142,7 @@ Material:
     - _BaseColor: {r: 0.49803922, g: 0.5176471, b: 0.6117647, a: 1}
     - _Color: {r: 0.42352942, g: 0.4392157, b: 0.5254902, a: 1}
     - _EmissionColor: {r: 0, g: 0, b: 0, a: 1}
+    - _FogColor: {r: 0.06666998, g: 0.06666998, b: 0.10587997, a: 1}
     - _RimColor: {r: 0.8039216, g: 0.8392157, b: 0.95686275, a: 1}
     - _SeamColor: {r: 0.06666667, g: 0.06666667, b: 0.105882354, a: 1}
     - _ShadeColor: {r: 0.09411765, g: 0.09411765, b: 0.14509805, a: 1}
