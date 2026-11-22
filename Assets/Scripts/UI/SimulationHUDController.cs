@@ -402,6 +402,7 @@ namespace Polymulator
             {
                 partitionFusionController.OnPartitionPerformed += HandlePartitionPerformed;
                 partitionFusionController.OnFusionPerformed += HandleFusionPerformed;
+                partitionFusionController.OnCutAxisModeChanged += HandleCutAxisModeChanged;
             }
             if (endingController != null)
             {
@@ -452,6 +453,7 @@ namespace Polymulator
             {
                 partitionFusionController.OnPartitionPerformed -= HandlePartitionPerformed;
                 partitionFusionController.OnFusionPerformed -= HandleFusionPerformed;
+                partitionFusionController.OnCutAxisModeChanged -= HandleCutAxisModeChanged;
             }
             if (endingController != null)
             {
@@ -687,6 +689,11 @@ namespace Polymulator
 
         private void HandlePartitionPerformed(InteractableObject a, InteractableObject b) => RefreshTargetAndPrompt(true);
         private void HandleFusionPerformed(InteractableObject merged) => RefreshTargetAndPrompt(true);
+        private void HandleCutAxisModeChanged(PartitionAxisMode mode)
+        {
+            RefreshPartitionFusionDock();
+            RefreshTargetAndPrompt(true);
+        }
         private void HandleChoiceFeedback(string msg) => HandleStatusBanner(msg, PaletteSettings.Peach);
 
         private void HandleEndingChosen(EndingOutcome outcome)
@@ -873,6 +880,7 @@ namespace Polymulator
             }
 
             AddRow("ctrl-row-partition", "[ 1 ]", "Partition (Belah Beban)", false);
+            AddRow("ctrl-row-cut-axis", "[ 3 ]", "Arah Potong Partition", false);
             AddRow("ctrl-row-fusion", "[ 2 ]", "Fusion (Gabung Beban)", false);
             AddRow("ctrl-row-hint", "[ F1 ]", "Petunjuk Ruangan", true);
         }
@@ -892,7 +900,18 @@ namespace Polymulator
             if (iconPartition != null)
                 iconPartition.SetTint(canPart ? PaletteSettings.Peach : PaletteSettings.Overlay0);
             if (keyPartitionLabel != null)
-                keyPartitionLabel.text = canPart ? "[ 1 ] Belah" : "[ 1 ] Terkunci";
+            {
+                string axisBadge = partitionFusionController != null
+                    ? partitionFusionController.CutAxisMode switch
+                    {
+                        PartitionAxisMode.LeftRight => "X",
+                        PartitionAxisMode.FrontBack => "Z",
+                        PartitionAxisMode.Horizontal => "Y",
+                        _ => "AUTO"
+                    }
+                    : "AUTO";
+                keyPartitionLabel.text = canPart ? "[1] Belah (" + axisBadge + ")" : "[ 1 ] Terkunci";
+            }
 
             if (slotFusion != null)
             {
@@ -1026,7 +1045,7 @@ namespace Polymulator
                 hintStep = (hintStep + 1) % 2;
                 string msg = hintStep == 0
                     ? "Petunjuk: Letakkan balok pemberat di atas pelat lantai hingga berubah hijau"
-                    : "Petunjuk: Gunakan [E] untuk mengangkat, [SPACE] untuk Mode Fleksibel, atau [1]/[2] bila aktif";
+                    : "Petunjuk: Gunakan [E] untuk mengangkat, [TAB] untuk Mode Fleksibel, atau [1]/[3]/[2] bila aktif";
                 HandleStatusBanner(msg, PaletteSettings.Peach);
                 return;
             }
@@ -1216,7 +1235,29 @@ namespace Polymulator
 
             bool canSplit = modeController != null && modeController.CanUsePartition;
             bool canFusePair = modeController != null && modeController.CanUseFusion && partitionFusionController != null && partitionFusionController.HasFusionPair;
-            string partFuseSuffix = (canSplit ? "   [ 1 ] Belah" : string.Empty) + (canFusePair ? "   [ 2 ] Gabung" : string.Empty);
+            bool hasCutPreview = canSplit && partitionFusionController != null && partitionFusionController.HasCutPreview;
+
+            string splitAxisTag = partitionFusionController != null ? partitionFusionController.CutAxisShortLabel : "OTOMATIS";
+            string cutRuleInfo = hasCutPreview
+                ? "  •  Potong " + partitionFusionController.CutAxisRuleLabel + " -> 2x " +
+                  partitionFusionController.PreviewSplitHalfMass.ToString("0.0", CultureInfo.InvariantCulture) + "t"
+                : string.Empty;
+
+            string fusePartnerInfo = string.Empty;
+            string fusePromptInfo = string.Empty;
+            if (canFusePair)
+            {
+                InteractableObject srcObj = partitionFusionController.PreviewSource;
+                InteractableObject partnerObj = partitionFusionController.PreviewPartner;
+                float mA = srcObj != null && srcObj.Body != null ? srcObj.Body.mass : 1f;
+                float mB = partnerObj != null && partnerObj.Body != null ? partnerObj.Body.mass : 1f;
+                float sumMass = mA + mB;
+                string partnerName = partnerObj != null ? partnerObj.displayName : "Partner";
+                fusePartnerInfo = "  •  Fusion + " + partnerName + " (" + sumMass.ToString("0.0", CultureInfo.InvariantCulture) + "t)";
+                fusePromptInfo = "   [ 2 ] Gabung (" + partnerName + ")";
+            }
+
+            string cutPromptTag = hasCutPreview ? "   [ 1 ] Belah (" + splitAxisTag + ")   [ 3 ] Arah" : string.Empty;
 
             if (carryController != null && carryController.IsCarrying)
             {
@@ -1225,18 +1266,17 @@ namespace Polymulator
                 stateText = "DIBAWA";
                 objName = carryController.CarriedObjectName;
                 metaText = "Arah " + Mathf.RoundToInt(carryController.CurrentHeldYawDegrees) +
-                           "°  •  Jangkauan " + carryController.CurrentDropDistanceGrid.ToString("0.0", CultureInfo.InvariantCulture) + " m";
+                           "°  •  Jangkauan " + carryController.CurrentDropDistanceGrid.ToString("0.0", CultureInfo.InvariantCulture) + " m" +
+                           fusePartnerInfo;
                 string rangeSuffix = carryController.TryGetPredictedThrowLanding(out _, out float rangeGu)
                     ? "  •  Lempar ~" + rangeGu.ToString("0.0", CultureInfo.InvariantCulture) + " m"
                     : string.Empty;
-                vectorText = FormatGridPos(held != null ? held.transform.position : Vector3.zero) + rangeSuffix;
+                vectorText = FormatGridPos(held != null ? held.transform.position : Vector3.zero) + rangeSuffix + cutRuleInfo;
                 swatchColor = held != null ? held.AssignedColor : PaletteSettings.Green;
-                barColor = PaletteSettings.Green;
+                barColor = canFusePair ? PaletteSettings.Green : PaletteSettings.Sapphire;
 
-                string splitHeld = canSplit && held != null && held.canPartition ? "   [ 1 ] Belah" : string.Empty;
-                string fuseHeld = canFusePair ? "   [ 2 ] Gabung" : string.Empty;
-                prompt = "[ E ] Letakkan   [ R ] Putar 90°   [ Klik ] Lempar" + splitHeld + fuseHeld;
-                promptColor = canFusePair ? PaletteSettings.Green : PaletteSettings.Sapphire;
+                prompt = "[ E ] Letakkan   [ R ] Putar 90°   [ Klik ] Lempar" + cutPromptTag + fusePromptInfo;
+                promptColor = canFusePair ? PaletteSettings.Green : (hasCutPreview ? PaletteSettings.Peach : PaletteSettings.Sapphire);
             }
             else if (telekinesisController != null && telekinesisController.HasTether)
             {
@@ -1244,13 +1284,15 @@ namespace Polymulator
                 InteractableObject tethered = telekinesisController.TetheredObject;
                 stateText = "TELEKINESIS";
                 objName = tethered != null ? tethered.displayName : "OBJEK";
-                metaText = "Tinggi " + telekinesisController.CurrentElevationGrid.ToString("0.0", CultureInfo.InvariantCulture) + " m";
+                metaText = "Tinggi " + telekinesisController.CurrentElevationGrid.ToString("0.0", CultureInfo.InvariantCulture) + " m" +
+                           fusePartnerInfo;
                 vectorText = FormatGridPos(tethered != null ? tethered.transform.position : Vector3.zero) +
-                             (tethered != null ? "  •  Massa " + (tethered.Body != null ? tethered.Body.mass.ToString("0.0", CultureInfo.InvariantCulture) : "1.0") + " t" : "");
+                             (tethered != null ? "  •  Massa " + (tethered.Body != null ? tethered.Body.mass.ToString("0.0", CultureInfo.InvariantCulture) : "1.0") + " t" : "") +
+                             cutRuleInfo;
                 swatchColor = tethered != null ? tethered.AssignedColor : PaletteSettings.BeamTelekinesis;
                 barColor = PaletteSettings.BeamTelekinesis;
 
-                prompt = "[ E / F ] Lepas   [ Q / Z ] Naik-Turun   [ R ] Putar" + partFuseSuffix;
+                prompt = "[ E / F ] Lepas   [ Q / Z ] Naik-Turun   [ R ] Putar" + cutPromptTag + fusePromptInfo;
                 promptColor = PaletteSettings.BeamTelekinesis;
             }
             else if (interactor != null && interactor.HasTarget)
@@ -1264,13 +1306,12 @@ namespace Polymulator
                 {
                     float mass = target != null && target.Body != null ? target.Body.mass : 1f;
                     stateText = isFlexible ? "JANGKAUAN SINAR" : "SIAP ANGKAT";
-                    metaText = (isFlexible ? "[E] Angkat atau [F] Telekinesis" : "[E] Angkat objek") + "  •  Massa " + mass.ToString("0.0", CultureInfo.InvariantCulture) + " t";
-                    vectorText = target != null ? FormatGridPos(target.transform.position) : string.Empty;
-                    barColor = modeColor;
-                    string splitTarget = canSplit && target != null && target.canPartition && mass >= 1.15f ? "   [ 1 ] Belah" : string.Empty;
-                    string fuseTarget = canFusePair ? "   [ 2 ] Gabung" : string.Empty;
-                    prompt = (isFlexible ? "[ E ] Angkat  •  [ F ] Telekinesis  " : "[ E ] Angkat  ") + objName + splitTarget + fuseTarget;
-                    promptColor = modeColor;
+                    metaText = (isFlexible ? "[E] Angkat atau [F] Telekinesis" : "[E] Angkat objek") +
+                               "  •  Massa " + mass.ToString("0.0", CultureInfo.InvariantCulture) + " t" + fusePartnerInfo;
+                    vectorText = (target != null ? FormatGridPos(target.transform.position) : string.Empty) + cutRuleInfo;
+                    barColor = canFusePair ? PaletteSettings.Green : (hasCutPreview ? PaletteSettings.Peach : modeColor);
+                    prompt = (isFlexible ? "[ E ] Angkat  •  [ F ] Telekinesis  " : "[ E ] Angkat  ") + objName + cutPromptTag + fusePromptInfo;
+                    promptColor = canFusePair ? PaletteSettings.Green : (hasCutPreview ? PaletteSettings.Peach : modeColor);
                 }
                 else
                 {

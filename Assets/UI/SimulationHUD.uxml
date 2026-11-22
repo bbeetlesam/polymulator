@@ -7,7 +7,6 @@
             <ui:VisualElement name="identity-card" class="panel-card identity-card" picking-mode="Ignore">
                 <ui:VisualElement name="mode-accent-bar" class="accent-bar" picking-mode="Ignore" />
                 <ui:VisualElement class="identity-content" picking-mode="Ignore">
-                    <ui:Label text="POLYMULATOR" class="brand-title" picking-mode="Ignore" />
                     <ui:Label name="chamber-subtitle-label" text="Ruangan 1.1  •  Ruang Uji 01" class="brand-subtitle" picking-mode="Ignore" />
                     <ui:VisualElement name="mode-pill" class="mode-pill" picking-mode="Ignore">
                         <poly:HudVectorIcon name="mode-icon" icon-kind="Limited" class="mode-icon" picking-mode="Ignore" />
@@ -15,7 +14,7 @@
                             <ui:Label name="mode-badge-label" text="TERBATAS" class="mode-badge-title" picking-mode="Ignore" />
                             <ui:Label name="mode-summary-label" text="Langkah Grid  •  Putar 90°  •  Lempar" class="mode-badge-sub" picking-mode="Ignore" />
                         </ui:VisualElement>
-                        <ui:Label text="SPACE" class="keycap-mini" picking-mode="Ignore" />
+                        <ui:Label text="TAB" class="keycap-mini" picking-mode="Ignore" />
                     </ui:VisualElement>
                     <ui:Label name="objective-label" text="Tujuan: Bawa CORE-01 menuju soket Anchor" class="objective-line" picking-mode="Ignore" />
                 </ui:VisualElement>
