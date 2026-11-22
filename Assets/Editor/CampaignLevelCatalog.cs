@@ -325,7 +325,7 @@ namespace Polymulator.EditorTools
             openingDialogue = new[]
             {
                 Line("VELA", "Pelat pemicu jembatan berada di atas balkon kiri!"),
-                Line("TEPI", "Tekan [SPACE] untuk beralih ke Mode Fleksibel agar Rect bisa melompat dan memakai telekinesis [F].")
+                Line("TEPI", "Tekan [TAB] untuk beralih ke Mode Fleksibel agar Rect bisa melompat dan memakai telekinesis [F].")
             },
             clearDialogue = new[]
             {
@@ -333,7 +333,7 @@ namespace Polymulator.EditorTools
             },
             hints = new[]
             {
-                "Tekan [SPACE] untuk mengganti mode gerak ke Mode Fleksibel (warna ungu).",
+                "Tekan [TAB] untuk mengganti mode gerak ke Mode Fleksibel (warna ungu).",
                 "Angkat BEBAN-UNGU lewat tangga balkon kiri, atau arahkan ke BEBAN-UNGU dan tekan [F] untuk mengangkatnya dengan telekinesis ke PAD-BALKON.",
                 "Setelah jembatan kanan aktif, bawa CORE-01 naik ke Dek Anchor."
             }
@@ -373,7 +373,7 @@ namespace Polymulator.EditorTools
             openingDialogue = new[]
             {
                 Line("MIRA", "CORE-01 terjebak di puncak tiang barat tanpa tangga!"),
-                Line("VELA", "Di Mode Fleksibel [SPACE], gunakan sinar [F] Telekinesis untuk menurunkan benda dari tempat tinggi.")
+                Line("VELA", "Di Mode Fleksibel [TAB], gunakan sinar [F] Telekinesis untuk menurunkan benda dari tempat tinggi.")
             },
             clearDialogue = new[]
             {
@@ -381,7 +381,7 @@ namespace Polymulator.EditorTools
             },
             hints = new[]
             {
-                "Tekan [SPACE] ke Mode Fleksibel agar Telekinesis aktif.",
+                "Tekan [TAB] ke Mode Fleksibel agar Telekinesis aktif.",
                 "Arahkan ke BEBAN-RAK di platform kanan atas, tekan [F] untuk menariknya turun ke PAD-UTARA.",
                 "Arahkan ke CORE-01 di menara kiri atas, tekan [F] untuk menurunkannya, lalu bawa masuk melewati pagar yang sudah terbuka."
             }
@@ -445,7 +445,7 @@ namespace Polymulator.EditorTools
             hints = new[]
             {
                 "Taruh PEMBERAT-A ke PAD-PINTU di kiri bawah agar pagar tengah terbuka.",
-                "Gunakan Mode Fleksibel [SPACE] dan angkat PEMBERAT-B (dengan tangga atau [F]) ke PAD-PUNCAK di balkon kanan.",
+                "Gunakan Mode Fleksibel [TAB] dan angkat PEMBERAT-B (dengan tangga atau [F]) ke PAD-PUNCAK di balkon kanan.",
                 "Setelah jembatan ke puncak aktif, bawa CORE-01 naik ke ANCHOR-01."
             }
         };
@@ -611,7 +611,7 @@ namespace Polymulator.EditorTools
             props = new[]
             {
                 new PropSpec { name = "RINGAN-A", shape = PrimitiveType.Cube, posGrid = new Vector3(-1.5f, 0.48f, -3.2f), sizeGrid = new Vector3(0.88f, 0.88f, 0.88f), mass = 1.2f },
-                new PropSpec { name = "RINGAN-B", shape = PrimitiveType.Cube, posGrid = new Vector3(1.5f, 0.48f, -3.2f), sizeGrid = new Vector3(0.88f, 0.88f, 0.88f), mass = 1.2f }
+                new PropSpec { name = "RINGAN-B", shape = PrimitiveType.Cylinder, posGrid = new Vector3(1.5f, 0.44f, -3.2f), sizeGrid = new Vector3(0.88f, 0.88f, 0.88f), mass = 1.2f }
             },
             plates = new[]
             {
@@ -625,13 +625,13 @@ namespace Polymulator.EditorTools
             {
                 enabled = true, posGrid = new Vector3(-5.5f, 0.52f, 1.4f),
                 title = "Hukum Kekekalan Ruang",
-                speaker = "VELA", line = "Dua bagian kecil yang disatukan dengan Fusion tidak hanya bertambah ukuran, tapi juga bobotnya.",
-                replySpeaker = "SIM", replyLine = "FUSION [2] aktif: gabungkan dua benda berdekatan menjadi satu massa gabungan."
+                speaker = "VELA", line = "Dua benda yang disatukan dengan Fusion tidak harus sejenis — kubus dan prisma tetap menyatu membentuk komposit baru.",
+                replySpeaker = "SIM", replyLine = "FUSION [2] aktif: gabungkan dua benda berbeda bentuk maupun massa menjadi satu inti komposit."
             },
             openingDialogue = new[]
             {
-                Line("SIM", "Pelat PAD-BERAT membutuhkan beban minimal 2.2 ton. Masing-masing balok hanya 1.2 ton."),
-                Line("VELA", "Dekatkan RINGAN-A dan RINGAN-B sampai muncul garis hijau, lalu tekan [2] FUSION.")
+                Line("SIM", "Pelat PAD-BERAT butuh minimal 2.2 ton. Di depanmu ada Kubus RINGAN-A (1.2 t) dan Prisma RINGAN-B (1.2 t)."),
+                Line("VELA", "Bawa salah satu mendekati pasangannya hingga garis lengkung hijau menyala, lalu tekan [2] FUSION untuk menyatukan bentuk yang berbeda.")
             },
             clearDialogue = new[]
             {
@@ -683,8 +683,8 @@ namespace Polymulator.EditorTools
             },
             openingDialogue = new[]
             {
-                Line("MIRA", "Hanya ada satu blok MONOLIT seberat 2.4 ton, padahal jembatan butuh dua pelat terpisah."),
-                Line("VELA", "Arahkan atau pegang MONOLIT lalu tekan [1] PARTITION untuk membelahnya menjadi dua.")
+                Line("MIRA", "Hanya ada satu blok MONOLIT seberat 2.4 ton. Bidang laser oranye menunjukkan ke mana belahan akan jatuh."),
+                Line("VELA", "Secara otomatis arah potong mengikuti hadap Rect; tekan [3] untuk memutar bidang potong (Kiri|Kanan, Depan|Belakang, Atas|Bawah), lalu [1] PARTITION.")
             },
             clearDialogue = new[]
             {
@@ -692,8 +692,8 @@ namespace Polymulator.EditorTools
             },
             hints = new[]
             {
-                "Dekati atau pegang blok besar MONOLIT (2.4 t) di tengah ruangan, lalu tekan tombol [1] untuk PARTITION.",
-                "MONOLIT akan terbelah menjadi MONOLIT-A (1.2 t) dan MONOLIT-B (1.2 t).",
+                "Dekati atau pegang blok besar MONOLIT (2.4 t): garis bidang laser menunjukkan arah potongan secara real-time.",
+                "Gunakan [3] bila ingin mengubah sumbu potong (Auto / X / Z / Y), lalu tekan [1] untuk membelah MONOLIT menjadi MONOLIT-A & -B (1.2 t x 2).",
                 "Taruh masing-masing pecahan di PAD-KIRI dan PAD-KANAN, lalu bawa CORE-01 naik jembatan."
             }
         };
@@ -817,7 +817,7 @@ namespace Polymulator.EditorTools
             },
             hints = new[]
             {
-                "Belah PENAHAN-BESAR (2.4 t) dengan [1] Partition -> naikkan satu bagian 1.2 t ke PAD-GARDU di balkon kiri (pakai [SPACE] + [F] atau tangga).",
+                "Belah PENAHAN-BESAR (2.4 t) dengan [1] Partition (putar bidang potong dengan [3] jika perlu) -> naikkan satu bagian 1.2 t ke PAD-GARDU di balkon kiri ([TAB] + [F] atau tangga).",
                 "Gabungkan bagian 1.2 t kedua dengan PENAHAN-TAMBAH (1.2 t) memakai [2] Fusion -> letakkan blok 2.4 t di PAD-TANGGUL (kanan).",
                 "Putar CORE-01 dengan [R] ke 90° (Timur), lalu bawa melewati pagar dan jembatan ke ANCHOR-01."
             }
@@ -896,9 +896,9 @@ namespace Polymulator.EditorTools
             {
                 // Partition [1] Demo — Left Side
                 new PropSpec { name = "DEMO-PARTITION", shape = PrimitiveType.Cube, posGrid = new Vector3(-4.8f, 0.54f, -4.2f), sizeGrid = new Vector3(1.35f, 1.05f, 1.05f), mass = 2.4f },
-                // Fusion [2] Demo — Right Side
+                // Fusion [2] Demo — Right Side (Heterogeneous Cube + Octagon Prism)
                 new PropSpec { name = "DEMO-FUSE-A", shape = PrimitiveType.Cube, posGrid = new Vector3(3.8f, 0.48f, -4.6f), sizeGrid = new Vector3(0.88f, 0.88f, 0.88f), mass = 1.2f },
-                new PropSpec { name = "DEMO-FUSE-B", shape = PrimitiveType.Cube, posGrid = new Vector3(6.0f, 0.48f, -4.6f), sizeGrid = new Vector3(0.88f, 0.88f, 0.88f), mass = 1.2f }
+                new PropSpec { name = "DEMO-FUSE-B", shape = PrimitiveType.Cylinder, posGrid = new Vector3(6.0f, 0.44f, -4.6f), sizeGrid = new Vector3(0.88f, 0.88f, 0.88f), mass = 1.2f }
             },
             plates = new[]
             {
@@ -916,14 +916,14 @@ namespace Polymulator.EditorTools
             {
                 enabled = true, posGrid = new Vector3(5.8f, 0.52f, 5.2f),
                 title = "Arsip Demo POLYMULATOR",
-                speaker = "TIM 8", line = "Seluruh mekanik utama aktif di ruang ini: Translasi, Elevasi, Rotasi, Fusion [2], dan Partition [1].",
-                replySpeaker = "RECT", replyLine = "Gunakan [SPACE] untuk Mode Fleksibel, [F] Telekinesis, [R] Rotasi, [1] Partition, dan [2] Fusion.",
+                speaker = "TIM 8", line = "Seluruh mekanik utama aktif di ruang ini: Translasi, Elevasi, Rotasi, Partition [1]/[3], dan Fusion Hibrid [2].",
+                replySpeaker = "RECT", replyLine = "Gunakan [TAB] untuk Mode Fleksibel, [F] Telekinesis, [R] Rotasi, [1] Partition, [3] Arah Potong, dan [2] Fusion.",
                 playPianoMotif = true
             },
             openingDialogue = new[]
             {
-                Line("TIM 8", "Selamat datang di Ruang Showcase POLYMULATOR! Semua fitur mekanik langsung aktif tanpa syarat."),
-                Line("RECT", "Kiri: uji Partition [1]  •  Kanan: uji Fusion [2] + Telekinesis [F]  •  Tengah: Rotasi [R] CORE-01.")
+                Line("TIM 8", "Selamat datang di Ruang Showcase! Semua mekanik siap diuji dengan pratinjau laser Partition & tautan Fusion."),
+                Line("RECT", "Kiri: uji Partition [1] & sumbu potong [3]  •  Kanan: uji Fusion [2] objek Kubus+Prisma  •  Tengah: Rotasi [R] CORE-01.")
             },
             clearDialogue = new[]
             {
@@ -931,8 +931,8 @@ namespace Polymulator.EditorTools
             },
             hints = new[]
             {
-                "KIRI (Partition [1]): Dekati DEMO-PARTITION (2.4 t), tekan [1] untuk membelah jadi 2 x 1.2 t dan coba di PAD-SPLIT-1 & 2.",
-                "KANAN (Fusion [2] + Elevasi [SPACE]/[F]): Dekatkan DEMO-FUSE-A & B, tekan [2] untuk menggabung jadi 2.4 t, lalu angkat ke PAD-FUSE-ATAS (Rak Elevasi) untuk menyalakan jembatan.",
+                "KIRI (Partition [1] + [3]): Dekati DEMO-PARTITION (2.4 t) untuk melihat bidang potong laser oranye. Tekan [3] untuk mengganti sumbu potong, lalu [1] untuk membelah jadi 2 x 1.2 t.",
+                "KANAN (Fusion Hibrid [2] + [TAB]/[F]): Dekatkan Kubus DEMO-FUSE-A & Prisma DEMO-FUSE-B, tekan [2] untuk menggabung dua bentuk berbeda jadi 2.4 t, lalu naikkan ke PAD-FUSE-ATAS.",
                 "TENGAH (Rotasi [R]): Ambil CORE-01, tekan [R] tiga kali sampai 0° (Utara), lalu pasang ke ANCHOR-01 di puncak."
             }
         };

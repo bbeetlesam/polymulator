@@ -492,7 +492,7 @@ namespace Polymulator
             return mat;
         }
 
-        private static Material GetSharedSurfaceMaterial(Color color)
+        public static Material GetSharedSurfaceMaterial(Color color)
         {
             uint key = PackColorKey(color);
             if (SharedRuntimeSurfaceMaterials.TryGetValue(key, out Material cached) && cached != null)

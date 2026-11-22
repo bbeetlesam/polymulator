@@ -97,11 +97,13 @@ namespace Polymulator
                 ToggleMode();
             prevTabPressed = tabDown;
 
-            // Milestone hooks: Partition & Fusion
+            // Milestone hooks: Partition [1], Fusion [2], Cut-Axis [3]
             if (keyboard.digit1Key.wasPressedThisFrame)
                 TriggerPartitionHook();
             if (keyboard.digit2Key.wasPressedThisFrame)
                 TriggerFusionHook();
+            if (keyboard.digit3Key.wasPressedThisFrame)
+                TriggerCycleCutAxisHook();
         }
 
         public void ToggleMode()
@@ -157,6 +159,17 @@ namespace Polymulator
                 return;
             }
             partitionFusionController?.TryFusion();
+        }
+
+        /// <summary>Cycles Partition [1] cut-plane orientation ([3]) when unlocked.</summary>
+        public void TriggerCycleCutAxisHook()
+        {
+            if (!CanUsePartition)
+            {
+                OnStatusBanner?.Invoke("PARTITION [1] belum aktif di chapter ini", PaletteSettings.Peach);
+                return;
+            }
+            partitionFusionController?.CycleCutAxis();
         }
     }
 }

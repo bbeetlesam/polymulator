@@ -1050,9 +1050,16 @@ namespace Polymulator.EditorTools
             GameObject anchor = BuildAnchorStation(props, m, spec);
             InteractivePaletteAssigner.AssignAll(PaletteSettings.InteractivePalette, m.interactivePalette);
 
+            float resolvedCoreMass = spec.coreMass > 0f ? spec.coreMass : 1.2f;
             GameObject coreGo = Prop("CORE-01", PrimitiveType.Cube, spec.coreSpawnGrid,
-                new Vector3(0.92f, 0.92f, 0.92f), m.coreGold, m, props, 1.2f);
+                new Vector3(0.92f, 0.92f, 0.92f), m.coreGold, m, props, resolvedCoreMass);
             coreGo.transform.rotation = Quaternion.Euler(0f, spec.coreStartYaw, 0f);
+            InteractableObject coreInteract = coreGo.GetComponent<InteractableObject>();
+            if (coreInteract != null)
+            {
+                coreInteract.canFuse = false;
+                coreInteract.canPartition = spec.isEndingChamber;
+            }
 
             CreateUnscaledChildTrim("Core Halo", PrimitiveType.Cylinder, Vector3.zero,
                 new Vector3(1.18f, 0.08f, 1.18f), m.accentYellow, coreGo.transform);
