@@ -25,17 +25,18 @@ MonoBehaviour:
   allowFusion: 0
   openingDialogue:
   - speaker: MIRA
-    text: Hanya ada satu blok MONOLIT seberat 2.4 ton, padahal jembatan butuh dua
-      pelat terpisah.
+    text: Hanya ada satu blok MONOLIT seberat 2.4 ton. Bidang laser oranye menunjukkan
+      ke mana belahan akan jatuh.
   - speaker: VELA
-    text: Arahkan atau pegang MONOLIT lalu tekan [1] PARTITION untuk membelahnya
-      menjadi dua.
+    text: Secara otomatis arah potong mengikuti hadap Rect; tekan [3] untuk memutar
+      bidang potong (Kiri|Kanan, Depan|Belakang, Atas|Bawah), lalu [1] PARTITION.
   clearDialogue:
   - speaker: MIRA
     text: Satu benda jadi dua kunci. Pembagian yang adil menyelamatkan jalur ini.
   hints:
-  - Dekati atau pegang blok besar MONOLIT (2.4 t) di tengah ruangan, lalu tekan tombol
-    [1] untuk PARTITION.
-  - MONOLIT akan terbelah menjadi MONOLIT-A (1.2 t) dan MONOLIT-B (1.2 t).
+  - 'Dekati atau pegang blok besar MONOLIT (2.4 t): garis bidang laser menunjukkan
+    arah potongan secara real-time.'
+  - Gunakan [3] bila ingin mengubah sumbu potong (Auto / X / Z / Y), lalu tekan [1]
+    untuk membelah MONOLIT menjadi MONOLIT-A & -B (1.2 t x 2).
   - Taruh masing-masing pecahan di PAD-KIRI dan PAD-KANAN, lalu bawa CORE-01 naik
     jembatan.

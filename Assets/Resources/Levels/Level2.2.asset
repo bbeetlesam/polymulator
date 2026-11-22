@@ -27,13 +27,13 @@ MonoBehaviour:
   - speaker: MIRA
     text: CORE-01 terjebak di puncak tiang barat tanpa tangga!
   - speaker: VELA
-    text: Di Mode Fleksibel [SPACE], gunakan sinar [F] Telekinesis untuk menurunkan
+    text: Di Mode Fleksibel [TAB], gunakan sinar [F] Telekinesis untuk menurunkan
       benda dari tempat tinggi.
   clearDialogue:
   - speaker: MIRA
     text: Sinar telekinesismu makin stabil. Puncak menara tinggal selangkah lagi.
   hints:
-  - Tekan [SPACE] ke Mode Fleksibel agar Telekinesis aktif.
+  - Tekan [TAB] ke Mode Fleksibel agar Telekinesis aktif.
   - Arahkan ke BEBAN-RAK di platform kanan atas, tekan [F] untuk menariknya turun
     ke PAD-UTARA.
   - Arahkan ke CORE-01 di menara kiri atas, tekan [F] untuk menurunkannya, lalu bawa

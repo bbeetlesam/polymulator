@@ -25,11 +25,11 @@ MonoBehaviour:
   allowFusion: 1
   openingDialogue:
   - speaker: SIM
-    text: Pelat PAD-BERAT membutuhkan beban minimal 2.2 ton. Masing-masing balok
-      hanya 1.2 ton.
+    text: Pelat PAD-BERAT butuh minimal 2.2 ton. Di depanmu ada Kubus RINGAN-A (1.2
+      t) dan Prisma RINGAN-B (1.2 t).
   - speaker: VELA
-    text: Dekatkan RINGAN-A dan RINGAN-B sampai muncul garis hijau, lalu tekan [2]
-      FUSION.
+    text: Bawa salah satu mendekati pasangannya hingga garis lengkung hijau menyala,
+      lalu tekan [2] FUSION untuk menyatukan bentuk yang berbeda.
   clearDialogue:
   - speaker: VELA
     text: Berhasil! Sekarang kamu menguasai FUSION [2] untuk menggabungkan beban

@@ -27,13 +27,13 @@ MonoBehaviour:
   - speaker: VELA
     text: Pelat pemicu jembatan berada di atas balkon kiri!
   - speaker: TEPI
-    text: Tekan [SPACE] untuk beralih ke Mode Fleksibel agar Rect bisa melompat dan
+    text: Tekan [TAB] untuk beralih ke Mode Fleksibel agar Rect bisa melompat dan
       memakai telekinesis [F].
   clearDialogue:
   - speaker: NARA
     text: Pelan-pelan, bangunan lama ini mulai merespons langkah kita lagi.
   hints:
-  - Tekan [SPACE] untuk mengganti mode gerak ke Mode Fleksibel (warna ungu).
+  - Tekan [TAB] untuk mengganti mode gerak ke Mode Fleksibel (warna ungu).
   - Angkat BEBAN-UNGU lewat tangga balkon kiri, atau arahkan ke BEBAN-UNGU dan tekan
     [F] untuk mengangkatnya dengan telekinesis ke PAD-BALKON.
   - Setelah jembatan kanan aktif, bawa CORE-01 naik ke Dek Anchor.

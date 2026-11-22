@@ -35,8 +35,9 @@ MonoBehaviour:
     text: 'Peringatan: Ruang Pilihan Akhir telah dicapai. Bersiaplah mengambil keputusan
       untuk Kota Tepi.'
   hints:
-  - Belah PENAHAN-BESAR (2.4 t) dengan [1] Partition -> naikkan satu bagian 1.2 t
-    ke PAD-GARDU di balkon kiri (pakai [SPACE] + [F] atau tangga).
+  - Belah PENAHAN-BESAR (2.4 t) dengan [1] Partition (putar bidang potong dengan
+    [3] jika perlu) -> naikkan satu bagian 1.2 t ke PAD-GARDU di balkon kiri ([TAB]
+    + [F] atau tangga).
   - Gabungkan bagian 1.2 t kedua dengan PENAHAN-TAMBAH (1.2 t) memakai [2] Fusion
     -> letakkan blok 2.4 t di PAD-TANGGUL (kanan).
   - "Putar CORE-01 dengan [R] ke 90\xB0 (Timur), lalu bawa melewati pagar dan jembatan

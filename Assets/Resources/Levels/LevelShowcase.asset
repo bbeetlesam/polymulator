@@ -25,20 +25,20 @@ MonoBehaviour:
   allowFusion: 1
   openingDialogue:
   - speaker: TIM 8
-    text: Selamat datang di Ruang Showcase POLYMULATOR! Semua fitur mekanik langsung
-      aktif tanpa syarat.
+    text: Selamat datang di Ruang Showcase! Semua mekanik siap diuji dengan pratinjau
+      laser Partition & tautan Fusion.
   - speaker: RECT
-    text: "Kiri: uji Partition [1]  \u2022  Kanan: uji Fusion [2] + Telekinesis [F] 
-      \u2022  Tengah: Rotasi [R] CORE-01."
+    text: "Kiri: uji Partition [1] & sumbu potong [3]  \u2022  Kanan: uji Fusion
+      [2] objek Kubus+Prisma  \u2022  Tengah: Rotasi [R] CORE-01."
   clearDialogue:
   - speaker: TIM 8
     text: Demo Showcase selesai! Semua sistem mekanik dan audio-visual terverifikasi
       berfungsi.
   hints:
-  - 'KIRI (Partition [1]): Dekati DEMO-PARTITION (2.4 t), tekan [1] untuk membelah
-    jadi 2 x 1.2 t dan coba di PAD-SPLIT-1 & 2.'
-  - 'KANAN (Fusion [2] + Elevasi [SPACE]/[F]): Dekatkan DEMO-FUSE-A & B, tekan [2]
-    untuk menggabung jadi 2.4 t, lalu angkat ke PAD-FUSE-ATAS (Rak Elevasi) untuk
-    menyalakan jembatan.'
+  - 'KIRI (Partition [1] + [3]): Dekati DEMO-PARTITION (2.4 t) untuk melihat bidang
+    potong laser oranye. Tekan [3] untuk mengganti sumbu potong, lalu [1] untuk membelah
+    jadi 2 x 1.2 t.'
+  - 'KANAN (Fusion Hibrid [2] + [TAB]/[F]): Dekatkan Kubus DEMO-FUSE-A & Prisma DEMO-FUSE-B,
+    tekan [2] untuk menggabung dua bentuk berbeda jadi 2.4 t, lalu naikkan ke PAD-FUSE-ATAS.'
   - "TENGAH (Rotasi [R]): Ambil CORE-01, tekan [R] tiga kali sampai 0\xB0 (Utara),
     lalu pasang ke ANCHOR-01 di puncak."

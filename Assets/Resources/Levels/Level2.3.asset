@@ -33,6 +33,6 @@ MonoBehaviour:
     text: Sektor Elevasi terhubung. Pintu Gedung Arsip mulai terbaca.
   hints:
   - Taruh PEMBERAT-A ke PAD-PINTU di kiri bawah agar pagar tengah terbuka.
-  - Gunakan Mode Fleksibel [SPACE] dan angkat PEMBERAT-B (dengan tangga atau [F])
-    ke PAD-PUNCAK di balkon kanan.
+  - Gunakan Mode Fleksibel [TAB] dan angkat PEMBERAT-B (dengan tangga atau [F]) ke
+    PAD-PUNCAK di balkon kanan.
   - Setelah jembatan ke puncak aktif, bawa CORE-01 naik ke ANCHOR-01.
