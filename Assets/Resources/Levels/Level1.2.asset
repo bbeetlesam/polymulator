@@ -1,0 +1,39 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 2763873eddf04f878f13270a059f332a, type: 3}
+  m_Name: Level1.2
+  m_EditorClassIdentifier: Assembly-CSharp::Polymulator.LevelInfo
+  levelTitle: Pasar
+  chapterSubtitle: TRANSLASI
+  districtLabel: JALAN PASAR
+  parActions: 8
+  requireFacingAngle: 0
+  requiredFacingYaw: 0
+  fragmentTitle: Gambar Nara (4 thn)
+  triggerGlitchOnClear: 0
+  playPianoOnClear: 0
+  openingDialogue:
+  - speaker: SIM
+    text: Distrik Jalan Pasar dimuat. Dua Conduit Pad harus aktif bersamaan.
+  - speaker: RECT
+    text: Hanya ada satu balok 2.0t.
+  - speaker: SIM
+    text: Massa bersifat aditif. Gabungkan dua beban lebih ringan di satu pad.
+  clearDialogue:
+  - speaker: MIRA
+    text: Bagus... rig di Tepi mulai membersihkan puing Jalan Pasar.
+  - speaker: SIM
+    text: Membuka jalur Sektor 1.3.
+  hints:
+  - Pad B butuh >= 2.0t tapi CUBE-01 (2.0t) terpakai di Pad A. Gabungkan CUBE-02
+    (1.5t) + ORB-01 (1.0t) = 2.5t!
+  - Tengok sudut kiri belakang Kios Barat untuk fragmen 'Gambar Nara'.

@@ -6,9 +6,14 @@ namespace Polymulator
     [DisallowMultipleComponent]
     public class InteractableObject : MonoBehaviour
     {
-        [Header("Identity")]
+        [Header("Identity & Capabilities")]
         public string displayName = "OBJECT";
         public bool canBePickedUp = true;
+        public bool canRotate = true;
+        public bool canThrow = true;
+        public bool canTelekinesis = true;
+        public bool canPartition = true;
+        public bool canFuse = true;
 
         [Header("Colour")]
         [SerializeField] private Color assignedColor = new Color(0f, 0f, 0f, 0f);
@@ -16,21 +21,36 @@ namespace Polymulator
         [Header("Outline")]
         [Tooltip("How much larger the target outline is than the object itself.")]
         [Range(1.01f, 1.5f)]
-        [SerializeField] private float outlineScale = 1.08f;
+        [SerializeField] private float outlineScale = 1.07f;
 
         private static readonly int BaseColorId = Shader.PropertyToID("_BaseColor");
         private static readonly int ColorId = Shader.PropertyToID("_Color");
         private static readonly int CullId = Shader.PropertyToID("_Cull");
+        private static readonly Dictionary<uint, Material> SharedOutlineMaterials = new Dictionary<uint, Material>();
+        private static readonly Dictionary<uint, Material> SharedRuntimeSurfaceMaterials = new Dictionary<uint, Material>();
 
-        private static Material sharedOutlineMaterial;
+        private static Material sharedOutlineTemplate;
 
         private readonly List<Renderer> outlineRenderers = new List<Renderer>();
         private Rigidbody body;
         private Renderer[] renderers;
+        private Renderer[] boundsRenderers;
         private Collider[] colliders;
         private bool isHighlighted;
         private bool highlightedAsPickup;
         private bool outlinesBuilt;
+        private Vector3 initialLocalScale = Vector3.one;
+        private float pulseTimer;
+        private float pulseDuration = 0.22f;
+        private float pulseStrength;
+
+        [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.SubsystemRegistration)]
+        private static void ResetStaticMaterialCaches()
+        {
+            SharedOutlineMaterials.Clear();
+            SharedRuntimeSurfaceMaterials.Clear();
+            sharedOutlineTemplate = null;
+        }
 
         public bool CanBePickedUp => canBePickedUp && Body != null;
         public bool HasAssignedColor => assignedColor.a > 0.5f;
@@ -47,6 +67,7 @@ namespace Polymulator
 
         private void Awake()
         {
+            initialLocalScale = transform.localScale;
             CacheComponents();
             if (!HasAssignedColor)
             {
@@ -58,19 +79,56 @@ namespace Polymulator
             ApplyVisualState();
         }
 
+        public void RefreshBaseScale()
+        {
+            initialLocalScale = transform.localScale;
+            pulseTimer = 0f;
+            pulseStrength = 0f;
+        }
+
+        public void TriggerPulse(float strength = 0.14f, float duration = 0.22f)
+        {
+            pulseStrength = Mathf.Max(pulseStrength, strength);
+            pulseDuration = Mathf.Max(0.08f, duration);
+            pulseTimer = pulseDuration;
+        }
+
+        private void Update()
+        {
+            if (pulseTimer <= 0f) return;
+
+            pulseTimer -= Time.deltaTime;
+            if (pulseTimer <= 0f)
+            {
+                pulseTimer = 0f;
+                pulseStrength = 0f;
+                transform.localScale = initialLocalScale;
+                return;
+            }
+
+            float k = 1f - (pulseTimer / pulseDuration);
+            float bell = Mathf.Sin(k * Mathf.PI) * (1f - k * 0.35f);
+            transform.localScale = initialLocalScale * (1f + pulseStrength * bell);
+        }
+
         public void CacheComponents()
         {
             body = GetComponent<Rigidbody>();
             colliders = GetComponentsInChildren<Collider>(true);
 
             Renderer[] all = GetComponentsInChildren<Renderer>(true);
-            List<Renderer> baseRenderers = new List<Renderer>(all.Length);
+            List<Renderer> primaryRenderers = new List<Renderer>(all.Length);
+            List<Renderer> extentRenderers = new List<Renderer>(all.Length);
             for (int i = 0; i < all.Length; i++)
             {
-                if (all[i] != null && all[i].GetComponent<OutlineShell>() == null)
-                    baseRenderers.Add(all[i]);
+                Renderer r = all[i];
+                if (r == null || r.GetComponent<OutlineShell>() != null) continue;
+                extentRenderers.Add(r);
+                if (r.GetComponent<ObjectTrim>() == null)
+                    primaryRenderers.Add(r);
             }
-            renderers = baseRenderers.ToArray();
+            renderers = primaryRenderers.ToArray();
+            boundsRenderers = extentRenderers.ToArray();
         }
 
         /// <summary>
@@ -116,13 +174,13 @@ namespace Polymulator
         public bool TryGetHalfExtents(out Vector3 halfExtents)
         {
             halfExtents = Vector3.zero;
-            if (renderers == null) CacheComponents();
-            if (renderers == null || renderers.Length == 0) return false;
+            if (boundsRenderers == null) CacheComponents();
+            if (boundsRenderers == null || boundsRenderers.Length == 0) return false;
 
             Vector3 center = transform.position;
-            for (int i = 0; i < renderers.Length; i++)
+            for (int i = 0; i < boundsRenderers.Length; i++)
             {
-                Renderer targetRenderer = renderers[i];
+                Renderer targetRenderer = boundsRenderers[i];
                 if (targetRenderer == null) continue;
 
                 Bounds bounds = targetRenderer.bounds;
@@ -159,41 +217,39 @@ namespace Polymulator
         }
 
         /// <summary>
-        /// Keeps the assigned colour on the object and shows the inverted-hull outline
-        /// only while a pickable object is targeted. Locked objects never receive a
-        /// visible outline, and the base colour is never replaced by feedback.
+        /// Keeps the assigned shared SRP-Batched material on the object and enables the shared
+        /// colour-matched inverted-hull outline only while a pickable object is targeted.
+        /// Never creates per-renderer MaterialPropertyBlocks.
         /// </summary>
         private void ApplyVisualState()
         {
             if (renderers == null) CacheComponents();
             if (!HasAssignedColor) return;
 
-            Color display = assignedColor;
-
-            for (int i = 0; i < renderers.Length; i++)
+            if (Application.isPlaying && renderers != null)
             {
-                Renderer targetRenderer = renderers[i];
-                if (targetRenderer == null) continue;
-
-                MaterialPropertyBlock block = new MaterialPropertyBlock();
-                targetRenderer.GetPropertyBlock(block);
-                block.SetColor(BaseColorId, display);
-                block.SetColor(ColorId, display);
-                targetRenderer.SetPropertyBlock(block);
+                for (int i = 0; i < renderers.Length; i++)
+                {
+                    Renderer r = renderers[i];
+                    if (r == null) continue;
+                    if (r.sharedMaterial == null || !r.sharedMaterial.name.StartsWith("Sim_Object_"))
+                    {
+                        r.sharedMaterial = GetSharedSurfaceMaterial(assignedColor);
+                    }
+                }
             }
 
             bool showOutline = isHighlighted && highlightedAsPickup && CanBePickedUp;
             if (showOutline && !outlinesBuilt) BuildOutlines();
 
+            Material coloredOutline = showOutline ? GetSharedOutlineMaterial(assignedColor) : null;
             for (int i = 0; i < outlineRenderers.Count; i++)
             {
                 Renderer outline = outlineRenderers[i];
                 if (outline == null) continue;
 
-                MaterialPropertyBlock block = new MaterialPropertyBlock();
-                outline.GetPropertyBlock(block);
-                block.SetColor(BaseColorId, display);
-                outline.SetPropertyBlock(block);
+                if (coloredOutline != null)
+                    outline.sharedMaterial = coloredOutline;
                 outline.enabled = showOutline;
             }
         }
@@ -208,6 +264,10 @@ namespace Polymulator
             outlinesBuilt = true;
 
             float scale = Mathf.Max(1.01f, outlineScale);
+            Material outlineMat = HasAssignedColor
+                ? GetSharedOutlineMaterial(assignedColor)
+                : OutlineMaterial;
+
             for (int i = 0; i < renderers.Length; i++)
             {
                 Renderer source = renderers[i];
@@ -227,7 +287,7 @@ namespace Polymulator
                 shellFilter.sharedMesh = filter.sharedMesh;
 
                 MeshRenderer shellRenderer = shell.AddComponent<MeshRenderer>();
-                shellRenderer.sharedMaterial = OutlineMaterial;
+                shellRenderer.sharedMaterial = outlineMat;
                 shellRenderer.shadowCastingMode = UnityEngine.Rendering.ShadowCastingMode.Off;
                 shellRenderer.receiveShadows = false;
                 shellRenderer.lightProbeUsage = UnityEngine.Rendering.LightProbeUsage.Off;
@@ -239,22 +299,65 @@ namespace Polymulator
             }
         }
 
+        private static uint PackColorKey(Color c)
+        {
+            Color32 c32 = c;
+            return ((uint)c32.r << 16) | ((uint)c32.g << 8) | c32.b;
+        }
+
+        private static Material GetSharedOutlineMaterial(Color color)
+        {
+            uint key = PackColorKey(color);
+            if (SharedOutlineMaterials.TryGetValue(key, out Material cached) && cached != null)
+                return cached;
+
+            Material mat = new Material(OutlineMaterial);
+            mat.hideFlags = HideFlags.HideAndDontSave;
+            mat.name = "Sim_ObjectOutline_" + key.ToString("X6");
+            Color hdr = color * 1.15f;
+            hdr.a = 1f;
+            mat.SetColor(BaseColorId, hdr);
+            mat.SetColor(ColorId, hdr);
+            SharedOutlineMaterials[key] = mat;
+            return mat;
+        }
+
+        private static Material GetSharedSurfaceMaterial(Color color)
+        {
+            uint key = PackColorKey(color);
+            if (SharedRuntimeSurfaceMaterials.TryGetValue(key, out Material cached) && cached != null)
+                return cached;
+
+            Shader shader = Shader.Find("POLYMULATOR/Sim Surface");
+            if (shader == null) shader = Shader.Find("Universal Render Pipeline/Lit");
+            Material mat = new Material(shader);
+            mat.hideFlags = HideFlags.HideAndDontSave;
+            mat.name = "Sim_Object_Runtime_" + key.ToString("X6");
+            mat.SetColor(BaseColorId, color);
+            mat.SetColor(ColorId, color);
+            if (mat.HasProperty("_ShadeColor")) mat.SetColor("_ShadeColor", PaletteSettings.Mantle);
+            if (mat.HasProperty("_RimColor")) mat.SetColor("_RimColor", Color.Lerp(color, PaletteSettings.Text, 0.55f));
+            if (mat.HasProperty("_SeamColor")) mat.SetColor("_SeamColor", PaletteSettings.Crust);
+            SharedRuntimeSurfaceMaterials[key] = mat;
+            return mat;
+        }
+
         private static Material OutlineMaterial
         {
             get
             {
-                if (sharedOutlineMaterial != null) return sharedOutlineMaterial;
+                if (sharedOutlineTemplate != null) return sharedOutlineTemplate;
 
-                sharedOutlineMaterial = Resources.Load<Material>("Sim_ObjectOutline");
-                if (sharedOutlineMaterial != null) return sharedOutlineMaterial;
+                sharedOutlineTemplate = Resources.Load<Material>("Sim_ObjectOutline");
+                if (sharedOutlineTemplate != null) return sharedOutlineTemplate;
 
                 Shader shader = Shader.Find("Universal Render Pipeline/Unlit");
                 if (shader == null) shader = Shader.Find("Unlit/Color");
-                sharedOutlineMaterial = new Material(shader);
-                sharedOutlineMaterial.name = "Sim_ObjectOutline (Runtime)";
-                if (sharedOutlineMaterial.HasProperty(CullId))
-                    sharedOutlineMaterial.SetFloat(CullId, 1f);
-                return sharedOutlineMaterial;
+                sharedOutlineTemplate = new Material(shader);
+                sharedOutlineTemplate.name = "Sim_ObjectOutline (Runtime)";
+                if (sharedOutlineTemplate.HasProperty(CullId))
+                    sharedOutlineTemplate.SetFloat(CullId, 1f);
+                return sharedOutlineTemplate;
             }
         }
     }

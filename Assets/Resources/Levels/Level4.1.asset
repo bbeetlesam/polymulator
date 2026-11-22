@@ -1,0 +1,38 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 2763873eddf04f878f13270a059f332a, type: 3}
+  m_Name: Level4.1
+  m_EditorClassIdentifier: Assembly-CSharp::Polymulator.LevelInfo
+  levelTitle: Dua Sisi
+  chapterSubtitle: REKONSTRUKSI
+  districtLabel: JEMBATAN LAMA VELA
+  parActions: 11
+  requireFacingAngle: 1
+  requiredFacingYaw: 180
+  fragmentTitle: Data Echo Warga Vela
+  triggerGlitchOnClear: 0
+  playPianoOnClear: 0
+  openingDialogue:
+  - speaker: MIRA
+    text: Dua sisi Tepi berselisih antara tanggul dan taman. Kita butuh jembatan
+      stabil sekarang.
+  - speaker: SIM
+    text: Pad Barat (2.0t) dan Pad Dermaga Timur (1.8t) menyalakan Jembatan Lama.
+      Anchor menuntut sudut 180 deg.
+  clearDialogue:
+  - speaker: SIM
+    text: 'PERINGATAN CUACA: Badai Ibu mendekati batas kritis. Bersiap untuk kalibrasi
+      akhir.'
+  hints:
+  - Bawa CUBE-01 ke Pad Barat dan CUBE-06 menaiki tangga selatan ke Pad Dermaga Timur
+    (+1.0 GU).
+  - Putar CORE-01 dengan [R] dua kali (0 -> 180 deg Selatan) sebelum masuk ANCHOR-01.

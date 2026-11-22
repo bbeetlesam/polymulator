@@ -13,3 +13,28 @@ MonoBehaviour:
   m_Name: Level1.1
   m_EditorClassIdentifier: Assembly-CSharp::Polymulator.LevelInfo
   levelTitle: Warming Up
+  chapterSubtitle: TRANSLASI
+  districtLabel: RUANG UJI 01
+  parActions: 6
+  requireFacingAngle: 0
+  requiredFacingYaw: 0
+  fragmentTitle: 
+  triggerGlitchOnClear: 1
+  playPianoOnClear: 0
+  openingDialogue:
+  - speaker: SIM
+    text: Selamat datang di Polymulator, Iterasi #127. Letakkan beban >= 1.8t di
+      Conduit Pad.
+  - speaker: RECT
+    text: Apa itu iterasi?
+  - speaker: SIM
+    text: Jumlah percobaan. Untuk menjadi cukup.
+  clearDialogue:
+  - speaker: SIGNAL
+    text: ...Apakah dia merespons?
+  - speaker: SIM
+    text: Gangguan arsip sesaat. Abaikan. Memuat Sektor 1.2.
+  hints:
+  - Conduit Pad butuh massa >= 1.8t. Bawa CUBE-01 (2.0t) lalu drop [E] atau lempar
+    [F].
+  - Naiki Energy Bridge ke Platform High, ambil CORE-01 emas dan masukkan ke ANCHOR-01.

@@ -1,0 +1,580 @@
+/* POLYMULATOR — Catppuccin Mocha HUD Stylesheet */
+
+.hud-root {
+    flex-grow: 1;
+    width: 100%;
+    height: 100%;
+    padding: 24px;
+    flex-direction: column;
+    justify-content: space-between;
+    -unity-font-definition: url("/Assets/UI/Fonts/Font_InterSemiBold.asset");
+}
+
+.hud-top-row {
+    flex-direction: row;
+    justify-content: space-between;
+    align-items: flex-start;
+}
+
+.panel-card {
+    background-color: rgba(17, 17, 27, 0.90);
+    border-color: #45475A;
+    border-width: 1px;
+    border-radius: 8px;
+    flex-direction: row;
+    overflow: hidden;
+}
+
+.accent-bar {
+    width: 5px;
+    background-color: #74C7EC;
+}
+
+.accent-bar--right {
+    position: absolute;
+    right: 0;
+    top: 0;
+    bottom: 0;
+    width: 5px;
+    background-color: #74C7EC;
+}
+
+/* Identity Card */
+.identity-card {
+    min-width: 344px;
+}
+
+.identity-content {
+    padding: 14px 18px 14px 15px;
+    flex-direction: column;
+}
+
+.brand-title {
+    font-size: 24px;
+    color: #CDD6F4;
+    letter-spacing: 1.5px;
+    margin-bottom: 1px;
+}
+
+.brand-subtitle {
+    -unity-font-definition: url("/Assets/UI/Fonts/Font_InterSemiBold.asset");
+    font-size: 13px;
+    color: #A6ADC8;
+    margin-bottom: 10px;
+}
+
+.mode-pill {
+    flex-direction: row;
+    align-items: center;
+    background-color: rgba(49, 50, 68, 0.78);
+    border-color: #585B70;
+    border-width: 1px;
+    border-radius: 6px;
+    padding: 7px 11px;
+}
+
+.mode-icon {
+    width: 22px;
+    height: 22px;
+    margin-right: 10px;
+    color: #74C7EC;
+}
+
+.mode-pill-text {
+    flex-direction: column;
+    flex-grow: 1;
+    margin-right: 12px;
+}
+
+.mode-badge-title {
+    font-size: 14px;
+    color: #74C7EC;
+    letter-spacing: 1px;
+}
+
+.mode-badge-sub {
+    -unity-font-definition: url("/Assets/UI/Fonts/Font_InterRegular.asset");
+    font-size: 12px;
+    color: #BAC2DE;
+}
+
+.keycap-mini {
+    -unity-font-definition: url("/Assets/UI/Fonts/Font_RobotoMono.asset");
+    font-size: 12px;
+    color: #11111B;
+    background-color: #BAC2DE;
+    border-radius: 4px;
+    padding: 2px 7px;
+}
+
+.objective-line {
+    -unity-font-definition: url("/Assets/UI/Fonts/Font_RobotoMono.asset");
+    font-size: 13px;
+    color: #94E2D5;
+    margin-top: 8px;
+    letter-spacing: 0.4px;
+}
+
+/* Toast */
+.status-toast {
+    flex-direction: row;
+    align-items: center;
+    background-color: rgba(24, 24, 37, 0.94);
+    border-color: #74C7EC;
+    border-width: 1px;
+    border-radius: 16px;
+    padding: 7px 16px;
+    margin-top: 4px;
+    transition-property: opacity;
+    transition-duration: 0.2s;
+}
+
+.status-toast--hidden {
+    opacity: 0;
+}
+
+.toast-dot {
+    width: 8px;
+    height: 8px;
+    border-radius: 4px;
+    background-color: #74C7EC;
+    margin-right: 9px;
+}
+
+.status-toast-label {
+    -unity-font-definition: url("/Assets/UI/Fonts/Font_RobotoMono.asset");
+    font-size: 13px;
+    color: #CDD6F4;
+}
+
+/* Contextual Target Card */
+.target-card {
+    min-width: 280px;
+    transition-property: opacity;
+    transition-duration: 0.16s;
+}
+
+.target-card--hidden {
+    opacity: 0;
+}
+
+.target-content {
+    padding: 13px 22px 13px 16px;
+    flex-direction: column;
+    flex-grow: 1;
+}
+
+.target-header-row {
+    flex-direction: row;
+    align-items: center;
+    margin-bottom: 3px;
+}
+
+.target-swatch {
+    width: 11px;
+    height: 11px;
+    border-radius: 6px;
+    background-color: #585B70;
+    margin-right: 8px;
+}
+
+.target-state-label {
+    -unity-font-definition: url("/Assets/UI/Fonts/Font_RobotoMono.asset");
+    font-size: 12px;
+    color: #A6ADC8;
+}
+
+.target-name-label {
+    font-size: 20px;
+    color: #CDD6F4;
+    margin-bottom: 2px;
+}
+
+.target-meta-label {
+    -unity-font-definition: url("/Assets/UI/Fonts/Font_InterRegular.asset");
+    font-size: 13px;
+    color: #BAC2DE;
+}
+
+.target-vector-label {
+    -unity-font-definition: url("/Assets/UI/Fonts/Font_InterSemiBold.asset");
+    font-size: 13px;
+    color: #94E2D5;
+    margin-top: 4px;
+}
+
+/* Bottom Row */
+.hud-bottom-row {
+    flex-direction: row;
+    justify-content: space-between;
+    align-items: flex-end;
+}
+
+.controls-card {
+    width: 268px;
+    transition-property: opacity;
+    transition-duration: 0.18s;
+}
+
+.controls-card--collapsed {
+    opacity: 0.28;
+}
+
+.controls-accent-bar {
+    background-color: #585B70;
+}
+
+.controls-content {
+    padding: 11px 14px;
+    flex-direction: column;
+    flex-grow: 1;
+}
+
+.controls-header-row {
+    flex-direction: row;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 7px;
+}
+
+.controls-header {
+    -unity-font-definition: url("/Assets/UI/Fonts/Font_RobotoMono.asset");
+    font-size: 12px;
+    color: #A6ADC8;
+    letter-spacing: 1px;
+}
+
+.control-line {
+    flex-direction: row;
+    align-items: center;
+    margin-bottom: 5px;
+}
+
+.control-line--last {
+    margin-bottom: 0;
+}
+
+.keycap {
+    -unity-font-definition: url("/Assets/UI/Fonts/Font_RobotoMono.asset");
+    min-width: 82px;
+    font-size: 12px;
+    color: #CDD6F4;
+    background-color: #313244;
+    border-color: #585B70;
+    border-width: 1px;
+    border-radius: 4px;
+    padding: 2px 6px;
+    margin-right: 10px;
+    -unity-text-align: middle-center;
+}
+
+.control-desc {
+    -unity-font-definition: url("/Assets/UI/Fonts/Font_InterRegular.asset");
+    font-size: 13px;
+    color: #BAC2DE;
+}
+
+.bottom-center-stack {
+    flex-direction: column;
+    align-items: center;
+}
+
+.story-feed {
+    flex-direction: row;
+    align-items: center;
+    max-width: 680px;
+    background-color: rgba(17, 17, 27, 0.92);
+    border-color: #45475A;
+    border-width: 1px;
+    border-left-width: 4px;
+    border-left-color: #74C7EC;
+    border-radius: 6px;
+    padding: 8px 14px;
+    margin-bottom: 8px;
+    transition-property: opacity;
+    transition-duration: 0.22s;
+}
+
+.story-feed--hidden {
+    opacity: 0;
+}
+
+.story-speaker {
+    -unity-font-definition: url("/Assets/UI/Fonts/Font_RobotoMono.asset");
+    font-size: 12px;
+    color: #74C7EC;
+    margin-right: 10px;
+    min-width: 48px;
+}
+
+.story-text {
+    -unity-font-definition: url("/Assets/UI/Fonts/Font_InterRegular.asset");
+    font-size: 13px;
+    color: #CDD6F4;
+    white-space: normal;
+}
+
+.context-prompt {
+    flex-direction: row;
+    align-items: center;
+    background-color: rgba(17, 17, 27, 0.94);
+    border-color: #585B70;
+    border-width: 1px;
+    border-radius: 7px;
+    overflow: hidden;
+    margin-bottom: 10px;
+    padding-right: 18px;
+    height: 38px;
+    transition-property: opacity;
+    transition-duration: 0.14s;
+}
+
+.context-prompt--hidden {
+    opacity: 0;
+}
+
+.context-prompt-accent {
+    width: 5px;
+    height: 100%;
+    background-color: #74C7EC;
+    margin-right: 14px;
+}
+
+.context-prompt-label {
+    -unity-font-definition: url("/Assets/UI/Fonts/Font_RobotoMono.asset");
+    font-size: 14px;
+    color: #CDD6F4;
+}
+
+.ability-dock {
+    flex-direction: row;
+    align-items: center;
+    background-color: rgba(17, 17, 27, 0.90);
+    border-color: #45475A;
+    border-width: 1px;
+    border-radius: 10px;
+    padding: 8px 10px;
+}
+
+.ability-slot {
+    width: 106px;
+    flex-direction: column;
+    align-items: center;
+    background-color: rgba(49, 50, 68, 0.58);
+    border-color: #45475A;
+    border-width: 1px;
+    border-radius: 7px;
+    padding: 7px 6px;
+    margin-right: 7px;
+}
+
+.ability-slot--active {
+    border-color: #585B70;
+}
+
+.ability-slot--highlight {
+    background-color: rgba(116, 199, 236, 0.16);
+    border-color: #74C7EC;
+}
+
+.ability-slot--flexible {
+    background-color: rgba(203, 166, 247, 0.16);
+    border-color: #CBA6F7;
+}
+
+.ability-slot--queued {
+    background-color: rgba(24, 24, 37, 0.65);
+    border-color: #313244;
+    opacity: 0.70;
+}
+
+.ability-slot--last {
+    margin-right: 0;
+}
+
+.dock-divider {
+    width: 1px;
+    height: 48px;
+    background-color: #45475A;
+    margin-right: 7px;
+}
+
+.ability-icon {
+    width: 24px;
+    height: 24px;
+    margin-bottom: 4px;
+    color: #CDD6F4;
+}
+
+.ability-title {
+    font-size: 12px;
+    color: #CDD6F4;
+    letter-spacing: 0.5px;
+    margin-bottom: 1px;
+}
+
+.ability-key {
+    -unity-font-definition: url("/Assets/UI/Fonts/Font_RobotoMono.asset");
+    font-size: 11px;
+    color: #A6ADC8;
+}
+
+.bottom-right-spacer {
+    width: 268px;
+}
+
+/* Modal Overlay (Pause / Chamber Clear) */
+.chamber-overlay {
+    position: absolute;
+    left: 0;
+    right: 0;
+    top: 0;
+    bottom: 0;
+    align-items: center;
+    justify-content: center;
+    background-color: rgba(17, 17, 27, 0.74);
+}
+
+.chamber-overlay--hidden {
+    display: none;
+}
+
+.modal-card {
+    width: 420px;
+    background-color: #1E1E2E;
+    border-color: #585B70;
+    border-width: 1px;
+    border-radius: 10px;
+    padding: 24px 26px 22px 26px;
+    align-items: center;
+    overflow: hidden;
+}
+
+.modal-top-bar {
+    position: absolute;
+    left: 0;
+    right: 0;
+    top: 0;
+    height: 4px;
+    background-color: #74C7EC;
+}
+
+.modal-title {
+    font-size: 22px;
+    color: #CDD6F4;
+    letter-spacing: 1.4px;
+    margin-top: 4px;
+    margin-bottom: 4px;
+    -unity-text-align: middle-center;
+}
+
+.modal-subtitle {
+    -unity-font-definition: url("/Assets/UI/Fonts/Font_InterSemiBold.asset");
+    font-size: 13px;
+    color: #A6ADC8;
+    margin-bottom: 10px;
+    -unity-text-align: middle-center;
+}
+
+.modal-rank {
+    -unity-font-definition: url("/Assets/UI/Fonts/Font_InterSemiBold.asset");
+    font-size: 15px;
+    color: #F9E2AF;
+    letter-spacing: 2px;
+    margin-bottom: 12px;
+    -unity-text-align: middle-center;
+}
+
+.modal-rank--hidden {
+    display: none;
+}
+
+.modal-actions {
+    width: 100%;
+    flex-direction: column;
+}
+
+.modal-btn {
+    -unity-font-definition: url("/Assets/UI/Fonts/Font_InterSemiBold.asset");
+    font-size: 14px;
+    color: #CDD6F4;
+    background-color: #313244;
+    border-color: #45475A;
+    border-width: 1px;
+    border-radius: 6px;
+    height: 38px;
+    margin-bottom: 8px;
+}
+
+.modal-btn:hover {
+    background-color: #45475A;
+    border-color: #89B4FA;
+}
+
+.modal-btn--primary {
+    border-color: #74C7EC;
+    color: #74C7EC;
+}
+
+.modal-btn--hidden {
+    display: none;
+}
+
+.modal-metrics {
+    width: 100%;
+    flex-direction: column;
+    background-color: rgba(24, 24, 37, 0.85);
+    border-color: #45475A;
+    border-width: 1px;
+    border-radius: 6px;
+    padding: 10px 12px;
+    margin-bottom: 16px;
+}
+
+.modal-metrics--hidden {
+    display: none;
+}
+
+.modal-metric-row {
+    flex-direction: row;
+    justify-content: space-between;
+    margin-bottom: 8px;
+}
+
+.modal-metric-cell {
+    flex-grow: 1;
+    align-items: center;
+    border-right-color: #45475A;
+    border-right-width: 1px;
+    padding: 2px 6px;
+}
+
+.modal-metric-cell--last {
+    border-right-width: 0;
+}
+
+.metric-value {
+    -unity-font-definition: url("/Assets/UI/Fonts/Font_InterSemiBold.asset");
+    font-size: 18px;
+    color: #A6E3A1;
+}
+
+.metric-label {
+    -unity-font-definition: url("/Assets/UI/Fonts/Font_RobotoMono.asset");
+    font-size: 10px;
+    color: #A6ADC8;
+    margin-top: 2px;
+}
+
+.metric-concept-note {
+    -unity-font-definition: url("/Assets/UI/Fonts/Font_InterRegular.asset");
+    font-size: 12px;
+    color: #94E2D5;
+    -unity-text-align: middle-center;
+    white-space: normal;
+    margin-left: 4px;
+    margin-right: 4px;
+    border-top-color: #313244;
+    border-top-width: 1px;
+    padding-top: 7px;
+}

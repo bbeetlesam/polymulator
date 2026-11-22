@@ -1,0 +1,37 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 2763873eddf04f878f13270a059f332a, type: 3}
+  m_Name: Level1.4
+  m_EditorClassIdentifier: Assembly-CSharp::Polymulator.LevelInfo
+  levelTitle: Ujian Pasar
+  chapterSubtitle: TRANSLASI
+  districtLabel: GERBANG ARSIP TIMUR
+  parActions: 10
+  requireFacingAngle: 0
+  requiredFacingYaw: 0
+  fragmentTitle: 
+  triggerGlitchOnClear: 0
+  playPianoOnClear: 0
+  openingDialogue:
+  - speaker: SIM
+    text: 'Ujian Bab 1: Kaskade Ruang. Bebaskan beban berat dari kubah timur terlebih
+      dahulu.'
+  clearDialogue:
+  - speaker: MIRA
+    text: Pintu Menara Arsip terbuka! Persiapkan modul Elevasi, RECT.
+  - speaker: SIM
+    text: 'Memasuki Babak II: Rusun Matahari.'
+  hints:
+  - Taruh CUBE-02 (1.5t) di Pad Barat (CONDUIT-VAULT-A) agar Energy Barrier kubah
+    timur terbuka.
+  - Ambil CUBE-01 (2.0t) dari kubah timur lalu pindahkan ke Pad Utara untuk menyalakan
+    Energy Bridge.

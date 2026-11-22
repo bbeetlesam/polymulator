@@ -1,0 +1,38 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 2763873eddf04f878f13270a059f332a, type: 3}
+  m_Name: Level3.3
+  m_EditorClassIdentifier: Assembly-CSharp::Polymulator.LevelInfo
+  levelTitle: Ruang Piano
+  chapterSubtitle: ROTASI
+  districtLabel: APARTEMEN TAK TERINDEKS
+  parActions: 10
+  requireFacingAngle: 1
+  requiredFacingYaw: 0
+  fragmentTitle: Pita Rekaman Ruang Piano
+  triggerGlitchOnClear: 0
+  playPianoOnClear: 1
+  openingDialogue:
+  - speaker: SIM
+    text: 'PERINGATAN: Anomali ruangan tak terindeks terdeteksi di barat.'
+  - speaker: MIRA
+    text: Jangan sentuh penghapusannya, SIM. Biarkan saja di situ.
+  clearDialogue:
+  - speaker: DANU
+    text: ITERATION 47 // JANGAN HAPUS. Mereka juga mencoba melindunginya.
+  - speaker: SIM
+    text: 'Memasuki Babak IV: Jembatan Lama & Peringatan Badai.'
+  hints:
+  - Aktifkan Pad Barat (>= 1.4t) untuk membuka Ruang Piano hangat dan dengarkan rekaman
+    Adi.
+  - Aktifkan Pad Timur (2.0t), ambil CORE-01, dan putar [R] hingga menghadap 0 deg
+    (Utara) ke Anchor.

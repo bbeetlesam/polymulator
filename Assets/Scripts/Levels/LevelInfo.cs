@@ -3,15 +3,66 @@ using UnityEngine;
 namespace Polymulator
 {
     /// <summary>
-    /// Per-level metadata. Stored as a ScriptableObject in Assets/Resources/Levels so
-    /// the LevelMenu can read a level's title without loading the level scene. The
-    /// asset name must match the level scene name: Level{chapter}.{level}.
+    /// Per-level metadata, objective configuration, and diegetic narrative beats stored in
+    /// Assets/Resources/Levels/Level{chapter}.{level}.asset.
     /// </summary>
     [CreateAssetMenu(fileName = "LevelInfo", menuName = "POLYMULATOR/Level Info")]
     public sealed class LevelInfo : ScriptableObject
     {
+        [System.Serializable]
+        public struct StoryLine
+        {
+            public string speaker;
+            public string text;
+        }
+
+        [Header("Identity")]
         [SerializeField] private string levelTitle = string.Empty;
+        [SerializeField] private string chapterSubtitle = "TRANSLASI";
+        [SerializeField] private string districtLabel = "RUANG UJI";
+        [SerializeField, Min(1)] private int parActions = 8;
+
+        [Header("Objective Rules")]
+        [SerializeField] private bool requireFacingAngle;
+        [SerializeField] private float requiredFacingYaw;
+        [SerializeField] private string fragmentTitle = string.Empty;
+        [SerializeField] private bool triggerGlitchOnClear;
+        [SerializeField] private bool playPianoOnClear;
+
+        [Header("Diegetic Narrative & Hints")]
+        [SerializeField] private StoryLine[] openingDialogue = System.Array.Empty<StoryLine>();
+        [SerializeField] private StoryLine[] clearDialogue = System.Array.Empty<StoryLine>();
+        [SerializeField] private string[] hints = System.Array.Empty<string>();
 
         public string Title => levelTitle;
+        public string ChapterSubtitle => chapterSubtitle;
+        public string DistrictLabel => districtLabel;
+        public int ParActions => Mathf.Max(1, parActions);
+        public bool RequireFacingAngle => requireFacingAngle;
+        public float RequiredFacingYaw => requiredFacingYaw;
+        public string FragmentTitle => fragmentTitle;
+        public bool TriggerGlitchOnClear => triggerGlitchOnClear;
+        public bool PlayPianoOnClear => playPianoOnClear;
+        public StoryLine[] OpeningDialogue => openingDialogue;
+        public StoryLine[] ClearDialogue => clearDialogue;
+        public string[] Hints => hints;
+
+        public void Configure(string title, string chapterSub, string district, int par,
+            bool requireAngle, float targetYaw, string fragment, bool glitchClear, bool pianoClear,
+            StoryLine[] opening, StoryLine[] clear, string[] simHints)
+        {
+            levelTitle = title;
+            chapterSubtitle = chapterSub;
+            districtLabel = district;
+            parActions = Mathf.Max(1, par);
+            requireFacingAngle = requireAngle;
+            requiredFacingYaw = targetYaw;
+            fragmentTitle = fragment;
+            triggerGlitchOnClear = glitchClear;
+            playPianoOnClear = pianoClear;
+            openingDialogue = opening ?? System.Array.Empty<StoryLine>();
+            clearDialogue = clear ?? System.Array.Empty<StoryLine>();
+            hints = simHints ?? System.Array.Empty<string>();
+        }
     }
 }

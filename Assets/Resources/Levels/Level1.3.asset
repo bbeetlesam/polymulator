@@ -1,0 +1,36 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 2763873eddf04f878f13270a059f332a, type: 3}
+  m_Name: Level1.3
+  m_EditorClassIdentifier: Assembly-CSharp::Polymulator.LevelInfo
+  levelTitle: Tag AD-I
+  chapterSubtitle: TRANSLASI
+  districtLabel: LENGKUNGAN PASAR
+  parActions: 7
+  requireFacingAngle: 0
+  requiredFacingYaw: 0
+  fragmentTitle: Tag Logam AD-I
+  triggerGlitchOnClear: 0
+  playPianoOnClear: 0
+  openingDialogue:
+  - speaker: SIM
+    text: Pad berada di atas Balkon Barat. Lemparan parabola [F] atau tangga barat
+      dapat menjangkaunya.
+  clearDialogue:
+  - speaker: RECT
+    text: Kenapa Mira melarangku menyentuh nama di tag logam itu?
+  - speaker: SIM
+    text: 'Tag AD-I ditandai: tidak terindeks.'
+  hints:
+  - Bawa CUBE-01 (2.0t) melewati tangga di sisi barat Balkon Barat, atau lempar dengan
+    Throw Arc [F] melewati parapet.
+  - Periksa sudut barat laut untuk menemukan Tag Logam AD-I.

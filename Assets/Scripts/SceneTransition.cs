@@ -23,8 +23,11 @@ namespace Polymulator
         private Phase phase;
         private Mode mode;
 
+        private static SceneTransition activeTransition;
+
         public static void Begin(string targetScene, float waitSeconds, float duration)
         {
+            if (activeTransition != null) return;
             SceneTransition transition = Create(waitSeconds, duration);
             transition.mode = Mode.LoadScene;
             transition.sceneName = targetScene;
@@ -32,6 +35,7 @@ namespace Polymulator
 
         public static void Quit(float waitSeconds, float duration)
         {
+            if (activeTransition != null) return;
             SceneTransition transition = Create(waitSeconds, duration);
             transition.mode = Mode.Quit;
         }
@@ -42,6 +46,7 @@ namespace Polymulator
             DontDestroyOnLoad(overlay);
 
             SceneTransition transition = overlay.AddComponent<SceneTransition>();
+            activeTransition = transition;
             transition.delay = Mathf.Max(0f, waitSeconds);
             transition.fadeDuration = Mathf.Max(0.05f, duration);
             transition.startTime = Time.unscaledTime;
@@ -84,6 +89,7 @@ namespace Polymulator
                         else
                         {
                             phase = Phase.FadeIn;
+                            Time.timeScale = 1f;
                             SceneManager.LoadScene(sceneName);
                             startTime = Time.unscaledTime;
                         }
@@ -126,6 +132,7 @@ namespace Polymulator
 
         private void OnDestroy()
         {
+            if (activeTransition == this) activeTransition = null;
             if (fadeTexture != null) Destroy(fadeTexture);
         }
     }

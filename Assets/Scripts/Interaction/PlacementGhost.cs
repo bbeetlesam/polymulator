@@ -40,14 +40,41 @@ namespace Polymulator
         private InteractableObject source;
         private float radius;
         private bool visible;
+        private Quaternion targetRotation = Quaternion.identity;
+        private Vector3? overrideWorldXZ;
+        private Color? accentOverride;
 
         public bool Visible => visible;
+        public Quaternion TargetRotation => targetRotation;
 
         private enum GhostShape { Box, Sphere, Cylinder, Capsule, Generic }
 
         public void Initialize(Transform rect)
         {
             rectTransform = rect;
+        }
+
+        public void SetTargetRotation(Quaternion rotation)
+        {
+            targetRotation = rotation;
+            if (visible) transform.rotation = targetRotation;
+        }
+
+        public void SetOverrideXZ(Vector3? xzWorld)
+        {
+            overrideWorldXZ = xzWorld;
+        }
+
+        public void SetAccentOverride(Color? color)
+        {
+            accentOverride = color;
+        }
+
+        public void ClearOverrides()
+        {
+            targetRotation = Quaternion.identity;
+            overrideWorldXZ = null;
+            accentOverride = null;
         }
 
         public void Show(InteractableObject target)
@@ -85,7 +112,7 @@ namespace Polymulator
         private void UpdatePosition()
         {
             transform.position = GetPlacementPosition(source);
-            transform.rotation = Quaternion.identity;
+            transform.rotation = targetRotation;
         }
 
         private void UpdateDepthGlobals()
@@ -100,28 +127,37 @@ namespace Polymulator
         }
 
         /// <summary>
-        /// World position where the object would be dropped: in front of Rect,
-        /// resting on the surface below, and inside the world boundary.
+        /// World position where the object would be dropped: in front of Rect (or at
+        /// override XZ for Flexible telekinesis), resting on the surface below, inside bounds.
         /// </summary>
         public Vector3 GetPlacementPosition(InteractableObject target)
         {
-            Vector3 forward = rectTransform != null
-                ? Vector3.ProjectOnPlane(rectTransform.forward, Vector3.up)
-                : Vector3.forward;
-            if (forward.sqrMagnitude < 0.0001f) forward = Vector3.forward;
-            forward.Normalize();
+            Vector3 probe;
+            if (overrideWorldXZ.HasValue)
+            {
+                probe = new Vector3(overrideWorldXZ.Value.x, GridSettings.ToWorld(12f), overrideWorldXZ.Value.z);
+            }
+            else
+            {
+                Vector3 forward = rectTransform != null
+                    ? Vector3.ProjectOnPlane(rectTransform.forward, Vector3.up)
+                    : Vector3.forward;
+                if (forward.sqrMagnitude < 0.0001f) forward = Vector3.forward;
+                forward.Normalize();
 
-            Vector3 origin = rectTransform != null ? rectTransform.position : Vector3.zero;
-            Vector3 probe = origin + forward * GridSettings.ToWorld(forwardDistance);
-            probe.y = 5f;
+                Vector3 origin = rectTransform != null ? rectTransform.position : Vector3.zero;
+                probe = origin + forward * GridSettings.ToWorld(forwardDistance);
+                probe.y = GridSettings.ToWorld(12f);
+            }
 
             float surfaceY = 0f;
-            RaycastHit[] hits = Physics.RaycastAll(probe, Vector3.down, 20f, ~0, QueryTriggerInteraction.Ignore);
+            RaycastHit[] hits = Physics.RaycastAll(probe, Vector3.down, GridSettings.ToWorld(25f), ~0, QueryTriggerInteraction.Ignore);
             System.Array.Sort(hits, (a, b) => a.distance.CompareTo(b.distance));
             for (int i = 0; i < hits.Length; i++)
             {
                 if (hits[i].collider == null) continue;
-                if (hits[i].collider.GetComponentInParent<InteractableObject>() != null) continue;
+                InteractableObject hitObj = hits[i].collider.GetComponentInParent<InteractableObject>();
+                if (hitObj != null && (hitObj == target || hitObj.canBePickedUp)) continue;
                 surfaceY = hits[i].point.y;
                 break;
             }
@@ -323,8 +359,9 @@ namespace Polymulator
             for (int i = 1; i < line.positionCount; i++)
                 length += Vector3.Distance(line.GetPosition(i - 1), line.GetPosition(i));
 
+            Color wireTint = accentOverride ?? PaletteSettings.Green;
             MaterialPropertyBlock block = new MaterialPropertyBlock();
-            block.SetColor(BaseColorId, PaletteSettings.Green);
+            block.SetColor(BaseColorId, wireTint);
             block.SetFloat(DashCountId, Mathf.Max(1f, dashCount * length / GridSettings.ToWorld(1f)));
             line.SetPropertyBlock(block);
 
@@ -352,7 +389,7 @@ namespace Polymulator
             renderer.reflectionProbeUsage = UnityEngine.Rendering.ReflectionProbeUsage.Off;
 
             MaterialPropertyBlock block = new MaterialPropertyBlock();
-            Color color = PaletteSettings.Green;
+            Color color = accentOverride ?? PaletteSettings.Green;
             color.a = fillAlpha;
             block.SetColor(BaseColorId, color);
             renderer.SetPropertyBlock(block);

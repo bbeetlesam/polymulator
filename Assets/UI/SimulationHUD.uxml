@@ -1,0 +1,180 @@
+<ui:UXML xmlns:ui="UnityEngine.UIElements" xmlns:poly="Polymulator" editor-extension-mode="False">
+    <Style src="SimulationHUD.uss" />
+    <ui:VisualElement name="hud-root" class="hud-root" picking-mode="Ignore">
+        <!-- Top Row -->
+        <ui:VisualElement name="hud-top-row" class="hud-top-row" picking-mode="Ignore">
+            <!-- Top-Left: Identity & Mode Pill -->
+            <ui:VisualElement name="identity-card" class="panel-card identity-card" picking-mode="Ignore">
+                <ui:VisualElement name="mode-accent-bar" class="accent-bar" picking-mode="Ignore" />
+                <ui:VisualElement class="identity-content" picking-mode="Ignore">
+                    <ui:Label text="POLYMULATOR" class="brand-title" picking-mode="Ignore" />
+                    <ui:Label name="chamber-subtitle-label" text="CHAMBER 1.1  //  WARMING UP" class="brand-subtitle" picking-mode="Ignore" />
+                    <ui:VisualElement name="mode-pill" class="mode-pill" picking-mode="Ignore">
+                        <poly:HudVectorIcon name="mode-icon" icon-kind="Limited" class="mode-icon" picking-mode="Ignore" />
+                        <ui:VisualElement class="mode-pill-text" picking-mode="Ignore">
+                            <ui:Label name="mode-badge-label" text="LIMITED" class="mode-badge-title" picking-mode="Ignore" />
+                            <ui:Label name="mode-summary-label" text="Carry  /  90 deg Rotate  /  Throw" class="mode-badge-sub" picking-mode="Ignore" />
+                        </ui:VisualElement>
+                        <ui:Label text="TAB" class="keycap-mini" picking-mode="Ignore" />
+                    </ui:VisualElement>
+                    <ui:Label name="objective-label" text="OBJ // ACTIVATE CONDUIT PAD -> BRIDGE CORE-01" class="objective-line" picking-mode="Ignore" />
+                </ui:VisualElement>
+            </ui:VisualElement>
+
+            <!-- Top-Center: Dynamic Mode / Hook Toast -->
+            <ui:VisualElement name="status-toast" class="status-toast status-toast--hidden" picking-mode="Ignore">
+                <ui:VisualElement name="status-toast-dot" class="toast-dot" picking-mode="Ignore" />
+                <ui:Label name="status-toast-label" text="LIMITED MODE" class="status-toast-label" picking-mode="Ignore" />
+            </ui:VisualElement>
+
+            <!-- Top-Right: Contextual Target Card (only shown when targeting/holding) -->
+            <ui:VisualElement name="target-card" class="panel-card target-card target-card--hidden" picking-mode="Ignore">
+                <ui:VisualElement name="target-accent-bar" class="accent-bar accent-bar--right" picking-mode="Ignore" />
+                <ui:VisualElement class="target-content" picking-mode="Ignore">
+                    <ui:VisualElement class="target-header-row" picking-mode="Ignore">
+                        <ui:VisualElement name="target-swatch" class="target-swatch" picking-mode="Ignore" />
+                        <ui:Label name="target-state-label" text="TARGET" class="target-state-label" picking-mode="Ignore" />
+                    </ui:VisualElement>
+                    <ui:Label name="target-name-label" text="CUBE-01" class="target-name-label" picking-mode="Ignore" />
+                    <ui:Label name="target-meta-label" text="Ready" class="target-meta-label" picking-mode="Ignore" />
+                    <ui:Label name="target-vector-label" text="Pos (0.0, 0.0, 0.0) GU" class="target-vector-label" picking-mode="Ignore" />
+                </ui:VisualElement>
+            </ui:VisualElement>
+        </ui:VisualElement>
+
+        <!-- Bottom Cluster -->
+        <ui:VisualElement name="hud-bottom-row" class="hud-bottom-row" picking-mode="Ignore">
+            <!-- Bottom-Left: Compact Controls Card -->
+            <ui:VisualElement name="controls-card" class="panel-card controls-card" picking-mode="Ignore">
+                <ui:VisualElement class="accent-bar controls-accent-bar" picking-mode="Ignore" />
+                <ui:VisualElement class="controls-content" picking-mode="Ignore">
+                    <ui:VisualElement class="controls-header-row" picking-mode="Ignore">
+                        <ui:Label text="CONTROLS" class="controls-header" picking-mode="Ignore" />
+                        <ui:Label text="H" class="keycap-mini" picking-mode="Ignore" />
+                    </ui:VisualElement>
+                    <ui:VisualElement class="control-line" picking-mode="Ignore">
+                        <ui:Label text="WASD" class="keycap" picking-mode="Ignore" />
+                        <ui:Label text="Move" class="control-desc" picking-mode="Ignore" />
+                    </ui:VisualElement>
+                    <ui:VisualElement class="control-line" picking-mode="Ignore">
+                        <ui:Label text="TAB" class="keycap" picking-mode="Ignore" />
+                        <ui:Label text="Switch Mode" class="control-desc" picking-mode="Ignore" />
+                    </ui:VisualElement>
+                    <ui:VisualElement class="control-line" picking-mode="Ignore">
+                        <ui:Label text="E / LMB" class="keycap" picking-mode="Ignore" />
+                        <ui:Label text="Grab / Drop / Tether" class="control-desc" picking-mode="Ignore" />
+                    </ui:VisualElement>
+                    <ui:VisualElement class="control-line" picking-mode="Ignore">
+                        <ui:Label text="R / F" class="keycap" picking-mode="Ignore" />
+                        <ui:Label text="Rotate / Throw" class="control-desc" picking-mode="Ignore" />
+                    </ui:VisualElement>
+                    <ui:VisualElement class="control-line" picking-mode="Ignore">
+                        <ui:Label text="Q / Z / SCR" class="keycap" picking-mode="Ignore" />
+                        <ui:Label text="Reach / Elevation" class="control-desc" picking-mode="Ignore" />
+                    </ui:VisualElement>
+                    <ui:VisualElement class="control-line" picking-mode="Ignore">
+                        <ui:Label text="RMB / C" class="keycap" picking-mode="Ignore" />
+                        <ui:Label text="Orbit Peek / Reset" class="control-desc" picking-mode="Ignore" />
+                    </ui:VisualElement>
+                    <ui:VisualElement class="control-line" picking-mode="Ignore">
+                        <ui:Label text="V / F1" class="keycap" picking-mode="Ignore" />
+                        <ui:Label text="3D Axes / SIM Hint" class="control-desc" picking-mode="Ignore" />
+                    </ui:VisualElement>
+                    <ui:VisualElement class="control-line control-line--last" picking-mode="Ignore">
+                        <ui:Label text="ESC" class="keycap" picking-mode="Ignore" />
+                        <ui:Label text="Pause / Menu" class="control-desc" picking-mode="Ignore" />
+                    </ui:VisualElement>
+                </ui:VisualElement>
+            </ui:VisualElement>
+
+            <!-- Bottom-Center: Story Feed + Context Prompt + 6-Slot Ability Dock -->
+            <ui:VisualElement class="bottom-center-stack" picking-mode="Ignore">
+                <ui:VisualElement name="story-feed" class="story-feed story-feed--hidden" picking-mode="Ignore">
+                    <ui:Label name="story-speaker-label" text="SIM" class="story-speaker" picking-mode="Ignore" />
+                    <ui:Label name="story-text-label" text="..." class="story-text" picking-mode="Ignore" />
+                </ui:VisualElement>
+
+                <ui:VisualElement name="context-prompt" class="context-prompt context-prompt--hidden" picking-mode="Ignore">
+                    <ui:VisualElement name="context-prompt-accent" class="context-prompt-accent" picking-mode="Ignore" />
+                    <ui:Label name="context-prompt-label" text="[ E ]  PICK UP  CUBE-01" class="context-prompt-label" picking-mode="Ignore" />
+                </ui:VisualElement>
+
+                <ui:VisualElement name="ability-dock" class="ability-dock" picking-mode="Ignore">
+                    <ui:VisualElement name="slot-translasi" class="ability-slot ability-slot--active" picking-mode="Ignore">
+                        <poly:HudVectorIcon name="icon-translasi" icon-kind="Translasi" class="ability-icon" picking-mode="Ignore" />
+                        <ui:Label text="TRANSLASI" class="ability-title" picking-mode="Ignore" />
+                        <ui:Label text="WASD" class="ability-key" picking-mode="Ignore" />
+                    </ui:VisualElement>
+
+                    <ui:VisualElement name="slot-elevasi" class="ability-slot ability-slot--active" picking-mode="Ignore">
+                        <poly:HudVectorIcon name="icon-elevasi" icon-kind="Elevasi" class="ability-icon" picking-mode="Ignore" />
+                        <ui:Label text="ELEVASI" class="ability-title" picking-mode="Ignore" />
+                        <ui:Label name="key-elevasi" text="Q / Z" class="ability-key" picking-mode="Ignore" />
+                    </ui:VisualElement>
+
+                    <ui:VisualElement name="slot-rotasi" class="ability-slot ability-slot--active" picking-mode="Ignore">
+                        <poly:HudVectorIcon name="icon-rotasi" icon-kind="Rotasi" class="ability-icon" picking-mode="Ignore" />
+                        <ui:Label text="ROTASI" class="ability-title" picking-mode="Ignore" />
+                        <ui:Label name="key-rotasi" text="[ R ]" class="ability-key" picking-mode="Ignore" />
+                    </ui:VisualElement>
+
+                    <ui:VisualElement name="slot-special" class="ability-slot ability-slot--highlight" picking-mode="Ignore">
+                        <poly:HudVectorIcon name="icon-special" icon-kind="Throw" class="ability-icon" picking-mode="Ignore" />
+                        <ui:Label name="title-special" text="THROW" class="ability-title" picking-mode="Ignore" />
+                        <ui:Label name="key-special" text="[ F ]" class="ability-key" picking-mode="Ignore" />
+                    </ui:VisualElement>
+
+                    <ui:VisualElement class="dock-divider" picking-mode="Ignore" />
+
+                    <ui:VisualElement name="slot-partition" class="ability-slot ability-slot--queued" picking-mode="Ignore">
+                        <poly:HudVectorIcon name="icon-partition" icon-kind="Partition" class="ability-icon" picking-mode="Ignore" />
+                        <ui:Label text="PARTITION" class="ability-title" picking-mode="Ignore" />
+                        <ui:Label text="[ 1 ] LOCKED" class="ability-key" picking-mode="Ignore" />
+                    </ui:VisualElement>
+
+                    <ui:VisualElement name="slot-fusion" class="ability-slot ability-slot--queued ability-slot--last" picking-mode="Ignore">
+                        <poly:HudVectorIcon name="icon-fusion" icon-kind="Fusion" class="ability-icon" picking-mode="Ignore" />
+                        <ui:Label text="FUSION" class="ability-title" picking-mode="Ignore" />
+                        <ui:Label text="[ 2 ] LOCKED" class="ability-key" picking-mode="Ignore" />
+                    </ui:VisualElement>
+                </ui:VisualElement>
+            </ui:VisualElement>
+
+            <!-- Right spacer keeps Ability Dock centered cleanly -->
+            <ui:VisualElement class="bottom-right-spacer" picking-mode="Ignore" />
+        </ui:VisualElement>
+
+        <!-- Modal Overlay: Pause / Chamber Clear -->
+        <ui:VisualElement name="chamber-overlay" class="chamber-overlay chamber-overlay--hidden">
+            <ui:VisualElement name="modal-card" class="modal-card">
+                <ui:VisualElement name="modal-accent-bar" class="modal-top-bar" />
+                <ui:Label name="modal-title" text="CHAMBER PAUSED" class="modal-title" />
+                <ui:Label name="modal-subtitle" text="CHAMBER 1.1  //  WARMING UP" class="modal-subtitle" />
+                <ui:Label name="modal-rank-label" text="" class="modal-rank modal-rank--hidden" />
+                <ui:VisualElement name="modal-metrics" class="modal-metrics modal-metrics--hidden">
+                    <ui:VisualElement class="modal-metric-row">
+                        <ui:VisualElement class="modal-metric-cell">
+                            <ui:Label name="metric-translations" text="0" class="metric-value" />
+                            <ui:Label text="TRANSLATIONS" class="metric-label" />
+                        </ui:VisualElement>
+                        <ui:VisualElement class="modal-metric-cell">
+                            <ui:Label name="metric-rotations" text="0" class="metric-value" />
+                            <ui:Label text="ROTATIONS" class="metric-label" />
+                        </ui:VisualElement>
+                        <ui:VisualElement class="modal-metric-cell modal-metric-cell--last">
+                            <ui:Label name="metric-tethers" text="0" class="metric-value" />
+                            <ui:Label text="THROWS / TETHERS" class="metric-label" />
+                        </ui:VisualElement>
+                    </ui:VisualElement>
+                    <ui:Label name="metric-concept-note" text="CONCEPTS // TRANSLATION (X,Y,Z) • ROTATION Ry • MASS CONDUIT" class="metric-concept-note" />
+                </ui:VisualElement>
+                <ui:VisualElement class="modal-actions">
+                    <ui:Button name="btn-next" text="NEXT CHAMBER   [ ENTER ]" class="modal-btn modal-btn--primary modal-btn--hidden" />
+                    <ui:Button name="btn-resume" text="RESUME   [ ESC ]" class="modal-btn modal-btn--primary" />
+                    <ui:Button name="btn-replay" text="REPLAY CHAMBER   [ R ]" class="modal-btn" />
+                    <ui:Button name="btn-mainmenu" text="MAIN MENU   [ M ]" class="modal-btn" />
+                </ui:VisualElement>
+            </ui:VisualElement>
+        </ui:VisualElement>
+    </ui:VisualElement>
+</ui:UXML>
