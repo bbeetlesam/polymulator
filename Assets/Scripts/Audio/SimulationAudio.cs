@@ -44,6 +44,9 @@ namespace Polymulator
         private AudioClip clipFragment;
         private AudioClip clipGlitch;
         private AudioClip clipDialog;
+        private AudioClip clipTypeTick;
+        private AudioClip clipPartition;
+        private AudioClip clipFusion;
         private readonly AudioClip[] adiPianoNotes = new AudioClip[5];
 
         private readonly List<AudioClip> ownedClips = new List<AudioClip>(20);
@@ -70,6 +73,7 @@ namespace Polymulator
                 return;
             }
             Instance = this;
+            SimulationSettings.ApplyAudioVolume();
 
             BuildAudioSources();
             SynthesizeLibrary();
@@ -182,6 +186,21 @@ namespace Polymulator
                     t => Env(t, 0.008f, 0.75f) * 0.30f *
                          (0.70f * Sine(t, hz) + 0.22f * Sine(t, hz * 2f) * Mathf.Exp(-t * 6f) + 0.08f * Sine(t, hz * 3f) * Mathf.Exp(-t * 9f)));
             }
+
+            clipTypeTick = RegisterClip("SFX_TypeTick", 0.030f,
+                t => Env(t, 0.002f, 0.030f) * 0.14f * (0.65f * Triangle(t, 680f) + 0.35f * Sine(t, 1020f)));
+
+            clipPartition = RegisterClip("SFX_Partition", 0.28f,
+                t => Env(t, 0.004f, 0.28f) * 0.36f *
+                     (0.50f * Triangle(t, Mathf.Lerp(920f, 340f, t / 0.28f)) +
+                      0.35f * Sine(t, 587.33f) * StepRatio(t, 0.05f) +
+                      0.15f * SoftNoise(t, 33f) * (1f - t / 0.28f)));
+
+            clipFusion = RegisterClip("SFX_Fusion", 0.38f,
+                t => Env(t, 0.014f, 0.38f) * 0.36f *
+                     (0.42f * Sine(t, 293.66f) +
+                      0.36f * Sine(t, 440f) * StepRatio(t, 0.06f) +
+                      0.32f * Sine(t, 587.33f) * StepRatio(t, 0.13f)));
         }
 
         private AudioClip RegisterClip(string clipName, float durationSeconds, System.Func<float, float> generator)
@@ -246,8 +265,18 @@ namespace Polymulator
             a.PlaySpatial("frag", a.clipFragment, pos, 0.92f, 0.25f, 0.02f);
             if (playPiano) a.PlayAdiPianoMotif();
         }
+        public static void PlayPartition(Vector3 pos) => EnsureInstance().PlaySpatial("part", Instance.clipPartition, pos, 0.96f, 0.08f, 1.0f, 0.04f);
+        public static void PlayFusion(Vector3 pos) => EnsureInstance().PlaySpatial("fuse", Instance.clipFusion, pos, 0.96f, 0.08f, 1.0f, 0.03f);
         public static void PlaySignalGlitch() => EnsureInstance().PlayUI("glitch", Instance.clipGlitch, 0.72f, 0.4f, 0.05f);
         public static void PlayDialogBlip(bool isHuman) => EnsureInstance().PlayUI("dialog", Instance.clipDialog, 0.6f, 0.08f, isHuman ? 0.08f : 0.02f);
+        public static void PlayTypewriterTick(string speaker)
+        {
+            SimulationAudio a = EnsureInstance();
+            if (a.clipTypeTick == null || a.uiSource == null || !a.CanPlay("type", 0.036f)) return;
+            float basePitch = speaker.Contains("MIRA") ? 1.18f : (speaker.Contains("RECT") ? 0.86f : (speaker.Contains("SIGNAL") ? 1.32f : 1.0f));
+            a.uiSource.pitch = basePitch + Random.Range(-0.06f, 0.06f);
+            a.uiSource.PlayOneShot(a.clipTypeTick, Mathf.Clamp01(a.uiVolume * 0.36f));
+        }
         public static void TriggerAdiPianoMotif() => EnsureInstance().PlayAdiPianoMotif();
 
         public void PlayAdiPianoMotif()
