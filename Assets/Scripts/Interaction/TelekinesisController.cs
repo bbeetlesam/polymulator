@@ -187,7 +187,7 @@ namespace Polymulator
 
             target.SetHighlight(false, false);
             target.TriggerPulse(0.16f);
-            RectVisualRig.NotifyActionStretch(transform, 0.14f);
+            RectVisualRig.NotifyCarryAction(transform, true);
             SimulationVFX.Burst(target.transform.position, PaletteSettings.BeamTelekinesis, 18, 2.4f);
             SimulationVFX.Ring(target.transform.position, PaletteSettings.Mauve, 1.55f, 0.36f);
 
@@ -239,11 +239,13 @@ namespace Polymulator
                     SimulationVFX.Burst(released.transform.position, PaletteSettings.Mauve, 20, 3.0f);
                     SimulationVFX.Ring(released.transform.position, PaletteSettings.Sapphire, 1.8f, 0.35f);
                     RectCameraController.AddImpulse(0.06f);
+                    RectVisualRig.NotifyThrowWhip(transform);
                 }
                 else
                 {
                     body.linearVelocity = Vector3.ClampMagnitude(body.linearVelocity, GridSettings.ToWorld(3f));
                     SimulationVFX.Burst(released.transform.position, PaletteSettings.Teal, 10, 1.4f);
+                    RectVisualRig.NotifyCarryAction(transform, false);
                 }
                 body.WakeUp();
             }
@@ -334,6 +336,10 @@ namespace Polymulator
             if (spinPressed)
             {
                 desiredRotation = Quaternion.Euler(0f, freeSpinSpeed * Time.deltaTime, 0f) * desiredRotation;
+                bool spinStarted = (keyboard != null && keyboard.rKey.wasPressedThisFrame) ||
+                                   (mouse != null && mouse.rightButton.wasPressedThisFrame);
+                if (spinStarted)
+                    RectVisualRig.NotifyRotateSnap(transform, 1f);
             }
 
             // 4. Telekinetic Push / Throw (F)
