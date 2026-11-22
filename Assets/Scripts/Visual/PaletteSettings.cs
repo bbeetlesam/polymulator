@@ -14,8 +14,8 @@ namespace Polymulator
         public const string ResourceName = "PaletteSettings";
 
         [Header("Base & Surfaces (Catppuccin Mocha)")]
-        [SerializeField] private Color crust = Hex(0x11, 0x11, 0x1B);
-        [SerializeField] private Color mantle = Hex(0x18, 0x18, 0x25);
+        [SerializeField] private Color crust = Hex(0x18, 0x18, 0x25);
+        [SerializeField] private Color mantle = Hex(0x11, 0x11, 0x1B);
         [SerializeField] private Color baseSurface = Hex(0x1E, 0x1E, 0x2E);
         [SerializeField] private Color surface0 = Hex(0x31, 0x32, 0x44);
         [SerializeField] private Color surface1 = Hex(0x45, 0x47, 0x5A);
@@ -136,8 +136,8 @@ namespace Polymulator
         [ContextMenu("Reset to Official Catppuccin Mocha")]
         public void ApplyCatppuccinMochaDefaults()
         {
-            crust = Hex(0x11, 0x11, 0x1B);
-            mantle = Hex(0x18, 0x18, 0x25);
+            crust = Hex(0x18, 0x18, 0x25);
+            mantle = Hex(0x11, 0x11, 0x1B);
             baseSurface = Hex(0x1E, 0x1E, 0x2E);
             surface0 = Hex(0x31, 0x32, 0x44);
             surface1 = Hex(0x45, 0x47, 0x5A);
