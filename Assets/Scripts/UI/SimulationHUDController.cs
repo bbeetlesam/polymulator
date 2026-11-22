@@ -904,13 +904,13 @@ namespace Polymulator
                 string axisBadge = partitionFusionController != null
                     ? partitionFusionController.CutAxisMode switch
                     {
-                        PartitionAxisMode.LeftRight => "X",
-                        PartitionAxisMode.FrontBack => "Z",
-                        PartitionAxisMode.Horizontal => "Y",
-                        _ => "AUTO"
+                        PartitionAxisMode.LeftRight => "Sumbu X",
+                        PartitionAxisMode.FrontBack => "Sumbu Z",
+                        PartitionAxisMode.Horizontal => "Sumbu Y",
+                        _ => "Auto [3]"
                     }
-                    : "AUTO";
-                keyPartitionLabel.text = canPart ? "[1] Belah (" + axisBadge + ")" : "[ 1 ] Terkunci";
+                    : "Auto [3]";
+                keyPartitionLabel.text = canPart ? "[ 1 ] " + axisBadge : "[ 1 ] Terkunci";
             }
 
             if (slotFusion != null)
@@ -1239,7 +1239,7 @@ namespace Polymulator
 
             string splitAxisTag = partitionFusionController != null ? partitionFusionController.CutAxisShortLabel : "OTOMATIS";
             string cutRuleInfo = hasCutPreview
-                ? "  •  Potong " + partitionFusionController.CutAxisRuleLabel + " -> 2x " +
+                ? "\nPotong: " + partitionFusionController.CutAxisRuleLabel + " -> 2x " +
                   partitionFusionController.PreviewSplitHalfMass.ToString("0.0", CultureInfo.InvariantCulture) + "t"
                 : string.Empty;
 
@@ -1253,7 +1253,7 @@ namespace Polymulator
                 float mB = partnerObj != null && partnerObj.Body != null ? partnerObj.Body.mass : 1f;
                 float sumMass = mA + mB;
                 string partnerName = partnerObj != null ? partnerObj.displayName : "Partner";
-                fusePartnerInfo = "  •  Fusion + " + partnerName + " (" + sumMass.ToString("0.0", CultureInfo.InvariantCulture) + "t)";
+                fusePartnerInfo = "\nSiap Fusion: + " + partnerName + " (" + sumMass.ToString("0.0", CultureInfo.InvariantCulture) + " t)";
                 fusePromptInfo = "   [ 2 ] Gabung (" + partnerName + ")";
             }
 
