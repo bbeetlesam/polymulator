@@ -7,7 +7,7 @@
     padding: 24px;
     flex-direction: column;
     justify-content: space-between;
-    -unity-font-definition: url("/Assets/UI/Fonts/Font_InterSemiBold.asset");
+    -unity-font-definition: url("/Assets/UI/Fonts/Font_AktSemiBold.asset");
 }
 
 .hud-top-row {
@@ -17,17 +17,18 @@
 }
 
 .panel-card {
-    background-color: rgba(17, 17, 27, 0.90);
+    background-color: rgba(17, 17, 27, 0.92);
     border-color: #45475A;
     border-width: 1px;
     border-radius: 8px;
     flex-direction: row;
-    overflow: hidden;
 }
 
 .accent-bar {
     width: 5px;
     background-color: #74C7EC;
+    border-top-left-radius: 7px;
+    border-bottom-left-radius: 7px;
 }
 
 .accent-bar--right {
@@ -37,81 +38,83 @@
     bottom: 0;
     width: 5px;
     background-color: #74C7EC;
+    border-top-right-radius: 7px;
+    border-bottom-right-radius: 7px;
 }
 
 /* Identity Card */
 .identity-card {
-    min-width: 344px;
+    min-width: 392px;
 }
 
 .identity-content {
-    padding: 14px 18px 14px 15px;
+    padding: 15px 20px 15px 17px;
     flex-direction: column;
 }
 
 .brand-title {
-    font-size: 24px;
+    font-size: 26px;
     color: #CDD6F4;
-    letter-spacing: 1.5px;
-    margin-bottom: 1px;
+    letter-spacing: 1.8px;
+    margin-bottom: 2px;
 }
 
 .brand-subtitle {
-    -unity-font-definition: url("/Assets/UI/Fonts/Font_InterSemiBold.asset");
-    font-size: 13px;
-    color: #A6ADC8;
-    margin-bottom: 10px;
+    -unity-font-definition: url("/Assets/UI/Fonts/Font_AktSemiBold.asset");
+    font-size: 15px;
+    color: #BAC2DE;
+    margin-bottom: 11px;
 }
 
 .mode-pill {
     flex-direction: row;
     align-items: center;
-    background-color: rgba(49, 50, 68, 0.78);
+    background-color: rgba(49, 50, 68, 0.80);
     border-color: #585B70;
     border-width: 1px;
     border-radius: 6px;
-    padding: 7px 11px;
+    padding: 8px 12px;
 }
 
 .mode-icon {
-    width: 22px;
-    height: 22px;
-    margin-right: 10px;
+    width: 24px;
+    height: 24px;
+    margin-right: 11px;
     color: #74C7EC;
 }
 
 .mode-pill-text {
     flex-direction: column;
     flex-grow: 1;
-    margin-right: 12px;
+    margin-right: 14px;
 }
 
 .mode-badge-title {
-    font-size: 14px;
+    font-size: 16px;
     color: #74C7EC;
     letter-spacing: 1px;
 }
 
 .mode-badge-sub {
-    -unity-font-definition: url("/Assets/UI/Fonts/Font_InterRegular.asset");
-    font-size: 12px;
+    -unity-font-definition: url("/Assets/UI/Fonts/Font_AktRegular.asset");
+    font-size: 14px;
     color: #BAC2DE;
 }
 
 .keycap-mini {
-    -unity-font-definition: url("/Assets/UI/Fonts/Font_RobotoMono.asset");
-    font-size: 12px;
+    -unity-font-definition: url("/Assets/UI/Fonts/Font_AktMedium.asset");
+    font-size: 13px;
     color: #11111B;
     background-color: #BAC2DE;
     border-radius: 4px;
-    padding: 2px 7px;
+    padding: 3px 8px;
 }
 
 .objective-line {
-    -unity-font-definition: url("/Assets/UI/Fonts/Font_RobotoMono.asset");
-    font-size: 13px;
+    -unity-font-definition: url("/Assets/UI/Fonts/Font_AktMedium.asset");
+    font-size: 15px;
     color: #94E2D5;
-    margin-top: 8px;
+    margin-top: 10px;
     letter-spacing: 0.4px;
 }
 
@@ -119,47 +122,49 @@
 .status-toast {
     flex-direction: row;
     align-items: center;
-    background-color: rgba(24, 24, 37, 0.94);
+    background-color: rgba(24, 24, 37, 0.95);
     border-color: #74C7EC;
     border-width: 1px;
-    border-radius: 16px;
-    padding: 7px 16px;
+    border-radius: 18px;
+    padding: 9px 20px;
     margin-top: 4px;
-    transition-property: opacity;
+    transition-property: opacity, translate;
     transition-duration: 0.2s;
 }
 
 .status-toast--hidden {
     opacity: 0;
+    translate: 0 -8px;
 }
 
 .toast-dot {
-    width: 8px;
-    height: 8px;
-    border-radius: 4px;
+    width: 9px;
+    height: 9px;
+    border-radius: 5px;
     background-color: #74C7EC;
-    margin-right: 9px;
+    margin-right: 10px;
 }
 
 .status-toast-label {
-    -unity-font-definition: url("/Assets/UI/Fonts/Font_RobotoMono.asset");
-    font-size: 13px;
+    -unity-font-definition: url("/Assets/UI/Fonts/Font_AktMedium.asset");
+    font-size: 15px;
     color: #CDD6F4;
 }
 
 /* Contextual Target Card */
 .target-card {
-    min-width: 280px;
-    transition-property: opacity;
+    min-width: 320px;
+    transition-property: opacity, translate;
     transition-duration: 0.16s;
 }
 
 .target-card--hidden {
     opacity: 0;
+    translate: 10px 0;
 }
 
 .target-content {
-    padding: 13px 22px 13px 16px;
+    padding: 14px 24px 14px 18px;
     flex-direction: column;
     flex-grow: 1;
 }
@@ -167,40 +172,40 @@
 .target-header-row {
     flex-direction: row;
     align-items: center;
-    margin-bottom: 3px;
+    margin-bottom: 4px;
 }
 
 .target-swatch {
-    width: 11px;
-    height: 11px;
+    width: 12px;
+    height: 12px;
     border-radius: 6px;
     background-color: #585B70;
-    margin-right: 8px;
+    margin-right: 9px;
 }
 
 .target-state-label {
-    -unity-font-definition: url("/Assets/UI/Fonts/Font_RobotoMono.asset");
-    font-size: 12px;
+    -unity-font-definition: url("/Assets/UI/Fonts/Font_AktMedium.asset");
+    font-size: 13px;
     color: #A6ADC8;
 }
 
 .target-name-label {
-    font-size: 20px;
+    font-size: 22px;
     color: #CDD6F4;
-    margin-bottom: 2px;
+    margin-bottom: 3px;
 }
 
 .target-meta-label {
-    -unity-font-definition: url("/Assets/UI/Fonts/Font_InterRegular.asset");
-    font-size: 13px;
+    -unity-font-definition: url("/Assets/UI/Fonts/Font_AktRegular.asset");
+    font-size: 15px;
     color: #BAC2DE;
 }
 
 .target-vector-label {
-    -unity-font-definition: url("/Assets/UI/Fonts/Font_InterSemiBold.asset");
-    font-size: 13px;
+    -unity-font-definition: url("/Assets/UI/Fonts/Font_AktSemiBold.asset");
+    font-size: 14px;
     color: #94E2D5;
-    margin-top: 4px;
+    margin-top: 5px;
 }
 
 /* Bottom Row */
@@ -211,13 +216,22 @@
 }
 
 .controls-card {
-    width: 268px;
+    width: 304px;
     transition-property: opacity;
     transition-duration: 0.18s;
 }
 
 .controls-card--collapsed {
-    opacity: 0.28;
+    width: auto;
+    opacity: 0.82;
+}
+
+.controls-card--collapsed .controls-header-row {
+    margin-bottom: 0;
+}
+
+.controls-card--collapsed .control-line {
+    display: none;
 }
 
 .controls-accent-bar {
@@ -234,20 +248,21 @@
     flex-direction: row;
     justify-content: space-between;
     align-items: center;
-    margin-bottom: 7px;
+    margin-bottom: 8px;
 }
 
 .controls-header {
-    -unity-font-definition: url("/Assets/UI/Fonts/Font_RobotoMono.asset");
-    font-size: 12px;
-    color: #A6ADC8;
-    letter-spacing: 1px;
+    -unity-font-definition: url("/Assets/UI/Fonts/Font_AktSemiBold.asset");
+    font-size: 13px;
+    color: #BAC2DE;
+    letter-spacing: 0.5px;
+    margin-right: 10px;
 }
 
 .control-line {
     flex-direction: row;
     align-items: center;
-    margin-bottom: 5px;
+    margin-bottom: 6px;
 }
 
 .control-line--last {
@@ -255,23 +270,23 @@
 }
 
 .keycap {
-    -unity-font-definition: url("/Assets/UI/Fonts/Font_RobotoMono.asset");
-    min-width: 82px;
+    -unity-font-definition: url("/Assets/UI/Fonts/Font_AktMedium.asset");
+    min-width: 84px;
     font-size: 12px;
     color: #CDD6F4;
     background-color: #313244;
     border-color: #585B70;
     border-width: 1px;
     border-radius: 4px;
-    padding: 2px 6px;
+    padding: 3px 7px;
     margin-right: 10px;
     -unity-text-align: middle-center;
 }
 
 .control-desc {
-    -unity-font-definition: url("/Assets/UI/Fonts/Font_InterRegular.asset");
-    font-size: 13px;
-    color: #BAC2DE;
+    -unity-font-definition: url("/Assets/UI/Fonts/Font_AktRegular.asset");
+    font-size: 14px;
+    color: #CDD6F4;
 }
 
 .bottom-center-stack {
@@ -280,68 +295,87 @@
 }
 
 .story-feed {
-    flex-direction: row;
-    align-items: center;
-    max-width: 680px;
-    background-color: rgba(17, 17, 27, 0.92);
-    border-color: #45475A;
+    flex-direction: column;
+    min-width: 520px;
+    max-width: 760px;
+    background-color: rgba(24, 24, 37, 0.92);
+    border-color: rgba(69, 71, 90, 0.72);
     border-width: 1px;
-    border-left-width: 4px;
+    border-left-width: 3px;
     border-left-color: #74C7EC;
-    border-radius: 6px;
-    padding: 8px 14px;
-    margin-bottom: 8px;
-    transition-property: opacity;
+    border-radius: 8px;
+    padding: 13px 18px 14px 18px;
+    margin-bottom: 10px;
+    transition-property: opacity, translate;
     transition-duration: 0.22s;
+    transition-timing-function: ease-out-cubic;
 }
 
 .story-feed--hidden {
     opacity: 0;
+    translate: 0 12px;
+    display: none;
+}
+
+.story-header-row {
+    flex-direction: row;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 5px;
 }
 
 .story-speaker {
-    -unity-font-definition: url("/Assets/UI/Fonts/Font_RobotoMono.asset");
-    font-size: 12px;
+    -unity-font-definition: url("/Assets/UI/Fonts/Font_AktSemiBold.asset");
+    font-size: 13px;
     color: #74C7EC;
-    margin-right: 10px;
-    min-width: 48px;
+    letter-spacing: 0.6px;
+}
+
+.story-progress {
+    -unity-font-definition: url("/Assets/UI/Fonts/Font_AktMedium.asset");
+    font-size: 12px;
+    color: #9399B2;
+    letter-spacing: 0.4px;
 }
 
 .story-text {
-    -unity-font-definition: url("/Assets/UI/Fonts/Font_InterRegular.asset");
-    font-size: 13px;
+    -unity-font-definition: url("/Assets/UI/Fonts/Font_AktRegular.asset");
+    font-size: 17px;
     color: #CDD6F4;
     white-space: normal;
+    letter-spacing: 0.1px;
 }
 
 .context-prompt {
     flex-direction: row;
     align-items: center;
-    background-color: rgba(17, 17, 27, 0.94);
-    border-color: #585B70;
+    background-color: rgba(24, 24, 37, 0.88);
+    border-color: rgba(69, 71, 90, 0.72);
     border-width: 1px;
     border-radius: 7px;
-    overflow: hidden;
-    margin-bottom: 10px;
-    padding-right: 18px;
+    margin-bottom: 8px;
+    padding-right: 16px;
     height: 38px;
-    transition-property: opacity;
+    transition-property: opacity, translate;
     transition-duration: 0.14s;
 }
 
 .context-prompt--hidden {
     opacity: 0;
+    translate: 0 6px;
 }
 
 .context-prompt-accent {
-    width: 5px;
+    width: 3px;
     height: 100%;
     background-color: #74C7EC;
-    margin-right: 14px;
+    border-top-left-radius: 6px;
+    border-bottom-left-radius: 6px;
+    margin-right: 12px;
 }
 
 .context-prompt-label {
-    -unity-font-definition: url("/Assets/UI/Fonts/Font_RobotoMono.asset");
+    -unity-font-definition: url("/Assets/UI/Fonts/Font_AktMedium.asset");
     font-size: 14px;
     color: #CDD6F4;
 }
@@ -349,43 +383,55 @@
 .ability-dock {
     flex-direction: row;
     align-items: center;
-    background-color: rgba(17, 17, 27, 0.90);
-    border-color: #45475A;
+    background-color: rgba(17, 17, 27, 0.88);
+    border-color: rgba(69, 71, 90, 0.65);
     border-width: 1px;
-    border-radius: 10px;
-    padding: 8px 10px;
+    border-radius: 9px;
+    padding: 7px 9px;
 }
 
 .ability-slot {
     width: 106px;
     flex-direction: column;
     align-items: center;
-    background-color: rgba(49, 50, 68, 0.58);
-    border-color: #45475A;
+    background-color: rgba(49, 50, 68, 0.45);
+    border-color: rgba(69, 71, 90, 0.60);
     border-width: 1px;
-    border-radius: 7px;
-    padding: 7px 6px;
+    border-radius: 6px;
+    padding: 7px 5px;
     margin-right: 7px;
+    transition-property: background-color, border-color, scale;
+    transition-duration: 0.15s;
 }
 
 .ability-slot--active {
-    border-color: #585B70;
+    border-color: rgba(88, 91, 112, 0.85);
 }
 
 .ability-slot--highlight {
-    background-color: rgba(116, 199, 236, 0.16);
-    border-color: #74C7EC;
+    background-color: rgba(116, 199, 236, 0.14);
+    border-color: rgba(116, 199, 236, 0.72);
 }
 
 .ability-slot--flexible {
-    background-color: rgba(203, 166, 247, 0.16);
-    border-color: #CBA6F7;
+    background-color: rgba(203, 166, 247, 0.14);
+    border-color: rgba(203, 166, 247, 0.72);
+}
+
+.ability-slot--partition-ready {
+    background-color: rgba(250, 179, 135, 0.14);
+    border-color: rgba(250, 179, 135, 0.78);
+}
+
+.ability-slot--fusion-ready {
+    background-color: rgba(166, 227, 161, 0.16);
+    border-color: rgba(166, 227, 161, 0.82);
 }
 
 .ability-slot--queued {
-    background-color: rgba(24, 24, 37, 0.65);
-    border-color: #313244;
-    opacity: 0.70;
+    background-color: rgba(24, 24, 37, 0.55);
+    border-color: rgba(49, 50, 68, 0.65);
+    opacity: 0.52;
 }
 
 .ability-slot--last {
@@ -400,30 +446,30 @@
 }
 
 .ability-icon {
-    width: 24px;
-    height: 24px;
-    margin-bottom: 4px;
+    width: 26px;
+    height: 26px;
+    margin-bottom: 5px;
     color: #CDD6F4;
 }
 
 .ability-title {
-    font-size: 12px;
+    font-size: 13px;
     color: #CDD6F4;
     letter-spacing: 0.5px;
-    margin-bottom: 1px;
+    margin-bottom: 2px;
 }
 
 .ability-key {
-    -unity-font-definition: url("/Assets/UI/Fonts/Font_RobotoMono.asset");
-    font-size: 11px;
-    color: #A6ADC8;
+    -unity-font-definition: url("/Assets/UI/Fonts/Font_AktMedium.asset");
+    font-size: 12px;
+    color: #BAC2DE;
 }
 
 .bottom-right-spacer {
-    width: 268px;
+    width: 304px;
 }
 
-/* Modal Overlay (Pause / Chamber Clear) */
+/* Modal Overlay (Pause / Chamber Clear / Settings) */
 .chamber-overlay {
     position: absolute;
     left: 0;
@@ -432,22 +478,33 @@
     bottom: 0;
     align-items: center;
     justify-content: center;
-    background-color: rgba(17, 17, 27, 0.74);
+    background-color: rgba(17, 17, 27, 0.78);
+    transition-property: opacity;
+    transition-duration: 0.18s;
 }
 
 .chamber-overlay--hidden {
     display: none;
+    opacity: 0;
 }
 
 .modal-card {
-    width: 420px;
+    width: 492px;
     background-color: #1E1E2E;
     border-color: #585B70;
     border-width: 1px;
-    border-radius: 10px;
-    padding: 24px 26px 22px 26px;
+    border-radius: 12px;
+    padding: 28px 30px 24px 30px;
     align-items: center;
-    overflow: hidden;
+    transition-property: scale, opacity, translate;
+    transition-duration: 0.20s;
+    transition-timing-function: ease-out-cubic;
+}
+
+.modal-card--entering {
+    opacity: 0;
+    scale: 0.94 0.94;
+    translate: 0 10px;
 }
 
 .modal-top-bar {
@@ -455,32 +512,35 @@
     left: 0;
     right: 0;
     top: 0;
-    height: 4px;
+    height: 3px;
     background-color: #74C7EC;
+    border-top-left-radius: 11px;
+    border-top-right-radius: 11px;
 }
 
 .modal-title {
-    font-size: 22px;
+    -unity-font-definition: url("/Assets/UI/Fonts/Font_AktBold.asset");
+    font-size: 24px;
     color: #CDD6F4;
-    letter-spacing: 1.4px;
+    letter-spacing: 0.4px;
     margin-top: 4px;
-    margin-bottom: 4px;
+    margin-bottom: 5px;
     -unity-text-align: middle-center;
 }
 
 .modal-subtitle {
-    -unity-font-definition: url("/Assets/UI/Fonts/Font_InterSemiBold.asset");
-    font-size: 13px;
-    color: #A6ADC8;
-    margin-bottom: 10px;
+    -unity-font-definition: url("/Assets/UI/Fonts/Font_AktSemiBold.asset");
+    font-size: 14px;
+    color: #BAC2DE;
+    margin-bottom: 12px;
     -unity-text-align: middle-center;
 }
 
 .modal-rank {
-    -unity-font-definition: url("/Assets/UI/Fonts/Font_InterSemiBold.asset");
-    font-size: 15px;
+    -unity-font-definition: url("/Assets/UI/Fonts/Font_AktSemiBold.asset");
+    font-size: 17px;
     color: #F9E2AF;
-    letter-spacing: 2px;
+    letter-spacing: 1px;
     margin-bottom: 12px;
     -unity-text-align: middle-center;
 }
@@ -495,29 +555,136 @@
 }
 
 .modal-btn {
-    -unity-font-definition: url("/Assets/UI/Fonts/Font_InterSemiBold.asset");
-    font-size: 14px;
+    -unity-font-definition: url("/Assets/UI/Fonts/Font_AktSemiBold.asset");
+    font-size: 16px;
+    letter-spacing: 1px;
     color: #CDD6F4;
     background-color: #313244;
-    border-color: #45475A;
+    border-color: #585B70;
     border-width: 1px;
-    border-radius: 6px;
-    height: 38px;
-    margin-bottom: 8px;
+    border-left-width: 4px;
+    border-radius: 7px;
+    height: 48px;
+    margin-bottom: 10px;
+    transition-property: background-color, border-color, color, scale, translate;
+    transition-duration: 0.16s;
+    transition-timing-function: ease-out-cubic;
 }
 
 .modal-btn:hover {
     background-color: #45475A;
     border-color: #89B4FA;
+    scale: 1.02 1.02;
+    translate: 0 -1px;
 }
 
-.modal-btn--primary {
+.modal-btn:focus {
+    background-color: #45475A;
     border-color: #74C7EC;
     color: #74C7EC;
 }
 
+.modal-btn:active {
+    scale: 0.97 0.97;
+    translate: 0 1px;
+}
+
+.modal-btn--primary {
+    border-left-color: #74C7EC;
+    border-color: #74C7EC;
+    color: #74C7EC;
+}
+
+.modal-btn--primary:hover {
+    background-color: rgba(116, 199, 236, 0.18);
+    color: #CDD6F4;
+}
+
 .modal-btn--hidden {
     display: none;
+}
+
+.pause-settings-panel {
+    width: 100%;
+    flex-direction: column;
+    background-color: rgba(24, 24, 37, 0.90);
+    border-color: #45475A;
+    border-width: 1px;
+    border-radius: 8px;
+    padding: 12px 14px;
+    margin-bottom: 14px;
+}
+
+.pause-settings-panel--hidden {
+    display: none;
+}
+
+.pause-setting-row {
+    flex-direction: row;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 10px;
+}
+
+.pause-setting-row--last {
+    margin-bottom: 0;
+}
+
+.pause-setting-label {
+    -unity-font-definition: url("/Assets/UI/Fonts/Font_AktMedium.asset");
+    font-size: 13px;
+    color: #CDD6F4;
+    min-width: 150px;
+}
+
+.pause-setting-slider {
+    flex-grow: 1;
+    margin-left: 8px;
+    margin-right: 10px;
+}
+
+.pause-setting-slider .unity-base-slider__tracker {
+    background-color: #45475A;
+    height: 6px;
+    border-radius: 3px;
+}
+
+.pause-setting-slider .unity-base-slider__dragger {
+    background-color: #74C7EC;
+    border-color: #CDD6F4;
+    border-width: 2px;
+    width: 16px;
+    height: 16px;
+    border-radius: 8px;
+    margin-top: -5px;
+}
+
+.pause-setting-value {
+    -unity-font-definition: url("/Assets/UI/Fonts/Font_AktMedium.asset");
+    font-size: 13px;
+    color: #94E2D5;
+    min-width: 44px;
+    -unity-text-align: middle-right;
+}
+
+.pause-setting-toggle {
+    margin: 0;
+}
+
+.pause-setting-toggle .unity-toggle__checkmark {
+    width: 20px;
+    height: 20px;
+    background-color: #313244;
+    border-color: #585B70;
+    border-width: 1px;
+    border-radius: 5px;
+    -unity-background-image-tint-color: #11111B;
+}
+
+.pause-setting-toggle:checked .unity-toggle__checkmark {
+    background-color: #74C7EC;
+    border-color: #89B4FA;
+    -unity-background-image-tint-color: #11111B;
 }
 
 .modal-metrics {
@@ -527,7 +694,7 @@
     border-color: #45475A;
     border-width: 1px;
     border-radius: 6px;
-    padding: 10px 12px;
+    padding: 12px 14px;
     margin-bottom: 16px;
 }
 
@@ -538,7 +705,7 @@
 .modal-metric-row {
     flex-direction: row;
     justify-content: space-between;
-    margin-bottom: 8px;
+    margin-bottom: 10px;
 }
 
 .modal-metric-cell {
@@ -554,21 +721,64 @@
 }
 
 .metric-value {
-    -unity-font-definition: url("/Assets/UI/Fonts/Font_InterSemiBold.asset");
-    font-size: 18px;
+    -unity-font-definition: url("/Assets/UI/Fonts/Font_AktSemiBold.asset");
+    font-size: 22px;
     color: #A6E3A1;
 }
 
 .metric-label {
-    -unity-font-definition: url("/Assets/UI/Fonts/Font_RobotoMono.asset");
-    font-size: 10px;
-    color: #A6ADC8;
+    -unity-font-definition: url("/Assets/UI/Fonts/Font_AktMedium.asset");
+    font-size: 11px;
+    color: #BAC2DE;
     margin-top: 2px;
 }
 
-.metric-concept-note {
-    -unity-font-definition: url("/Assets/UI/Fonts/Font_InterRegular.asset");
+.modal-card--ending {
+    width: 640px;
+    padding: 28px 32px 24px 32px;
+}
+
+.ending-epilogue-box {
+    width: 100%;
+    flex-direction: column;
+    background-color: rgba(24, 24, 37, 0.88);
+    border-color: rgba(69, 71, 90, 0.72);
+    border-width: 1px;
+    border-radius: 8px;
+    padding: 14px 18px;
+    margin-bottom: 14px;
+}
+
+.ending-epilogue-box--hidden {
+    display: none;
+}
+
+.ending-summary {
+    -unity-font-definition: url("/Assets/UI/Fonts/Font_AktSemiBold.asset");
+    font-size: 15px;
+    color: #94E2D5;
+    white-space: normal;
+    margin-bottom: 10px;
+}
+
+.ending-epilogue-para {
+    -unity-font-definition: url("/Assets/UI/Fonts/Font_AktRegular.asset");
+    font-size: 14px;
+    color: #CDD6F4;
+    white-space: normal;
+    margin-bottom: 8px;
+}
+
+.ending-memories-tag {
+    -unity-font-definition: url("/Assets/UI/Fonts/Font_AktMedium.asset");
     font-size: 12px;
+    color: #F2CDCD;
+    margin-top: 4px;
+}
+
+.metric-concept-note {
+    -unity-font-definition: url("/Assets/UI/Fonts/Font_AktRegular.asset");
+    font-size: 14px;
     color: #94E2D5;
     -unity-text-align: middle-center;
     white-space: normal;
@@ -576,5 +786,5 @@
     margin-right: 4px;
     border-top-color: #313244;
     border-top-width: 1px;
-    padding-top: 7px;
+    padding-top: 8px;
 }
