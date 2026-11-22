@@ -12,25 +12,28 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 2763873eddf04f878f13270a059f332a, type: 3}
   m_Name: Level3.1
   m_EditorClassIdentifier: Assembly-CSharp::Polymulator.LevelInfo
-  levelTitle: Kunci Orientasi
-  chapterSubtitle: ROTASI
-  districtLabel: GEDUNG ARSIP // PINTU
-  parActions: 6
+  levelTitle: Kunci Arah Arsip
+  chapterSubtitle: "CHAPTER 3  \u2022  ROTASI"
+  districtLabel: LOBI ARSIP
+  parActions: 7
   requireFacingAngle: 1
-  requiredFacingYaw: 90
-  fragmentTitle: 
+  requiredFacingYaw: 0
+  fragmentTitle: Kunci Putar Ruang Arsip
   triggerGlitchOnClear: 0
   playPianoOnClear: 0
+  allowPartition: 0
+  allowFusion: 0
   openingDialogue:
   - speaker: SIM
-    text: "ROTASI Ry(\u03B8). Bentuk tetap sama; arah hadap menentukan kecocokan."
-  - speaker: RECT
-    text: Apakah benda yang sama bisa salah hanya karena menghadap ke sisi lain?
+    text: Soket Anchor ini memiliki pengunci arah. Perhatikan panah pada dudukan
+      Anchor.
+  - speaker: MIRA
+    text: Tekan [R] saat memegang atau menarik kubus untuk memutarnya 90 derajat.
   clearDialogue:
-  - speaker: SIM
-    text: "Kalibrasi arah 90\xB0 valid. Pintu Gedung Arsip bergeser membuka koridor
-      dalam."
+  - speaker: MIRA
+    text: Pas sekali. Pintu menuju ruang dalam arsip langsung berbunyi klik.
   hints:
-  - Perhatikan indikator anak panah pada ANCHOR-01 menghadap 90 deg (Timur).
-  - Saat memegang CORE-01, tekan [R] untuk memutar Ry(+90 deg) hingga garis visor
-    sejajar panah Anchor.
+  - "Soket Anchor meminta inti menghadap UTARA (0\xB0), sesuai arah panah di dudukan."
+  - Saat memegang CORE-01 [E] atau mengarahkannya dengan [F], tekan [R] untuk memutarnya
+    hingga panah kubus cocok dengan soket.
+  - Letakkan CORE-01 yang sudah sejajar tepat ke tengah ANCHOR-01.

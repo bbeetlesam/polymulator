@@ -1,0 +1,43 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 2763873eddf04f878f13270a059f332a, type: 3}
+  m_Name: Level5.1
+  m_EditorClassIdentifier: Assembly-CSharp::Polymulator.LevelInfo
+  levelTitle: Ambang Badai
+  chapterSubtitle: "CHAPTER 5  \u2022  BADAI & PILIHAN AKHIR"
+  districtLabel: AMBANG TANGGUL UTARA
+  parActions: 13
+  requireFacingAngle: 1
+  requiredFacingYaw: 90
+  fragmentTitle: Gelombang Tanggul Utara
+  triggerGlitchOnClear: 1
+  playPianoOnClear: 0
+  allowPartition: 1
+  allowFusion: 1
+  openingDialogue:
+  - speaker: HALIM
+    text: Satu pagar energi dan jembatan rusak menghalangi pintu menuju inti pengendali
+      tanggul.
+  - speaker: VELA
+    text: 'Gunakan seluruh kemampuanmu: Partition [1], Fusion [2], Telekinesis [F],
+      dan Rotasi [R].'
+  clearDialogue:
+  - speaker: SIM
+    text: 'Peringatan: Ruang Pilihan Akhir telah dicapai. Bersiaplah mengambil keputusan
+      untuk Kota Tepi.'
+  hints:
+  - Belah PENAHAN-BESAR (2.4 t) dengan [1] Partition -> naikkan satu bagian 1.2 t
+    ke PAD-GARDU di balkon kiri (pakai [SPACE] + [F] atau tangga).
+  - Gabungkan bagian 1.2 t kedua dengan PENAHAN-TAMBAH (1.2 t) memakai [2] Fusion
+    -> letakkan blok 2.4 t di PAD-TANGGUL (kanan).
+  - "Putar CORE-01 dengan [R] ke 90\xB0 (Timur), lalu bawa melewati pagar dan jembatan
+    ke ANCHOR-01."

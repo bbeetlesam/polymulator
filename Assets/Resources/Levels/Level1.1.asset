@@ -12,29 +12,31 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 2763873eddf04f878f13270a059f332a, type: 3}
   m_Name: Level1.1
   m_EditorClassIdentifier: Assembly-CSharp::Polymulator.LevelInfo
-  levelTitle: Warming Up
-  chapterSubtitle: TRANSLASI
+  levelTitle: Bangun di Ruangan Kosong
+  chapterSubtitle: "CHAPTER 1  \u2022  TRANSLASI"
   districtLabel: RUANG UJI 01
-  parActions: 6
+  parActions: 5
   requireFacingAngle: 0
   requiredFacingYaw: 0
-  fragmentTitle: 
-  triggerGlitchOnClear: 1
+  fragmentTitle: Suara di Balik Kaca
+  triggerGlitchOnClear: 0
   playPianoOnClear: 0
+  allowPartition: 0
+  allowFusion: 0
   openingDialogue:
   - speaker: SIM
-    text: Selamat datang di Polymulator, Iterasi #127. Letakkan beban >= 1.8t di
-      Conduit Pad.
-  - speaker: RECT
-    text: Apa itu iterasi?
-  - speaker: SIM
-    text: Jumlah percobaan. Untuk menjadi cukup.
+    text: Sesi simulasi dimulai. Unit Rect aktif kembali di Ruang Uji 01.
+  - speaker: TEPI
+    text: Sebuah inti kuning menyala di tengah lantai. Seseorang meninggalkannya
+      tepat di jalurmu.
   clearDialogue:
-  - speaker: SIGNAL
-    text: ...Apakah dia merespons?
   - speaker: SIM
-    text: Gangguan arsip sesaat. Abaikan. Memuat Sektor 1.2.
+    text: Kunci utama terpasang. Pintu menuju Distrik Pasar terbuka.
+  - speaker: TEPI
+    text: Di balik cahaya dinding ruangan ini, bayangan jalanan lama mulai terlihat.
   hints:
-  - Conduit Pad butuh massa >= 1.8t. Bawa CUBE-01 (2.0t) lalu drop [E] atau lempar
-    [F].
-  - Naiki Energy Bridge ke Platform High, ambil CORE-01 emas dan masukkan ke ANCHOR-01.
+  - Gerakkan Rect dengan WASD atau tombol panah mendekati kubus kuning CORE-01.
+  - Tekan [E] untuk mengangkat CORE-01, bawa ke soket bulat ANCHOR-01 di utara, lalu
+    tekan [E] atau [Q] untuk meletakkan.
+  - "Kristal merah muda di sisi kiri bersifat opsional \u2014 sentuh untuk mendengar
+    fragmen cerita."

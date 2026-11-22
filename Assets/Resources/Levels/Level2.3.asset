@@ -12,26 +12,27 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 2763873eddf04f878f13270a059f332a, type: 3}
   m_Name: Level2.3
   m_EditorClassIdentifier: Assembly-CSharp::Polymulator.LevelInfo
-  levelTitle: Kotak Musik
-  chapterSubtitle: ELEVASI
+  levelTitle: Puncak Menara Rusun
+  chapterSubtitle: "CHAPTER 2  \u2022  ELEVASI"
   districtLabel: MENARA RUSUN
-  parActions: 9
+  parActions: 11
   requireFacingAngle: 0
   requiredFacingYaw: 0
-  fragmentTitle: Kotak Musik Adi
+  fragmentTitle: Antena Pemancar Nara
   triggerGlitchOnClear: 0
   playPianoOnClear: 0
+  allowPartition: 0
+  allowFusion: 0
   openingDialogue:
-  - speaker: SIM
-    text: 'PERINGATAN: stabilitas menara menurun. Fokus pada CORE-01.'
-  - speaker: RECT
-    text: Ada benda berdenyut di dalam reruntuhan timur.
+  - speaker: NARA
+    text: Puncak menara dijaga pagar tengah sekaligus tangga putus.
+  - speaker: VELA
+    text: Buka pagar dengan pelat kiri dulu, lalu bawa pemberat kedua ke balkon kanan.
   clearDialogue:
-  - speaker: MIRA
-    text: Terima kasih telah memeriksanya, RECT...
   - speaker: SIM
-    text: 'Memasuki Babak III: Gedung Arsip Vela.'
+    text: Sektor Elevasi terhubung. Pintu Gedung Arsip mulai terbaca.
   hints:
-  - Gunakan CUBE-02 (1.5t) pada Pad Timur untuk menyelamatkan Kotak Musik Adi (5
-    nada piano!) sebelum menyelesaikan menara.
-  - Gunakan CUBE-01 (2.0t) pada Pad Barat agar jembatan Menara Atas aktif.
+  - Taruh PEMBERAT-A ke PAD-PINTU di kiri bawah agar pagar tengah terbuka.
+  - Gunakan Mode Fleksibel [SPACE] dan angkat PEMBERAT-B (dengan tangga atau [F])
+    ke PAD-PUNCAK di balkon kanan.
+  - Setelah jembatan ke puncak aktif, bawa CORE-01 naik ke ANCHOR-01.

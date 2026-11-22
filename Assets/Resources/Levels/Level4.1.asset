@@ -12,27 +12,32 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 2763873eddf04f878f13270a059f332a, type: 3}
   m_Name: Level4.1
   m_EditorClassIdentifier: Assembly-CSharp::Polymulator.LevelInfo
-  levelTitle: Dua Sisi
-  chapterSubtitle: REKONSTRUKSI
-  districtLabel: JEMBATAN LAMA VELA
-  parActions: 11
-  requireFacingAngle: 1
-  requiredFacingYaw: 180
-  fragmentTitle: Data Echo Warga Vela
+  levelTitle: Dua Beban Jadi Satu
+  chapterSubtitle: "CHAPTER 4  \u2022  FUSION & PARTITION"
+  districtLabel: BENGKEL FUSION // 01
+  parActions: 7
+  requireFacingAngle: 0
+  requiredFacingYaw: 0
+  fragmentTitle: Hukum Kekekalan Ruang
   triggerGlitchOnClear: 0
   playPianoOnClear: 0
+  allowPartition: 0
+  allowFusion: 1
   openingDialogue:
-  - speaker: MIRA
-    text: Dua sisi Tepi berselisih antara tanggul dan taman. Kita butuh jembatan
-      stabil sekarang.
   - speaker: SIM
-    text: Pad Barat (2.0t) dan Pad Dermaga Timur (1.8t) menyalakan Jembatan Lama.
-      Anchor menuntut sudut 180 deg.
+    text: Pelat PAD-BERAT membutuhkan beban minimal 2.2 ton. Masing-masing balok
+      hanya 1.2 ton.
+  - speaker: VELA
+    text: Dekatkan RINGAN-A dan RINGAN-B sampai muncul garis hijau, lalu tekan [2]
+      FUSION.
   clearDialogue:
-  - speaker: SIM
-    text: 'PERINGATAN CUACA: Badai Ibu mendekati batas kritis. Bersiap untuk kalibrasi
-      akhir.'
+  - speaker: VELA
+    text: Berhasil! Sekarang kamu menguasai FUSION [2] untuk menggabungkan beban
+      berat.
   hints:
-  - Bawa CUBE-01 ke Pad Barat dan CUBE-06 menaiki tangga selatan ke Pad Dermaga Timur
-    (+1.0 GU).
-  - Putar CORE-01 dengan [R] dua kali (0 -> 180 deg Selatan) sebelum masuk ANCHOR-01.
+  - Dekati RINGAN-A atau RINGAN-B (atau pegang satu dan dekatkan ke pasangannya hingga
+    muncul garis tautan hijau).
+  - "Tekan tombol [2] untuk menjalankan FUSION \u2014 keduanya akan menyatu menjadi
+    satu blok 2.4 ton."
+  - Bawa blok gabungan 2.4 t ke PAD-BERAT agar pagar merah padam, lalu taruh CORE-01
+    ke ANCHOR-01.
