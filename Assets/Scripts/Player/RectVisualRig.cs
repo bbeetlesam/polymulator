@@ -45,7 +45,7 @@ namespace Polymulator
         private float currentHeadPitch;
         private float accelPitchOffset;
         private float prevSpeedNorm;
-        private bool wasGrounded = true;
+        private int airborneFrames;
 
         public static void NotifyActionStretch(Transform target, float strength = 0.14f)
         {
@@ -167,8 +167,7 @@ namespace Polymulator
                 headRestLocalPos = headPivot.localPosition;
                 headRestLocalRot = headPivot.localRotation;
             }
-            if (rectController != null)
-                wasGrounded = rectController.IsGrounded;
+            airborneFrames = 0;
         }
 
         private void OnEnable()
@@ -216,10 +215,17 @@ namespace Polymulator
             float turnRate = rectController != null ? rectController.AngularTurnRate : 0f;
             bool isGrounded = rectController == null || rectController.IsGrounded;
 
-            // Landing squash when touching down onto floor or platform
-            if (!wasGrounded && isGrounded)
-                TriggerSquash(0.16f);
-            wasGrounded = isGrounded;
+            // Landing squash when touching down onto floor or platform after genuine airtime
+            if (isGrounded)
+            {
+                if (airborneFrames >= 2)
+                    TriggerSquash(0.16f);
+                airborneFrames = 0;
+            }
+            else if (rectController.enabled)
+            {
+                airborneFrames++;
+            }
 
             // Acceleration surge & braking overshoot follow-through
             float rawAccel = Mathf.Clamp((speedNorm - prevSpeedNorm) / dt, -4.5f, 4.5f);
