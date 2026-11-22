@@ -132,6 +132,27 @@ namespace Polymulator
             fallbackInstance = null;
         }
 
+        /// <summary>Returns the closest official Catppuccin Mocha interactive color to preserve palette purity.</summary>
+        public static Color NearestInteractiveAccent(Color candidate)
+        {
+            Color[] palette = InteractivePalette;
+            Color best = Teal;
+            float bestDist = float.MaxValue;
+            for (int i = 0; i < palette.Length; i++)
+            {
+                float dr = palette[i].r - candidate.r;
+                float dg = palette[i].g - candidate.g;
+                float db = palette[i].b - candidate.b;
+                float d = dr * dr + dg * dg + db * db;
+                if (d < bestDist)
+                {
+                    bestDist = d;
+                    best = palette[i];
+                }
+            }
+            return best;
+        }
+
         /// <summary>Applies all 26 official Catppuccin Mocha sRGB values to this asset.</summary>
         [ContextMenu("Reset to Official Catppuccin Mocha")]
         public void ApplyCatppuccinMochaDefaults()
