@@ -16,6 +16,7 @@ Shader "POLYMULATOR/Chamber Grid"
         _Smoothness ("Smoothness", Range(0.0, 1.0)) = 0.32
         _Metallic ("Metallic", Range(0.0, 1.0)) = 0.05
         _EmissionStrength ("Grid & Pulse Emission", Range(0.0, 3.0)) = 0.55
+        _GrainStrength ("Slate Grain Strength", Range(0.0, 1.0)) = 0.24
     }
 
     SubShader
@@ -47,6 +48,7 @@ Shader "POLYMULATOR/Chamber Grid"
             float _Smoothness;
             float _Metallic;
             float _EmissionStrength;
+            float _GrainStrength;
         CBUFFER_END
         ENDHLSL
 
@@ -81,6 +83,10 @@ Shader "POLYMULATOR/Chamber Grid"
             float4 _SimRippleOrigin;
             float4 _SimRippleParams;
             float4 _SimRippleColor;
+            float _SimFlexGridFade;
+            float _SimLimitedClueActive;
+            float4 _SimCarryTargetPos;
+            float4 _SimCarryClueColor;
 
             struct Attributes
             {
@@ -100,6 +106,25 @@ Shader "POLYMULATOR/Chamber Grid"
                 UNITY_VERTEX_INPUT_INSTANCE_ID
                 UNITY_VERTEX_OUTPUT_STEREO
             };
+
+            float Hash21(float2 p)
+            {
+                p = frac(p * float2(234.34, 435.345));
+                p += dot(p, p + 34.23);
+                return frac(p.x * p.y);
+            }
+
+            float SlateNoise(float2 p)
+            {
+                float2 i = floor(p);
+                float2 f = frac(p);
+                float2 u = f * f * (3.0 - 2.0 * f);
+                float a = Hash21(i);
+                float b = Hash21(i + float2(1.0, 0.0));
+                float c = Hash21(i + float2(0.0, 1.0));
+                float d = Hash21(i + float2(1.0, 1.0));
+                return lerp(lerp(a, b, u.x), lerp(c, d, u.x), u.y);
+            }
 
             float GridMask(float2 coord, float lineWidth)
             {
@@ -138,21 +163,50 @@ Shader "POLYMULATOR/Chamber Grid"
                 float2 guXZ = input.positionWS.xz / unit;
 
                 float topMask = smoothstep(0.65, 0.9, abs(normalWS.y));
+                float gridVis = 1.0 - saturate(_SimFlexGridFade);
                 float2 cell = floor(guXZ + 0.0005);
+                float cellNoise = Hash21(cell);
+                float brushed = SlateNoise(guXZ * float2(3.5, 11.0)) * 0.65 + SlateNoise(guXZ * 24.0) * 0.35;
                 float checker = fmod(abs(cell.x + cell.y), 2.0);
-                half3 albedo = lerp(_BaseColor.rgb, _TileAltColor.rgb, checker * 0.65 * topMask);
+                half3 smoothSlate = lerp(_BaseColor.rgb, _TileAltColor.rgb, 0.25);
+                half3 checkerAlbedo = lerp(_BaseColor.rgb, _TileAltColor.rgb, (checker * 0.55 + cellNoise * 0.25) * topMask);
+                half3 albedo = lerp(smoothSlate, checkerAlbedo, gridVis);
+                albedo *= 1.0 + ((brushed - 0.5) * 0.14 * _GrainStrength);
 
-                // Anti-aliased 1 GU minor grid & N-GU major grid
-                float minorLine = GridMask(guXZ, _MinorWidth) * topMask;
+                float dGx = SlateNoise((guXZ + float2(0.025, 0.0)) * 14.0) - SlateNoise((guXZ - float2(0.025, 0.0)) * 14.0);
+                float dGz = SlateNoise((guXZ + float2(0.0, 0.025)) * 14.0) - SlateNoise((guXZ - float2(0.0, 0.025)) * 14.0);
+                normalWS = normalize(normalWS + float3(dGx, 0.0, dGz) * (0.08 * _GrainStrength * topMask));
+
+                // Anti-aliased 1 GU minor grid & N-GU major grid (hidden cleanly in Flexible Mode when _SimGridBlend == 0)
+                float minorLine = GridMask(guXZ, _MinorWidth) * topMask * gridVis;
                 float majorStep = max(1.0, _MajorStep);
-                float majorLine = GridMask(guXZ / majorStep, _MajorWidth / majorStep) * topMask;
+                float majorLine = GridMask(guXZ / majorStep, _MajorWidth / majorStep) * topMask * gridVis;
+
+                float2 tileFrac = abs(frac(guXZ) - 0.5);
+                float tileRim = smoothstep(0.44, 0.495, max(tileFrac.x, tileFrac.y)) * (1.0 - minorLine) * topMask * gridVis;
+                albedo = lerp(albedo, _MinorLineColor.rgb * 1.15, tileRim * 0.22);
 
                 albedo = lerp(albedo, _MinorLineColor.rgb, minorLine * 0.85);
                 albedo = lerp(albedo, _MajorLineColor.rgb, majorLine);
 
-                // Subtle vertex cross markers at major intersections
+                // Machined corner alignment sockets at major intersections
                 float2 majorLocal = abs(frac(guXZ / majorStep - 0.5) - 0.5) * majorStep;
-                float nodeGlow = (1.0 - smoothstep(0.05, 0.14, length(majorLocal))) * topMask;
+                float nodeGlow = (1.0 - smoothstep(0.05, 0.14, length(majorLocal))) * topMask * gridVis;
+                float socketRing = (1.0 - smoothstep(0.015, 0.04, abs(length(majorLocal) - 0.22))) * topMask * gridVis;
+                albedo = lerp(albedo, _MajorLineColor.rgb * 1.25, socketRing * 0.5);
+
+                // Optional subtle carry-target cell indicator (only when holding an object; no white clue cross)
+                float limitedActive = gridVis * saturate(_SimLimitedClueActive) * smoothstep(0.01, 0.5, _SimPlayerWorldPos.w) * topMask;
+                float2 cellLocal = abs(frac(guXZ) - 0.5);
+                float cellInnerPad = 1.0 - smoothstep(0.41, 0.47, max(cellLocal.x, cellLocal.y));
+                float cellEdgeFrame = smoothstep(0.42, 0.46, max(cellLocal.x, cellLocal.y)) * (1.0 - smoothstep(0.47, 0.50, max(cellLocal.x, cellLocal.y)));
+                half3 dropCol = _SimCarryClueColor.a > 0.01 ? _SimCarryClueColor.rgb : half3(0.97647, 0.88627, 0.68627);
+
+                float2 dropCell = floor(_SimCarryTargetPos.xz / unit + 0.0005);
+                float2 dropDelta = abs(cell - dropCell);
+                float isDropCell = step(dropDelta.x, 0.2) * step(dropDelta.y, 0.2) * smoothstep(0.01, 0.5, _SimCarryTargetPos.w) * limitedActive;
+                float dropStrength = isDropCell * (cellInnerPad * 0.28 + cellEdgeFrame * 0.68);
+                albedo = lerp(albedo, dropCol, saturate(dropStrength * 0.55));
 
                 // Boundary confinement band near +/- _BoundaryHalfExtent
                 float edgeDist = _BoundaryHalfExtent - max(abs(guXZ.x), abs(guXZ.y));
@@ -160,26 +214,27 @@ Shader "POLYMULATOR/Chamber Grid"
                 float outerDarken = smoothstep(0.4, -0.3, edgeDist) * 0.45;
                 albedo *= (1.0 - outerDarken);
 
-                // Reactive pulse around Rect & Anchor on the floor plane
+                // Subtle reactive aura around Rect & Anchor on the floor plane
                 half3 activeTint = _SimModeTint.a > 0.01 ? _SimModeTint.rgb : _PulseColor.rgb;
                 float playerDist = length(input.positionWS.xz - _SimPlayerWorldPos.xz) / unit;
-                float playerRing = (1.0 - smoothstep(0.02, 0.09, abs(playerDist - 0.95))) * smoothstep(0.01, 0.5, _SimPlayerWorldPos.w) * topMask;
-                float playerHalo = exp(-playerDist * 0.9) * 0.18 * smoothstep(0.01, 0.5, _SimPlayerWorldPos.w) * topMask;
+                float playerRing = (1.0 - smoothstep(0.02, 0.08, abs(playerDist - 0.88))) * smoothstep(0.01, 0.5, _SimPlayerWorldPos.w) * topMask * 0.42;
+                float playerHalo = exp(-playerDist * 1.1) * 0.10 * smoothstep(0.01, 0.5, _SimPlayerWorldPos.w) * topMask;
 
                 float anchorDist = length(input.positionWS.xz - _SimAnchorWorldPos.xz) / unit;
-                float pulseRadius = 1.15 + 0.15 * sin(_Time.y * 2.2);
-                float anchorRing = (1.0 - smoothstep(0.02, 0.10, abs(anchorDist - pulseRadius))) * smoothstep(0.01, 0.5, _SimAnchorWorldPos.w) * topMask;
-                float anchorGridBoost = (minorLine * 0.35 + majorLine * 0.65) * exp(-anchorDist * 0.35) * smoothstep(0.01, 0.5, _SimAnchorWorldPos.w);
+                float pulseRadius = 1.15 + 0.12 * sin(_Time.y * 2.2);
+                float anchorRing = (1.0 - smoothstep(0.02, 0.09, abs(anchorDist - pulseRadius))) * smoothstep(0.01, 0.5, _SimAnchorWorldPos.w) * topMask * 0.72;
+                float anchorGridBoost = (minorLine * 0.30 + majorLine * 0.55) * exp(-anchorDist * 0.35) * smoothstep(0.01, 0.5, _SimAnchorWorldPos.w);
 
                 // Radial GPU shockwave ripple emitted on heavy impacts, conduit lock & anchor completion
                 float rippleDist = length(input.positionWS.xz - _SimRippleOrigin.xz) / unit;
                 float rippleBand = 1.0 - smoothstep(0.04, max(0.18, _SimRippleParams.y), abs(rippleDist - _SimRippleParams.x));
-                float rippleMask = rippleBand * _SimRippleParams.z * _SimRippleOrigin.w * (minorLine * 0.55 + majorLine * 0.85 + 0.28) * topMask;
+                float rippleMask = rippleBand * _SimRippleParams.z * _SimRippleOrigin.w * (minorLine * 0.55 + majorLine * 0.85 + 0.34) * topMask;
 
                 half3 emission = 0;
                 emission += _MajorLineColor.rgb * majorLine * (0.12 * _EmissionStrength);
-                emission += activeTint * (nodeGlow * 0.35 + playerRing * 1.35 + playerHalo) * _EmissionStrength;
-                emission += _PulseColor.rgb * (anchorRing * 1.45 + anchorGridBoost * 0.9) * _EmissionStrength;
+                emission += dropCol * (dropStrength * 0.85 * _EmissionStrength);
+                emission += activeTint * (nodeGlow * 0.32 + playerRing + playerHalo) * _EmissionStrength;
+                emission += _PulseColor.rgb * (anchorRing + anchorGridBoost * 0.75) * _EmissionStrength;
                 emission += _SimRippleColor.rgb * rippleMask * _EmissionStrength;
                 emission += _BorderColor.rgb * borderBand * (0.9 * _EmissionStrength);
 
@@ -198,10 +253,10 @@ Shader "POLYMULATOR/Chamber Grid"
                 surfaceData.albedo = albedo;
                 surfaceData.metallic = _Metallic;
                 surfaceData.specular = half3(0, 0, 0);
-                surfaceData.smoothness = lerp(_Smoothness * 0.85, min(0.85, _Smoothness + 0.2), minorLine + majorLine);
+                surfaceData.smoothness = saturate(lerp(_Smoothness * 0.85 + (brushed - 0.5) * 0.18, min(0.88, _Smoothness + 0.24), minorLine + majorLine));
                 surfaceData.normalTS = half3(0, 0, 1);
                 surfaceData.emission = emission;
-                surfaceData.occlusion = 1.0 - minorLine * 0.15;
+                surfaceData.occlusion = saturate((1.0 - minorLine * 0.22) * (1.0 - majorLine * 0.15));
                 surfaceData.alpha = 1.0;
 
                 return UniversalFragmentPBR(inputData, surfaceData);
