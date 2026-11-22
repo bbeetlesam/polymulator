@@ -224,9 +224,9 @@ namespace Polymulator
             string meshName = mesh.name != null ? mesh.name.ToLowerInvariant() : string.Empty;
             string objectName = displayName != null ? displayName.ToUpperInvariant() : string.Empty;
 
-            if (meshName.Contains("cube") || objectName.StartsWith("CUBE")) return GhostShape.Box;
+            if (meshName.Contains("cube") || meshName.Contains("slab") || meshName.Contains("chamfer") || objectName.StartsWith("CUBE") || objectName.StartsWith("CORE")) return GhostShape.Box;
             if (meshName.Contains("sphere") || objectName.StartsWith("ORB")) return GhostShape.Sphere;
-            if (meshName.Contains("cylinder") || objectName.StartsWith("CYL")) return GhostShape.Cylinder;
+            if (meshName.Contains("cylinder") || meshName.Contains("octagon") || objectName.StartsWith("CYL")) return GhostShape.Cylinder;
             if (meshName.Contains("capsule")) return GhostShape.Capsule;
             return GhostShape.Generic;
         }

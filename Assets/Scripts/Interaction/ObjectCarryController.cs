@@ -49,6 +49,19 @@ namespace Polymulator
         public float CurrentDropDistanceGrid => placementGhost != null ? placementGhost.forwardDistance : defaultDropDistance;
         public float CurrentHeldYawDegrees => heldYawDegrees;
 
+        public bool TryGetPredictedDropPosition(out Vector3 dropWorldPos)
+        {
+            if (carried == null)
+            {
+                dropWorldPos = Vector3.zero;
+                return false;
+            }
+            dropWorldPos = placementGhost != null
+                ? placementGhost.GetPlacementPosition(carried)
+                : FallbackDropPosition(carried);
+            return true;
+        }
+
         public bool TryGetPredictedThrowLanding(out Vector3 landingPoint, out float horizontalRangeGrid)
         {
             landingPoint = predictedLandingPoint;
@@ -304,6 +317,14 @@ namespace Polymulator
             Vector3 position = transform.position + transform.forward * GridSettings.ToWorld(defaultDropDistance);
             position.y = halfExtents.y + GridSettings.ToWorld(0.02f);
             return WorldBounds.ClampInside(position, halfExtents.x, halfExtents.z);
+        }
+
+        /// <summary>Immediate release returning the released object for Partition/Fusion replacement.</summary>
+        public InteractableObject ReleaseAndReturn()
+        {
+            InteractableObject obj = carried;
+            Release();
+            return obj;
         }
 
         /// <summary>Immediate release, used for forced cleanup rather than player input.</summary>
