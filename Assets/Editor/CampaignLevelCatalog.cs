@@ -4,12 +4,12 @@ using UnityEngine;
 namespace Polymulator.EditorTools
 {
     /// <summary>
-    /// Declarative level specifications for all 12 POLYMULATOR campaign chambers
-    /// aligned cleanly to STORYLINE_POLYMULATOR_V2.md and Samudra's MainMenu chapter tree.
+    /// Authoritative level catalog covering Chapters 1-5 of Kota Tepi (14 chambers)
+    /// plus the always-unlocked Special Showcase chamber (LevelShowcase).
     /// </summary>
     public static class CampaignLevelCatalog
     {
-        public enum ChapterTheme { Translasi, Elevasi, Rotasi, Badai }
+        public enum ChapterTheme { Translasi, Elevasi, Rotasi, Badai, Rekonstruksi, Showcase }
 
         public struct PlatformSpec
         {
@@ -36,6 +36,8 @@ namespace Polymulator.EditorTools
             public Vector3 posGrid;
             public Vector3 sizeGrid;
             public float mass;
+            public bool disableSplit;
+            public bool disableFuse;
         }
 
         public struct PlateSpec
@@ -80,16 +82,23 @@ namespace Polymulator.EditorTools
         {
             public int chapter;
             public int level;
+            public string customSceneName;
             public string title;
             public string chapterSubtitle;
             public string districtLabel;
             public ChapterTheme theme;
             public int parActions;
 
+            public bool allowPartition;
+            public bool allowFusion;
+            public bool isEndingChamber;
+            public bool isShowcaseChamber;
+
             public Vector3 playerSpawnGrid;
             public Vector3 anchorGrid;
             public Vector3 coreSpawnGrid;
             public float coreStartYaw;
+            public float coreMass = 1.2f;
             public bool requireFacingAngle;
             public float requiredFacingYaw;
             public bool triggerGlitchOnClear;
@@ -108,633 +117,823 @@ namespace Polymulator.EditorTools
             public LevelInfo.StoryLine[] clearDialogue;
             public string[] hints;
 
-            public string SceneName => "Level" + chapter + "." + level;
+            public string SceneName => !string.IsNullOrEmpty(customSceneName)
+                ? customSceneName
+                : "Level" + chapter + "." + level;
+
             public string ScenePath => "Assets/Scenes/" + SceneName + ".unity";
         }
 
-        private static LevelInfo.StoryLine Line(string sp, string txt) =>
-            new LevelInfo.StoryLine { speaker = sp, text = txt };
+        private static LevelInfo.StoryLine Line(string speaker, string text)
+        {
+            return new LevelInfo.StoryLine { speaker = speaker, text = text };
+        }
 
         public static List<LevelSpec> BuildCatalog()
         {
-            var list = new List<LevelSpec>(12)
+            return new List<LevelSpec>(15)
             {
-                Build1_1(), Build1_2(), Build1_3(), Build1_4(),
+                Build1_1(), Build1_2(), Build1_3(),
                 Build2_1(), Build2_2(), Build2_3(),
                 Build3_1(), Build3_2(), Build3_3(),
-                Build4_1(), Build4_2()
+                Build4_1(), Build4_2(), Build4_3(),
+                Build5_1(), Build5_2(),
+                BuildShowcase()
             };
-            return list;
         }
+
+        // =====================================================================
+        // CHAPTER 1 — TRANSLASI (Mengenal Ruang & Jejak Awal)
+        // =====================================================================
 
         private static LevelSpec Build1_1() => new LevelSpec
         {
-            chapter = 1, level = 1, title = "Warming Up", chapterSubtitle = "TRANSLASI",
-            districtLabel = "RUANG UJI 01", theme = ChapterTheme.Translasi, parActions = 6,
+            chapter = 1, level = 1,
+            title = "Bangun di Ruangan Kosong",
+            chapterSubtitle = "CHAPTER 1  •  TRANSLASI",
+            districtLabel = "RUANG UJI 01", theme = ChapterTheme.Translasi, parActions = 5,
             playerSpawnGrid = new Vector3(0f, 0.05f, -6.5f),
-            anchorGrid = new Vector3(0f, 0.72f, 3.5f),
-            coreSpawnGrid = new Vector3(0f, 2.48f, 10.6f),
-            coreStartYaw = 0f,
-            triggerGlitchOnClear = true,
-            platforms = new[]
+            coreSpawnGrid = new Vector3(0f, 0.48f, -1.6f),
+            anchorGrid = new Vector3(0f, 0f, 5.4f),
+            fragment = new FragmentSpec
             {
-                new PlatformSpec { name = "Platform Low", centerGrid = new Vector3(-7f, 0.2f, 2f), sizeGrid = new Vector3(6f, 0.4f, 5f), tier = 0 },
-                new PlatformSpec { name = "Platform Mid", centerGrid = new Vector3(7f, 0.5f, 2.5f), sizeGrid = new Vector3(5f, 1f, 5f), tier = 1 },
-                new PlatformSpec { name = "Platform High", centerGrid = new Vector3(0f, 1f, 11f), sizeGrid = new Vector3(5f, 2f, 4f), tier = 2 }
-            },
-            plates = new[] { new PlateSpec { name = "CONDUIT-PAD-01", posGrid = new Vector3(-3.2f, 0f, -1.6f), requiredMass = 1.8f } },
-            bridge = new BridgeSpec { stairStartZ = 5.4f, staticStepCount = 2, dynamicStepCount = 2, targetHeightGrid = 2f, plateIndices = new[] { 0 } },
-            props = new[]
-            {
-                new PropSpec { name = "CUBE-01", shape = PrimitiveType.Cube, posGrid = new Vector3(-2.5f, 0.6f, -4.5f), sizeGrid = Vector3.one * 1.2f, mass = 2f },
-                new PropSpec { name = "CUBE-02", shape = PrimitiveType.Cube, posGrid = new Vector3(2.5f, 0.5f, -3.5f), sizeGrid = Vector3.one, mass = 1.5f },
-                new PropSpec { name = "CUBE-03", shape = PrimitiveType.Cube, posGrid = new Vector3(-8f, 1f, 2f), sizeGrid = Vector3.one * 1.2f, mass = 2f },
-                new PropSpec { name = "CUBE-04", shape = PrimitiveType.Cube, posGrid = new Vector3(6.5f, 1.5f, 2.5f), sizeGrid = Vector3.one, mass = 1.5f },
-                new PropSpec { name = "CUBE-05", shape = PrimitiveType.Cube, posGrid = new Vector3(-1.6f, 2.5f, 11.4f), sizeGrid = Vector3.one, mass = 1.5f },
-                new PropSpec { name = "CUBE-06", shape = PrimitiveType.Cube, posGrid = new Vector3(4f, 0.6f, 7f), sizeGrid = Vector3.one * 1.2f, mass = 2f },
-                new PropSpec { name = "ORB-01", shape = PrimitiveType.Sphere, posGrid = new Vector3(0f, 0.5f, -2.5f), sizeGrid = Vector3.one, mass = 1f },
-                new PropSpec { name = "ORB-02", shape = PrimitiveType.Sphere, posGrid = new Vector3(-5.5f, 0.9f, 3.5f), sizeGrid = Vector3.one, mass = 1f },
-                new PropSpec { name = "ORB-03", shape = PrimitiveType.Sphere, posGrid = new Vector3(1.6f, 2.5f, 11.4f), sizeGrid = Vector3.one, mass = 1f },
-                new PropSpec { name = "ORB-04", shape = PrimitiveType.Sphere, posGrid = new Vector3(4f, 0.5f, 8f), sizeGrid = Vector3.one, mass = 1f },
-                new PropSpec { name = "CYL-01", shape = PrimitiveType.Cylinder, posGrid = new Vector3(9f, 0.5f, -6f), sizeGrid = Vector3.one, mass = 1.5f },
-                new PropSpec { name = "CYL-02", shape = PrimitiveType.Cylinder, posGrid = new Vector3(8f, 1.5f, 1f), sizeGrid = Vector3.one, mass = 1.5f }
+                enabled = true, posGrid = new Vector3(-4.8f, 0.52f, 0.6f),
+                title = "Suara di Balik Kaca",
+                speaker = "VELA", line = "Kalau kau masih bisa mendengar rekaman ini, Rect... Kota Tepi belum benar-benar habis.",
+                replySpeaker = "MIRA", replyLine = "Kita tinggal di ruangan sunyi ini bersama suara yang sempat tertinggal."
             },
             openingDialogue = new[]
             {
-                Line("SIM", "Selamat datang di Polymulator, Iterasi #127. Letakkan beban >= 1.8t di Conduit Pad."),
-                Line("RECT", "Apa itu iterasi?"),
-                Line("SIM", "Jumlah percobaan. Untuk menjadi cukup.")
+                Line("SIM", "Sesi simulasi dimulai. Unit Rect aktif kembali di Ruang Uji 01."),
+                Line("TEPI", "Sebuah inti kuning menyala di tengah lantai. Seseorang meninggalkannya tepat di jalurmu.")
             },
             clearDialogue = new[]
             {
-                Line("SIGNAL", "...Apakah dia merespons?"),
-                Line("SIM", "Gangguan arsip sesaat. Abaikan. Memuat Sektor 1.2.")
+                Line("SIM", "Kunci utama terpasang. Pintu menuju Distrik Pasar terbuka."),
+                Line("TEPI", "Di balik cahaya dinding ruangan ini, bayangan jalanan lama mulai terlihat.")
             },
             hints = new[]
             {
-                "Conduit Pad butuh massa >= 1.8t. Bawa CUBE-01 (2.0t) lalu drop [E] atau lempar [F].",
-                "Naiki Energy Bridge ke Platform High, ambil CORE-01 emas dan masukkan ke ANCHOR-01."
+                "Gerakkan Rect dengan WASD atau tombol panah mendekati kubus kuning CORE-01.",
+                "Tekan [E] untuk mengangkat CORE-01, bawa ke soket bulat ANCHOR-01 di utara, lalu tekan [E] atau [Q] untuk meletakkan.",
+                "Kristal merah muda di sisi kiri bersifat opsional — sentuh untuk mendengar fragmen cerita."
             }
         };
 
         private static LevelSpec Build1_2() => new LevelSpec
         {
-            chapter = 1, level = 2, title = "Pasar", chapterSubtitle = "TRANSLASI",
-            districtLabel = "JALAN PASAR", theme = ChapterTheme.Translasi, parActions = 8,
-            playerSpawnGrid = new Vector3(0f, 0.05f, -8.5f),
-            anchorGrid = new Vector3(0f, 0.72f, -1.0f),
-            coreSpawnGrid = new Vector3(-7.0f, 0.90f, 6.2f),
-            platforms = new[]
-            {
-                new PlatformSpec { name = "Kios Barat", centerGrid = new Vector3(-7f, 0.2f, 5.5f), sizeGrid = new Vector3(5.5f, 0.4f, 6f), tier = 0, addSouthSteps = true },
-                new PlatformSpec { name = "Kios Timur", centerGrid = new Vector3(7f, 0.4f, 4f), sizeGrid = new Vector3(5f, 0.8f, 5f), tier = 1, addSouthSteps = true }
-            },
+            chapter = 1, level = 2,
+            title = "Jalan Pasar",
+            chapterSubtitle = "CHAPTER 1  •  TRANSLASI",
+            districtLabel = "JALAN PASAR LAMA", theme = ChapterTheme.Translasi, parActions = 8,
+            playerSpawnGrid = new Vector3(0f, 0.05f, -7.2f),
+            coreSpawnGrid = new Vector3(4.0f, 0.48f, -2.4f),
+            anchorGrid = new Vector3(0f, 0f, 6.8f),
             extraWalls = new[]
             {
-                new WallSpec { name = "Arch Back", centerGrid = new Vector3(-7f, 1.3f, 8.3f), sizeGrid = new Vector3(5.6f, 2.2f, 0.4f) },
-                new WallSpec { name = "Arch West", centerGrid = new Vector3(-9.6f, 1.3f, 5.5f), sizeGrid = new Vector3(0.4f, 2.2f, 5.6f) },
-                new WallSpec { name = "Arch East", centerGrid = new Vector3(-4.4f, 1.3f, 5.5f), sizeGrid = new Vector3(0.4f, 2.2f, 5.6f) }
-            },
-            plates = new[]
-            {
-                new PlateSpec { name = "CONDUIT-PAD-A", posGrid = new Vector3(-3.4f, 0f, -3.5f), requiredMass = 1.8f },
-                new PlateSpec { name = "CONDUIT-PAD-B", posGrid = new Vector3(3.4f, 0f, -3.5f), requiredMass = 2.0f }
-            },
-            barriers = new[]
-            {
-                new BarrierSpec { name = "Market Gate Barrier", posGrid = new Vector3(-7f, 1.4f, 2.65f), sizeGrid = new Vector3(4.8f, 2.0f, 0.25f), plateIndices = new[] { 0, 1 } }
+                new WallSpec { name = "Gate Wall L", centerGrid = new Vector3(-6.8f, 1.5f, 3.2f), sizeGrid = new Vector3(7.4f, 3.0f, 0.5f) },
+                new WallSpec { name = "Gate Wall R", centerGrid = new Vector3(6.8f, 1.5f, 3.2f), sizeGrid = new Vector3(7.4f, 3.0f, 0.5f) }
             },
             props = new[]
             {
-                new PropSpec { name = "CUBE-01", shape = PrimitiveType.Cube, posGrid = new Vector3(-5.8f, 0.6f, -6.2f), sizeGrid = Vector3.one * 1.2f, mass = 2f },
-                new PropSpec { name = "CUBE-02", shape = PrimitiveType.Cube, posGrid = new Vector3(2.8f, 0.5f, -6.2f), sizeGrid = Vector3.one, mass = 1.5f },
-                new PropSpec { name = "ORB-01", shape = PrimitiveType.Sphere, posGrid = new Vector3(5.5f, 0.5f, -5.2f), sizeGrid = Vector3.one, mass = 1f },
-                new PropSpec { name = "CYL-01", shape = PrimitiveType.Cylinder, posGrid = new Vector3(6.8f, 1.3f, 3.8f), sizeGrid = Vector3.one, mass = 1.5f },
-                new PropSpec { name = "ORB-02", shape = PrimitiveType.Sphere, posGrid = new Vector3(-1.2f, 0.5f, -5.8f), sizeGrid = Vector3.one, mass = 1f }
+                new PropSpec { name = "BEBAN-PASAR", shape = PrimitiveType.Cube, posGrid = new Vector3(-4.0f, 0.50f, -3.4f), sizeGrid = new Vector3(0.95f, 0.95f, 0.95f), mass = 1.2f }
+            },
+            plates = new[]
+            {
+                new PlateSpec { name = "PAD-PASAR", posGrid = new Vector3(-4.0f, 0f, 0.8f), requiredMass = 1.0f }
+            },
+            barriers = new[]
+            {
+                new BarrierSpec { name = "GERBANG-PASAR", posGrid = new Vector3(0f, 1.35f, 3.2f), sizeGrid = new Vector3(6.2f, 2.7f, 0.35f), plateIndices = new[] { 0 } }
             },
             fragment = new FragmentSpec
             {
-                enabled = true, posGrid = new Vector3(-11.2f, 0.65f, 8.2f),
-                title = "Gambar Nara (4 thn)",
-                speaker = "RECT", line = "Ada gambar kotak biru dengan dua mata di balik lengkungan. Tertulis: 'Nara, 4 tahun.'",
-                replySpeaker = "SIM", replyLine = "Data tidak lengkap. Lanjutkan rekonstruksi pasar."
+                enabled = true, posGrid = new Vector3(6.2f, 0.52f, 0.6f),
+                title = "Gerai Roti Pagi",
+                speaker = "MIRA", line = "Dulu bau roti selalu sampai ke tikungan sebelum matahari naik.",
+                replySpeaker = "VELA", replyLine = "Sekarang yang tersisa hanya kotak penahan dan pagar cahaya."
             },
             openingDialogue = new[]
             {
-                Line("SIM", "Distrik Jalan Pasar dimuat. Dua Conduit Pad harus aktif bersamaan."),
-                Line("RECT", "Hanya ada satu balok 2.0t."),
-                Line("SIM", "Massa bersifat aditif. Gabungkan dua beban lebih ringan di satu pad.")
+                Line("MIRA", "Gerbang merah di depan dikunci pelat beban di lantai kiri."),
+                Line("TEPI", "Cari balok pemberat di sekitar lorong agar pagarnya padam.")
             },
             clearDialogue = new[]
             {
-                Line("MIRA", "Bagus... rig di Tepi mulai membersihkan puing Jalan Pasar."),
-                Line("SIM", "Membuka jalur Sektor 1.3.")
+                Line("MIRA", "Bagus, jalannya terbuka lagi. Ayo terus ke arah gedung arsip.")
             },
             hints = new[]
             {
-                "Pad B butuh >= 2.0t tapi CUBE-01 (2.0t) terpakai di Pad A. Gabungkan CUBE-02 (1.5t) + ORB-01 (1.0t) = 2.5t!",
-                "Tengok sudut kiri belakang Kios Barat untuk fragmen 'Gambar Nara'."
+                "Angkat balok BEBAN-PASAR dengan [E] lalu letakkan di atas pelat lantai PAD-PASAR di kiri.",
+                "Saat pelat berubah hijau dan pagar merah menghilang, bawa CORE-01 ke ANCHOR-01 di utara.",
+                "Tips: tekan [Klik Kiri] saat memegang balok jika ingin mendorongnya ke depan."
             }
         };
 
         private static LevelSpec Build1_3() => new LevelSpec
         {
-            chapter = 1, level = 3, title = "Tag AD-I", chapterSubtitle = "TRANSLASI",
-            districtLabel = "LENGKUNGAN PASAR", theme = ChapterTheme.Translasi, parActions = 7,
-            playerSpawnGrid = new Vector3(0f, 0.05f, -8f),
-            anchorGrid = new Vector3(0f, 0.72f, 0.5f),
-            coreSpawnGrid = new Vector3(7f, 2.48f, 6.0f),
+            chapter = 1, level = 3,
+            title = "Gerbang Arsip Timur",
+            chapterSubtitle = "CHAPTER 1  •  TRANSLASI",
+            districtLabel = "GERBANG ARSIP", theme = ChapterTheme.Translasi, parActions = 10,
+            playerSpawnGrid = new Vector3(0f, 0.05f, -7.5f),
+            coreSpawnGrid = new Vector3(0f, 0.48f, -4.4f),
+            anchorGrid = new Vector3(0f, 1.40f, 6.2f),
             platforms = new[]
             {
-                new PlatformSpec { name = "Balkon Barat", centerGrid = new Vector3(-7f, 0.5f, 0f), sizeGrid = new Vector3(5.2f, 1f, 5.2f), tier = 0, addWestSteps = true },
-                new PlatformSpec { name = "Platform High", centerGrid = new Vector3(7f, 1f, 6f), sizeGrid = new Vector3(5f, 2f, 5f), tier = 2 }
-            },
-            plates = new[] { new PlateSpec { name = "CONDUIT-PAD-01", posGrid = new Vector3(-7f, 1.0f, 0f), requiredMass = 1.8f } },
-            bridge = new BridgeSpec { centerX = 7f, stairStartZ = -0.1f, staticStepCount = 2, dynamicStepCount = 2, targetHeightGrid = 2f, plateIndices = new[] { 0 } },
-            extraWalls = new[]
-            {
-                // Stepped offset X for bridge is shifted to East platform (x = +7) cleanly via stairShift! Let's build East ramp cleanly as stairs
-                new WallSpec { name = "Parapet Barat", centerGrid = new Vector3(-4.35f, 0.7f, 0f), sizeGrid = new Vector3(0.25f, 1.4f, 5.0f) }
+                new PlatformSpec { name = "Dek Gerbang Arsip", centerGrid = new Vector3(0f, 0.70f, 5.8f), sizeGrid = new Vector3(7.6f, 1.40f, 4.6f), tier = 1 }
             },
             props = new[]
             {
-                new PropSpec { name = "CUBE-01", shape = PrimitiveType.Cube, posGrid = new Vector3(-1.8f, 0.6f, -5.2f), sizeGrid = Vector3.one * 1.2f, mass = 2f },
-                new PropSpec { name = "CUBE-02", shape = PrimitiveType.Cube, posGrid = new Vector3(3.2f, 0.5f, -4.5f), sizeGrid = Vector3.one, mass = 1.5f },
-                new PropSpec { name = "ORB-01", shape = PrimitiveType.Sphere, posGrid = new Vector3(-2.8f, 0.5f, 4.2f), sizeGrid = Vector3.one, mass = 1f }
-            },
-            fragment = new FragmentSpec
-            {
-                enabled = true, posGrid = new Vector3(-11.2f, 0.65f, 5.5f),
-                title = "Tag Logam AD-I",
-                speaker = "RECT", line = "Ada tag logam kecil terjatuh dari lengkungan batu: 'AD-I'.",
-                replySpeaker = "MIRA", replyLine = "Jangan sentuh itu! ...Lanjutkan saja ke Anchor."
-            },
-            openingDialogue = new[]
-            {
-                Line("SIM", "Pad berada di atas Balkon Barat. Lemparan parabola [F] atau tangga barat dapat menjangkaunya.")
-            },
-            clearDialogue = new[]
-            {
-                Line("RECT", "Kenapa Mira melarangku menyentuh nama di tag logam itu?"),
-                Line("SIM", "Tag AD-I ditandai: tidak terindeks.")
-            },
-            hints = new[]
-            {
-                "Bawa CUBE-01 (2.0t) melewati tangga di sisi barat Balkon Barat, atau lempar dengan Throw Arc [F] melewati parapet.",
-                "Periksa sudut barat laut untuk menemukan Tag Logam AD-I."
-            }
-        };
-
-        private static LevelSpec Build1_4() => new LevelSpec
-        {
-            chapter = 1, level = 4, title = "Ujian Pasar", chapterSubtitle = "TRANSLASI",
-            districtLabel = "GERBANG ARSIP TIMUR", theme = ChapterTheme.Translasi, parActions = 10,
-            playerSpawnGrid = new Vector3(0f, 0.05f, -8.5f),
-            anchorGrid = new Vector3(0f, 0.72f, -4.2f),
-            coreSpawnGrid = new Vector3(0f, 2.48f, 9.8f),
-            platforms = new[]
-            {
-                new PlatformSpec { name = "Platform Vault Timur", centerGrid = new Vector3(8.5f, 0.2f, -1f), sizeGrid = new Vector3(4.5f, 0.4f, 4.5f), tier = 0, addWestSteps = true },
-                new PlatformSpec { name = "Platform High", centerGrid = new Vector3(0f, 1f, 10f), sizeGrid = new Vector3(5.2f, 2f, 4.2f), tier = 2 }
-            },
-            extraWalls = new[]
-            {
-                new WallSpec { name = "Vault N", centerGrid = new Vector3(8.5f, 1.3f, 1.35f), sizeGrid = new Vector3(4.6f, 2.2f, 0.35f) },
-                new WallSpec { name = "Vault S", centerGrid = new Vector3(8.5f, 1.3f, -3.35f), sizeGrid = new Vector3(4.6f, 2.2f, 0.35f) },
-                new WallSpec { name = "Vault E", centerGrid = new Vector3(10.8f, 1.3f, -1f), sizeGrid = new Vector3(0.35f, 2.2f, 4.6f) }
+                new PropSpec { name = "BEBAN-BARAT", shape = PrimitiveType.Cube, posGrid = new Vector3(-4.6f, 0.50f, -5.2f), sizeGrid = new Vector3(0.95f, 0.95f, 0.95f), mass = 1.2f },
+                new PropSpec { name = "BEBAN-TIMUR", shape = PrimitiveType.Cube, posGrid = new Vector3(4.6f, 0.50f, -5.2f), sizeGrid = new Vector3(0.95f, 0.95f, 0.95f), mass = 1.2f }
             },
             plates = new[]
             {
-                new PlateSpec { name = "CONDUIT-VAULT-A", posGrid = new Vector3(-5.2f, 0f, -3.5f), requiredMass = 1.4f },
-                new PlateSpec { name = "CONDUIT-BRIDGE-B", posGrid = new Vector3(-3.5f, 0f, 2.0f), requiredMass = 1.8f }
+                new PlateSpec { name = "PAD-BARAT", posGrid = new Vector3(-4.6f, 0f, -1.6f), requiredMass = 1.0f },
+                new PlateSpec { name = "PAD-TIMUR", posGrid = new Vector3(4.6f, 0f, -1.6f), requiredMass = 1.0f }
             },
-            barriers = new[]
+            bridge = new BridgeSpec
             {
-                new BarrierSpec { name = "Vault Door Barrier", posGrid = new Vector3(6.2f, 1.4f, -1f), sizeGrid = new Vector3(0.25f, 2.0f, 4.4f), plateIndices = new[] { 0 } }
+                centerX = 0f, stairStartZ = -0.2f, baseHeightGrid = 0f,
+                staticStepCount = 2, dynamicStepCount = 3, targetHeightGrid = 1.40f,
+                plateIndices = new[] { 0, 1 }
             },
-            bridge = new BridgeSpec { stairStartZ = 4.3f, staticStepCount = 2, dynamicStepCount = 2, targetHeightGrid = 2f, plateIndices = new[] { 1 } },
-            props = new[]
+            fragment = new FragmentSpec
             {
-                new PropSpec { name = "CUBE-02", shape = PrimitiveType.Cube, posGrid = new Vector3(-2.5f, 0.5f, -6.2f), sizeGrid = Vector3.one, mass = 1.5f },
-                new PropSpec { name = "CUBE-01", shape = PrimitiveType.Cube, posGrid = new Vector3(8.5f, 0.8f, -1f), sizeGrid = Vector3.one * 1.2f, mass = 2f },
-                new PropSpec { name = "ORB-01", shape = PrimitiveType.Sphere, posGrid = new Vector3(2.8f, 0.5f, -6.2f), sizeGrid = Vector3.one, mass = 1f }
+                enabled = true, posGrid = new Vector3(6.2f, 0.52f, 5.4f),
+                title = "Surat Penutup Shift",
+                speaker = "DANU", line = "Kalau jembatan arsip naik lagi suatu hari nanti, artinya ada yang menolak melupakan kota ini.",
+                replySpeaker = "VELA", replyLine = "Jembatannya butuh dua pemberat sekaligus. Jangan tinggalkan salah satunya."
             },
             openingDialogue = new[]
             {
-                Line("SIM", "Ujian Bab 1: Kaskade Ruang. Bebaskan beban berat dari kubah timur terlebih dahulu.")
+                Line("VELA", "Tangga menuju dek arsip terputus di tengah."),
+                Line("MIRA", "Aktifkan kedua pelat lantai agar jembatan energinya tersambung penuh.")
             },
             clearDialogue = new[]
             {
-                Line("MIRA", "Pintu Menara Arsip terbuka! Persiapkan modul Elevasi, RECT."),
-                Line("SIM", "Memasuki Babak II: Rusun Matahari.")
+                Line("SIM", "Sektor Translasi selesai. Akses ke tingkat elevasi rusun dibuka.")
             },
             hints = new[]
             {
-                "Taruh CUBE-02 (1.5t) di Pad Barat (CONDUIT-VAULT-A) agar Energy Barrier kubah timur terbuka.",
-                "Ambil CUBE-01 (2.0t) dari kubah timur lalu pindahkan ke Pad Utara untuk menyalakan Energy Bridge."
+                "Letakkan BEBAN-BARAT di PAD-BARAT dan BEBAN-TIMUR di PAD-TIMUR.",
+                "Jika kedua pelat sudah hijau, tangga jembatan di tengah akan memanjang hingga menyentuh dek atas.",
+                "Bawa CORE-01 naik menyusuri tangga jembatan ke ANCHOR-01."
             }
         };
 
+        // =====================================================================
+        // CHAPTER 2 — ELEVASI (Rusun Matahari & Telekinesis)
+        // =====================================================================
+
         private static LevelSpec Build2_1() => new LevelSpec
         {
-            chapter = 2, level = 1, title = "Angkat", chapterSubtitle = "ELEVASI",
-            districtLabel = "RUSUN MATAHARI // L1", theme = ChapterTheme.Elevasi, parActions = 7,
-            playerSpawnGrid = new Vector3(0f, 0.05f, -8f),
-            anchorGrid = new Vector3(-4.5f, 0.72f, 0f),
-            coreSpawnGrid = new Vector3(0f, 2.48f, 9.8f),
+            chapter = 2, level = 1,
+            title = "Tangga Rusun Matahari",
+            chapterSubtitle = "CHAPTER 2  •  ELEVASI",
+            districtLabel = "RUSUN MATAHARI // L1", theme = ChapterTheme.Elevasi, parActions = 8,
+            playerSpawnGrid = new Vector3(0f, 0.05f, -7.2f),
+            coreSpawnGrid = new Vector3(2.8f, 0.48f, -4.5f),
+            anchorGrid = new Vector3(4.2f, 1.40f, 6.0f),
             platforms = new[]
             {
-                new PlatformSpec { name = "Balkon Timur", centerGrid = new Vector3(6.8f, 0.5f, -0.5f), sizeGrid = new Vector3(5.2f, 1.0f, 5.5f), tier = 1, addSouthSteps = true },
-                new PlatformSpec { name = "Atap Rusun", centerGrid = new Vector3(0f, 1.0f, 10f), sizeGrid = new Vector3(5.2f, 2.0f, 4.2f), tier = 2 }
+                new PlatformSpec { name = "Balkon Pemberat", centerGrid = new Vector3(-5.2f, 0.50f, 0.5f), sizeGrid = new Vector3(4.4f, 1.00f, 4.4f), tier = 0, addSouthSteps = true },
+                new PlatformSpec { name = "Dek Anchor", centerGrid = new Vector3(4.2f, 0.70f, 5.8f), sizeGrid = new Vector3(6.2f, 1.40f, 4.6f), tier = 1 }
             },
-            plates = new[] { new PlateSpec { name = "CONDUIT-ELEV-01", posGrid = new Vector3(6.8f, 1.0f, -0.5f), requiredMass = 1.8f } },
-            bridge = new BridgeSpec { stairStartZ = 4.3f, staticStepCount = 2, dynamicStepCount = 2, targetHeightGrid = 2f, plateIndices = new[] { 0 } },
             props = new[]
             {
-                new PropSpec { name = "CUBE-01", shape = PrimitiveType.Cube, posGrid = new Vector3(-2.5f, 0.6f, -5.5f), sizeGrid = Vector3.one * 1.2f, mass = 2f },
-                new PropSpec { name = "CUBE-02", shape = PrimitiveType.Cube, posGrid = new Vector3(3.2f, 0.5f, -5.5f), sizeGrid = Vector3.one, mass = 1.5f },
-                new PropSpec { name = "ORB-01", shape = PrimitiveType.Sphere, posGrid = new Vector3(6.8f, 1.5f, 1.2f), sizeGrid = Vector3.one, mass = 1f }
+                new PropSpec { name = "BEBAN-UNGU", shape = PrimitiveType.Cube, posGrid = new Vector3(-2.0f, 0.50f, -3.5f), sizeGrid = new Vector3(0.95f, 0.95f, 0.95f), mass = 1.2f }
+            },
+            plates = new[]
+            {
+                new PlateSpec { name = "PAD-BALKON", posGrid = new Vector3(-5.2f, 1.00f, 0.5f), requiredMass = 1.0f }
+            },
+            bridge = new BridgeSpec
+            {
+                centerX = 4.2f, stairStartZ = -0.3f, baseHeightGrid = 0f,
+                staticStepCount = 2, dynamicStepCount = 3, targetHeightGrid = 1.40f,
+                plateIndices = new[] { 0 }
+            },
+            fragment = new FragmentSpec
+            {
+                enabled = true, posGrid = new Vector3(-5.4f, 0.52f, -4.5f),
+                title = "Jemuran Lantai Dua",
+                speaker = "NARA", line = "Waktu listrik naik turun, cuma anak tangga ini yang jadi jalan keluar warga.",
+                replySpeaker = "VELA", replyLine = "Di mode Fleksibel kamu bisa melompat dan menarik beban dari jauh."
             },
             openingDialogue = new[]
             {
-                Line("SIM", "ELEVASI. Ketinggian mengubah cara ruang terbaca."),
-                Line("RECT", "Angka iterasi di memori terus tercatat."),
-                Line("SIM", "Fokus pada atap Rusun Matahari.")
+                Line("VELA", "Pelat pemicu jembatan berada di atas balkon kiri!"),
+                Line("TEPI", "Tekan [SPACE] untuk beralih ke Mode Fleksibel agar Rect bisa melompat dan memakai telekinesis [F].")
             },
             clearDialogue = new[]
             {
-                Line("MIRA", "Satu platform logistik berhasil diangkat! Masih ada warga di atap blok sebelah.")
+                Line("NARA", "Pelan-pelan, bangunan lama ini mulai merespons langkah kita lagi.")
             },
             hints = new[]
             {
-                "Pad terletak di atas Balkon Timur (+1.0 GU). Bawa CUBE-01 menaiki tangga selatan Balkon Timur.",
-                "Gunakan Telekinesis [Tab] jika ingin mengangkat beban dari lantai langsung ke atas."
+                "Tekan [SPACE] untuk mengganti mode gerak ke Mode Fleksibel (warna ungu).",
+                "Angkat BEBAN-UNGU lewat tangga balkon kiri, atau arahkan ke BEBAN-UNGU dan tekan [F] untuk mengangkatnya dengan telekinesis ke PAD-BALKON.",
+                "Setelah jembatan kanan aktif, bawa CORE-01 naik ke Dek Anchor."
             }
         };
 
         private static LevelSpec Build2_2() => new LevelSpec
         {
-            chapter = 2, level = 2, title = "Susun", chapterSubtitle = "ELEVASI",
-            districtLabel = "RUSUN MATAHARI // L2", theme = ChapterTheme.Elevasi, parActions = 9,
-            playerSpawnGrid = new Vector3(0f, 0.05f, -8.5f),
-            anchorGrid = new Vector3(0f, 0.72f, 0f),
-            coreSpawnGrid = new Vector3(0f, 2.48f, 10.2f),
+            chapter = 2, level = 2,
+            title = "Teras Atas Rusun",
+            chapterSubtitle = "CHAPTER 2  •  ELEVASI",
+            districtLabel = "RUSUN MATAHARI // L2", theme = ChapterTheme.Elevasi, parActions = 10,
+            playerSpawnGrid = new Vector3(0f, 0.05f, -7.2f),
+            coreSpawnGrid = new Vector3(-5.5f, 1.82f, 2.5f),
+            anchorGrid = new Vector3(0f, 0f, 7.2f),
             platforms = new[]
             {
-                new PlatformSpec { name = "Sayap Barat", centerGrid = new Vector3(-7.2f, 0.25f, 0f), sizeGrid = new Vector3(4.8f, 0.5f, 5.2f), tier = 0, addSouthSteps = true },
-                new PlatformSpec { name = "Sayap Timur", centerGrid = new Vector3(7.2f, 0.5f, 0f), sizeGrid = new Vector3(4.8f, 1.0f, 5.2f), tier = 1, addSouthSteps = true },
-                new PlatformSpec { name = "Atap Rusun", centerGrid = new Vector3(0f, 1.0f, 10.2f), sizeGrid = new Vector3(5.2f, 2.0f, 4.2f), tier = 2 }
+                new PlatformSpec { name = "Menara Core Barat", centerGrid = new Vector3(-5.5f, 0.65f, 2.5f), sizeGrid = new Vector3(4.2f, 1.30f, 4.2f), tier = 1 },
+                new PlatformSpec { name = "Rak Pemberat Timur", centerGrid = new Vector3(5.6f, 0.55f, -3.8f), sizeGrid = new Vector3(3.8f, 1.10f, 3.8f), tier = 0 }
+            },
+            extraWalls = new[]
+            {
+                new WallSpec { name = "Teras Wall L", centerGrid = new Vector3(-6.8f, 1.5f, 4.8f), sizeGrid = new Vector3(7.4f, 3.0f, 0.5f) },
+                new WallSpec { name = "Teras Wall R", centerGrid = new Vector3(6.8f, 1.5f, 4.8f), sizeGrid = new Vector3(7.4f, 3.0f, 0.5f) }
+            },
+            props = new[]
+            {
+                new PropSpec { name = "BEBAN-RAK", shape = PrimitiveType.Cube, posGrid = new Vector3(5.6f, 1.62f, -3.8f), sizeGrid = new Vector3(0.95f, 0.95f, 0.95f), mass = 1.2f }
             },
             plates = new[]
             {
-                new PlateSpec { name = "CONDUIT-WEST", posGrid = new Vector3(-7.2f, 0.5f, 0f), requiredMass = 1.4f },
-                new PlateSpec { name = "CONDUIT-EAST", posGrid = new Vector3(7.2f, 1.0f, 0f), requiredMass = 1.8f }
+                new PlateSpec { name = "PAD-UTARA", posGrid = new Vector3(4.2f, 0f, 1.2f), requiredMass = 1.0f }
             },
             barriers = new[]
             {
-                new BarrierSpec { name = "Atap Shield", posGrid = new Vector3(0f, 2.5f, 8.2f), sizeGrid = new Vector3(4.8f, 1.8f, 0.25f), plateIndices = new[] { 0 } }
-            },
-            bridge = new BridgeSpec { stairStartZ = 4.5f, staticStepCount = 2, dynamicStepCount = 2, targetHeightGrid = 2f, plateIndices = new[] { 1 } },
-            props = new[]
-            {
-                new PropSpec { name = "CUBE-01", shape = PrimitiveType.Cube, posGrid = new Vector3(-4.0f, 0.6f, -6.0f), sizeGrid = Vector3.one * 1.2f, mass = 2f },
-                new PropSpec { name = "CUBE-02", shape = PrimitiveType.Cube, posGrid = new Vector3(4.0f, 0.5f, -6.0f), sizeGrid = Vector3.one, mass = 1.5f },
-                new PropSpec { name = "CYL-01", shape = PrimitiveType.Cylinder, posGrid = new Vector3(0f, 0.5f, -5.0f), sizeGrid = Vector3.one, mass = 1.5f }
+                new BarrierSpec { name = "PAGAR-TERAS", posGrid = new Vector3(0f, 1.35f, 4.8f), sizeGrid = new Vector3(6.2f, 2.7f, 0.35f), plateIndices = new[] { 0 } }
             },
             openingDialogue = new[]
             {
-                Line("DANU", "Tepi makin krisis daya, Mira. Jangan paksakan menara kalau belum seimbang."),
-                Line("SIM", "Seimbangkan Sayap Barat (1.4t) dan Sayap Timur (1.8t) untuk akses atap.")
+                Line("MIRA", "CORE-01 terjebak di puncak tiang barat tanpa tangga!"),
+                Line("VELA", "Di Mode Fleksibel [SPACE], gunakan sinar [F] Telekinesis untuk menurunkan benda dari tempat tinggi.")
             },
             clearDialogue = new[]
             {
-                Line("SIM", "Keseimbangan tercapai. Bersiap menghadapi getaran menara pada Sektor 2.3.")
+                Line("MIRA", "Sinar telekinesismu makin stabil. Puncak menara tinggal selangkah lagi.")
             },
             hints = new[]
             {
-                "Pad Barat membuka perisai energi atap, sedangkan Pad Timur menyalakan Energy Bridge.",
-                "Letakkan CUBE-02 / CYL-01 (1.5t) di Sayap Barat dan CUBE-01 (2.0t) di Sayap Timur."
+                "Tekan [SPACE] ke Mode Fleksibel agar Telekinesis aktif.",
+                "Arahkan ke BEBAN-RAK di platform kanan atas, tekan [F] untuk menariknya turun ke PAD-UTARA.",
+                "Arahkan ke CORE-01 di menara kiri atas, tekan [F] untuk menurunkannya, lalu bawa masuk melewati pagar yang sudah terbuka."
             }
         };
 
         private static LevelSpec Build2_3() => new LevelSpec
         {
-            chapter = 2, level = 3, title = "Kotak Musik", chapterSubtitle = "ELEVASI",
-            districtLabel = "MENARA RUSUN", theme = ChapterTheme.Elevasi, parActions = 9,
-            playerSpawnGrid = new Vector3(0f, 0.05f, -8.5f),
-            anchorGrid = new Vector3(0f, 0.72f, 1.5f),
-            coreSpawnGrid = new Vector3(0f, 2.48f, 10.5f),
+            chapter = 2, level = 3,
+            title = "Puncak Menara Rusun",
+            chapterSubtitle = "CHAPTER 2  •  ELEVASI",
+            districtLabel = "MENARA RUSUN", theme = ChapterTheme.Elevasi, parActions = 11,
+            playerSpawnGrid = new Vector3(0f, 0.05f, -7.6f),
+            coreSpawnGrid = new Vector3(0f, 0.48f, -5.0f),
+            anchorGrid = new Vector3(0f, 1.50f, 7.0f),
             platforms = new[]
             {
-                new PlatformSpec { name = "Pelindung Kotak Musik", centerGrid = new Vector3(8.0f, 0.25f, -2.5f), sizeGrid = new Vector3(4.5f, 0.5f, 4.5f), tier = 0, addWestSteps = true },
-                new PlatformSpec { name = "Menara Atas", centerGrid = new Vector3(0f, 1.0f, 10.5f), sizeGrid = new Vector3(5.2f, 2.0f, 4.2f), tier = 2 }
+                new PlatformSpec { name = "Balkon Menengah", centerGrid = new Vector3(5.4f, 0.50f, 1.2f), sizeGrid = new Vector3(4.0f, 1.00f, 4.0f), tier = 0, addSouthSteps = true },
+                new PlatformSpec { name = "Puncak Menara", centerGrid = new Vector3(0f, 0.75f, 6.8f), sizeGrid = new Vector3(6.8f, 1.50f, 4.4f), tier = 2 }
             },
             extraWalls = new[]
             {
-                new WallSpec { name = "Ruang Musik N", centerGrid = new Vector3(8.0f, 1.35f, -0.35f), sizeGrid = new Vector3(4.5f, 2.2f, 0.3f) },
-                new WallSpec { name = "Ruang Musik S", centerGrid = new Vector3(8.0f, 1.35f, -4.65f), sizeGrid = new Vector3(4.5f, 2.2f, 0.3f) },
-                new WallSpec { name = "Ruang Musik E", centerGrid = new Vector3(10.2f, 1.35f, -2.5f), sizeGrid = new Vector3(0.3f, 2.2f, 4.5f) }
+                new WallSpec { name = "Menara Wall L", centerGrid = new Vector3(-6.8f, 1.5f, 0.8f), sizeGrid = new Vector3(7.4f, 3.0f, 0.5f) },
+                new WallSpec { name = "Menara Wall R", centerGrid = new Vector3(6.8f, 1.5f, 0.8f), sizeGrid = new Vector3(7.4f, 3.0f, 0.5f) }
+            },
+            props = new[]
+            {
+                new PropSpec { name = "PEMBERAT-A", shape = PrimitiveType.Cube, posGrid = new Vector3(-4.5f, 0.50f, -4.5f), sizeGrid = new Vector3(0.95f, 0.95f, 0.95f), mass = 1.2f },
+                new PropSpec { name = "PEMBERAT-B", shape = PrimitiveType.Cube, posGrid = new Vector3(4.5f, 0.50f, -4.5f), sizeGrid = new Vector3(0.95f, 0.95f, 0.95f), mass = 1.2f }
             },
             plates = new[]
             {
-                new PlateSpec { name = "CONDUIT-TOWER", posGrid = new Vector3(-4.5f, 0f, -1.5f), requiredMass = 1.8f },
-                new PlateSpec { name = "CONDUIT-ARCHIVE", posGrid = new Vector3(3.5f, 0f, -5.0f), requiredMass = 1.4f }
+                new PlateSpec { name = "PAD-PINTU", posGrid = new Vector3(-4.6f, 0f, -1.8f), requiredMass = 1.0f },
+                new PlateSpec { name = "PAD-PUNCAK", posGrid = new Vector3(5.4f, 1.00f, 1.2f), requiredMass = 1.0f }
             },
             barriers = new[]
             {
-                new BarrierSpec { name = "Shelter Gate", posGrid = new Vector3(5.8f, 1.4f, -2.5f), sizeGrid = new Vector3(0.25f, 2.0f, 4.2f), plateIndices = new[] { 1 } }
+                new BarrierSpec { name = "SEKAT-MENARA", posGrid = new Vector3(0f, 1.35f, 0.8f), sizeGrid = new Vector3(6.2f, 2.7f, 0.35f), plateIndices = new[] { 0 } }
             },
-            bridge = new BridgeSpec { stairStartZ = 4.8f, staticStepCount = 2, dynamicStepCount = 2, targetHeightGrid = 2f, plateIndices = new[] { 0 } },
-            props = new[]
+            bridge = new BridgeSpec
             {
-                new PropSpec { name = "CUBE-01", shape = PrimitiveType.Cube, posGrid = new Vector3(-3.0f, 0.6f, -5.8f), sizeGrid = Vector3.one * 1.2f, mass = 2f },
-                new PropSpec { name = "CUBE-02", shape = PrimitiveType.Cube, posGrid = new Vector3(1.8f, 0.5f, -6.2f), sizeGrid = Vector3.one, mass = 1.5f }
+                centerX = 0f, stairStartZ = 1.8f, baseHeightGrid = 0f,
+                staticStepCount = 2, dynamicStepCount = 3, targetHeightGrid = 1.50f,
+                plateIndices = new[] { 1 }
             },
             fragment = new FragmentSpec
             {
-                enabled = true, posGrid = new Vector3(8.3f, 1.0f, -2.5f),
-                title = "Kotak Musik Adi", playPianoMotif = true,
-                speaker = "MIRA", line = "Simpan melodi itu... itu satu-satunya suara Adi yang masih tersisa.",
-                replySpeaker = "RECT", replyLine = "Lima nada. Kenapa suaranya tidak ada di tabel data?"
+                enabled = true, posGrid = new Vector3(2.4f, 2.02f, 7.0f),
+                title = "Antena Pemancar Nara",
+                speaker = "NARA", line = "Dari atap ini kita bisa melihat seluruh tanggul utara sebelum air naik.",
+                replySpeaker = "DANU", replyLine = "Jaga jalur elevasinya tetap utuh, Nara. Arsip berada di seberang."
             },
             openingDialogue = new[]
             {
-                Line("SIM", "PERINGATAN: stabilitas menara menurun. Fokus pada CORE-01."),
-                Line("RECT", "Ada benda berdenyut di dalam reruntuhan timur.")
+                Line("NARA", "Puncak menara dijaga pagar tengah sekaligus tangga putus."),
+                Line("VELA", "Buka pagar dengan pelat kiri dulu, lalu bawa pemberat kedua ke balkon kanan.")
             },
             clearDialogue = new[]
             {
-                Line("MIRA", "Terima kasih telah memeriksanya, RECT..."),
-                Line("SIM", "Memasuki Babak III: Gedung Arsip Vela.")
+                Line("SIM", "Sektor Elevasi terhubung. Pintu Gedung Arsip mulai terbaca.")
             },
             hints = new[]
             {
-                "Gunakan CUBE-02 (1.5t) pada Pad Timur untuk menyelamatkan Kotak Musik Adi (5 nada piano!) sebelum menyelesaikan menara.",
-                "Gunakan CUBE-01 (2.0t) pada Pad Barat agar jembatan Menara Atas aktif."
+                "Taruh PEMBERAT-A ke PAD-PINTU di kiri bawah agar pagar tengah terbuka.",
+                "Gunakan Mode Fleksibel [SPACE] dan angkat PEMBERAT-B (dengan tangga atau [F]) ke PAD-PUNCAK di balkon kanan.",
+                "Setelah jembatan ke puncak aktif, bawa CORE-01 naik ke ANCHOR-01."
             }
         };
 
+        // =====================================================================
+        // CHAPTER 3 — ROTASI (Gedung Arsip & Apartemen Piano Danu)
+        // =====================================================================
+
         private static LevelSpec Build3_1() => new LevelSpec
         {
-            chapter = 3, level = 1, title = "Kunci Orientasi", chapterSubtitle = "ROTASI",
-            districtLabel = "GEDUNG ARSIP // PINTU", theme = ChapterTheme.Rotasi, parActions = 6,
-            playerSpawnGrid = new Vector3(0f, 0.05f, -7.5f),
-            anchorGrid = new Vector3(0f, 0.72f, 1.8f),
-            coreSpawnGrid = new Vector3(0f, 2.48f, 9.8f),
-            coreStartYaw = 0f,
-            requireFacingAngle = true,
-            requiredFacingYaw = 90f,
-            platforms = new[]
+            chapter = 3, level = 1,
+            title = "Kunci Arah Arsip",
+            chapterSubtitle = "CHAPTER 3  •  ROTASI",
+            districtLabel = "LOBI ARSIP", theme = ChapterTheme.Rotasi, parActions = 7,
+            requireFacingAngle = true, requiredFacingYaw = 0f, coreStartYaw = 90f,
+            playerSpawnGrid = new Vector3(0f, 0.05f, -6.5f),
+            coreSpawnGrid = new Vector3(0f, 0.48f, -2.0f),
+            anchorGrid = new Vector3(0f, 0f, 5.4f),
+            fragment = new FragmentSpec
             {
-                new PlatformSpec { name = "Rak Arsip Barat", centerGrid = new Vector3(-7.5f, 0.4f, 1.5f), sizeGrid = new Vector3(4.5f, 0.8f, 5.5f), tier = 0, addSouthSteps = true },
-                new PlatformSpec { name = "Platform High", centerGrid = new Vector3(0f, 1f, 10f), sizeGrid = new Vector3(5.2f, 2f, 4.2f), tier = 2 }
-            },
-            plates = new[] { new PlateSpec { name = "CONDUIT-ARCHIVE-01", posGrid = new Vector3(-3.8f, 0f, -2.5f), requiredMass = 1.8f } },
-            bridge = new BridgeSpec { stairStartZ = 4.3f, staticStepCount = 2, dynamicStepCount = 2, targetHeightGrid = 2f, plateIndices = new[] { 0 } },
-            props = new[]
-            {
-                new PropSpec { name = "CUBE-01", shape = PrimitiveType.Cube, posGrid = new Vector3(2.8f, 0.6f, -5.0f), sizeGrid = Vector3.one * 1.2f, mass = 2f },
-                new PropSpec { name = "CYL-01", shape = PrimitiveType.Cylinder, posGrid = new Vector3(-6.8f, 1.3f, 1.5f), sizeGrid = Vector3.one, mass = 1.5f }
+                enabled = true, posGrid = new Vector3(4.8f, 0.52f, 0.4f),
+                title = "Kunci Putar Ruang Arsip",
+                speaker = "MIRA", line = "Semua pintu arsip lama hanya mau terkunci kalau simbol sisinya menghadap ke arah yang benar.",
+                replySpeaker = "DANU", replyLine = "Sudut yang keliru cuma akan memantulkan inti keluar."
             },
             openingDialogue = new[]
             {
-                Line("SIM", "ROTASI Ry(θ). Bentuk tetap sama; arah hadap menentukan kecocokan."),
-                Line("RECT", "Apakah benda yang sama bisa salah hanya karena menghadap ke sisi lain?")
+                Line("SIM", "Soket Anchor ini memiliki pengunci arah. Perhatikan panah pada dudukan Anchor."),
+                Line("MIRA", "Tekan [R] saat memegang atau menarik kubus untuk memutarnya 90 derajat.")
             },
             clearDialogue = new[]
             {
-                Line("SIM", "Kalibrasi arah 90° valid. Pintu Gedung Arsip bergeser membuka koridor dalam.")
+                Line("MIRA", "Pas sekali. Pintu menuju ruang dalam arsip langsung berbunyi klik.")
             },
             hints = new[]
             {
-                "Perhatikan indikator anak panah pada ANCHOR-01 menghadap 90 deg (Timur).",
-                "Saat memegang CORE-01, tekan [R] untuk memutar Ry(+90 deg) hingga garis visor sejajar panah Anchor."
+                "Soket Anchor meminta inti menghadap UTARA (0°), sesuai arah panah di dudukan.",
+                "Saat memegang CORE-01 [E] atau mengarahkannya dengan [F], tekan [R] untuk memutarnya hingga panah kubus cocok dengan soket.",
+                "Letakkan CORE-01 yang sudah sejajar tepat ke tengah ANCHOR-01."
             }
         };
 
         private static LevelSpec Build3_2() => new LevelSpec
         {
-            chapter = 3, level = 2, title = "Bias", chapterSubtitle = "ROTASI",
-            districtLabel = "RUANG CERMIN ARSIP", theme = ChapterTheme.Rotasi, parActions = 9,
-            playerSpawnGrid = new Vector3(0f, 0.05f, -8.5f),
-            anchorGrid = new Vector3(0f, 0.72f, -1.2f),
-            coreSpawnGrid = new Vector3(0f, 2.48f, 10.2f),
-            coreStartYaw = 180f,
-            requireFacingAngle = true,
-            requiredFacingYaw = 270f,
+            chapter = 3, level = 2,
+            title = "Ruang Cermin Arsip",
+            chapterSubtitle = "CHAPTER 3  •  ROTASI",
+            districtLabel = "RUANG CERMIN ARSIP", theme = ChapterTheme.Rotasi, parActions = 10,
+            requireFacingAngle = true, requiredFacingYaw = 180f, coreStartYaw = 0f,
+            playerSpawnGrid = new Vector3(0f, 0.05f, -7.2f),
+            coreSpawnGrid = new Vector3(4.4f, 0.48f, -3.8f),
+            anchorGrid = new Vector3(0f, 1.30f, 6.2f),
             platforms = new[]
             {
-                new PlatformSpec { name = "Cermin Barat", centerGrid = new Vector3(-7.5f, 0.25f, 1.5f), sizeGrid = new Vector3(4.5f, 0.5f, 5f), tier = 0, addSouthSteps = true },
-                new PlatformSpec { name = "Cermin Timur", centerGrid = new Vector3(7.5f, 0.25f, 1.5f), sizeGrid = new Vector3(4.5f, 0.5f, 5f), tier = 0, addSouthSteps = true },
-                new PlatformSpec { name = "Platform High", centerGrid = new Vector3(0f, 1f, 10.2f), sizeGrid = new Vector3(5.2f, 2f, 4.2f), tier = 2 }
+                new PlatformSpec { name = "Balkon Cermin", centerGrid = new Vector3(0f, 0.65f, 5.8f), sizeGrid = new Vector3(6.6f, 1.30f, 4.4f), tier = 1 }
+            },
+            props = new[]
+            {
+                new PropSpec { name = "PRISMA-BERAT", shape = PrimitiveType.Cube, posGrid = new Vector3(-4.5f, 0.50f, -3.8f), sizeGrid = new Vector3(0.95f, 0.95f, 0.95f), mass = 1.2f }
             },
             plates = new[]
             {
-                new PlateSpec { name = "CONDUIT-MIRROR-W", posGrid = new Vector3(-3.8f, 0f, -3.8f), requiredMass = 1.4f },
-                new PlateSpec { name = "CONDUIT-MIRROR-E", posGrid = new Vector3(3.8f, 0f, -3.8f), requiredMass = 1.8f }
+                new PlateSpec { name = "PAD-CERMIN", posGrid = new Vector3(-4.5f, 0f, 0.4f), requiredMass = 1.0f }
             },
-            bridge = new BridgeSpec { stairStartZ = 4.5f, staticStepCount = 2, dynamicStepCount = 2, targetHeightGrid = 2f, plateIndices = new[] { 0, 1 } },
-            props = new[]
+            bridge = new BridgeSpec
             {
-                new PropSpec { name = "CUBE-01", shape = PrimitiveType.Cube, posGrid = new Vector3(6.8f, 1.1f, 1.5f), sizeGrid = Vector3.one * 1.2f, mass = 2f },
-                new PropSpec { name = "CUBE-02", shape = PrimitiveType.Cube, posGrid = new Vector3(-6.8f, 1.0f, 1.5f), sizeGrid = Vector3.one, mass = 1.5f }
-            },
-            fragment = new FragmentSpec
-            {
-                enabled = true, posGrid = new Vector3(-9.5f, 1.0f, 8.2f),
-                title = "Foto Adi Muda",
-                speaker = "DANU", line = "Ini foto Adi di depan pianonya. Dia bukan sekadar baris kode di server, Mira.",
-                replySpeaker = "RECT", replyLine = "Tersimpan: Adi. Nama manusia."
+                centerX = 0f, stairStartZ = -0.2f, baseHeightGrid = 0f,
+                staticStepCount = 2, dynamicStepCount = 3, targetHeightGrid = 1.30f,
+                plateIndices = new[] { 0 }
             },
             openingDialogue = new[]
             {
-                Line("SIM", "Dua pelat cermin menuntut kesetimbangan sebelum jembatan terbuka. Kunci menuntut sudut 270 deg (Barat).")
+                Line("VELA", "Soket kali ini membalik ke arah SELATAN — berlawanan dari arah kedatanganmu."),
+                Line("TEPI", "Putar CORE-01 dua kali sebelum memasangnya.")
             },
             clearDialogue = new[]
             {
-                Line("SIM", "Rekonstruksi Cermin selesai. Terdeteksi ruang tersembunyi tanpa indeks pada Sektor 3.3.")
+                Line("DANU", "Rekaman arsip kota tersembunyi di unit yang tidak pernah dicatat peta resmi...")
             },
             hints = new[]
             {
-                "Kedua Pad (Barat >= 1.4t, Timur >= 1.8t) harus aktif bersamaan.",
-                "CORE-01 awalnya menghadap 180 deg (Selatan). Tekan [R] satu kali (+90 deg -> 270 deg Barat) atau gunakan [V] Blueprint."
+                "Bawa PRISMA-BERAT ke PAD-CERMIN di kiri untuk menyalakan tangga naik.",
+                "Ambil CORE-01 dan tekan [R] DUA KALI sampai arah hadapnya menjadi 180° (Selatan).",
+                "Bawa CORE-01 naik jembatan ke ANCHOR-01."
             }
         };
 
         private static LevelSpec Build3_3() => new LevelSpec
         {
-            chapter = 3, level = 3, title = "Ruang Piano", chapterSubtitle = "ROTASI",
-            districtLabel = "APARTEMEN TAK TERINDEKS", theme = ChapterTheme.Rotasi, parActions = 10,
-            playerSpawnGrid = new Vector3(0f, 0.05f, -8.5f),
-            anchorGrid = new Vector3(0f, 0.72f, 0.5f),
-            coreSpawnGrid = new Vector3(0f, 2.48f, 10.2f),
-            coreStartYaw = 90f,
-            requireFacingAngle = true,
-            requiredFacingYaw = 0f,
-            playPianoOnClear = true,
-            addPianoRoomProp = true,
+            chapter = 3, level = 3,
+            title = "Apartemen Tak Terindeks",
+            chapterSubtitle = "CHAPTER 3  •  ROTASI",
+            districtLabel = "UNIT PIANO DANU", theme = ChapterTheme.Rotasi, parActions = 11,
+            requireFacingAngle = true, requiredFacingYaw = 270f, coreStartYaw = 90f,
+            addPianoRoomProp = true, playPianoOnClear = true,
+            playerSpawnGrid = new Vector3(0f, 0.05f, -7.2f),
+            coreSpawnGrid = new Vector3(0f, 0.48f, -4.4f),
+            anchorGrid = new Vector3(0f, 1.30f, 6.2f),
             platforms = new[]
             {
-                new PlatformSpec { name = "Ruang Piano Hangat", centerGrid = new Vector3(-8.2f, 0.25f, 3.5f), sizeGrid = new Vector3(5.2f, 0.5f, 5.2f), tier = 0, addEastSteps = true },
-                new PlatformSpec { name = "Platform High", centerGrid = new Vector3(0f, 1f, 10.2f), sizeGrid = new Vector3(5.2f, 2f, 4.2f), tier = 2 }
+                new PlatformSpec { name = "Dek Ruang Piano", centerGrid = new Vector3(0f, 0.65f, 5.8f), sizeGrid = new Vector3(6.2f, 1.30f, 4.4f), tier = 1 }
             },
-            extraWalls = new[]
+            props = new[]
             {
-                new WallSpec { name = "Piano Room N", centerGrid = new Vector3(-8.2f, 1.4f, 6.2f), sizeGrid = new Vector3(5.2f, 2.3f, 0.3f) },
-                new WallSpec { name = "Piano Room S", centerGrid = new Vector3(-8.2f, 1.4f, 0.85f), sizeGrid = new Vector3(5.2f, 2.3f, 0.3f) },
-                new WallSpec { name = "Piano Room W", centerGrid = new Vector3(-10.9f, 1.4f, 3.5f), sizeGrid = new Vector3(0.3f, 2.3f, 5.2f) }
+                new PropSpec { name = "PEMBERAT-KIRI", shape = PrimitiveType.Cube, posGrid = new Vector3(-4.5f, 0.50f, -4.4f), sizeGrid = new Vector3(0.95f, 0.95f, 0.95f), mass = 1.2f },
+                new PropSpec { name = "PEMBERAT-KANAN", shape = PrimitiveType.Cube, posGrid = new Vector3(4.5f, 0.50f, -4.4f), sizeGrid = new Vector3(0.95f, 0.95f, 0.95f), mass = 1.2f }
             },
             plates = new[]
             {
-                new PlateSpec { name = "CONDUIT-PIANO", posGrid = new Vector3(-4.2f, 0f, -2.5f), requiredMass = 1.4f },
-                new PlateSpec { name = "CONDUIT-NORTH", posGrid = new Vector3(4.2f, 0f, -2.5f), requiredMass = 1.8f }
+                new PlateSpec { name = "PAD-KUNCI", posGrid = new Vector3(-4.5f, 0f, -1.2f), requiredMass = 1.0f },
+                new PlateSpec { name = "PAD-NADA", posGrid = new Vector3(4.5f, 0f, -1.2f), requiredMass = 1.0f }
             },
-            barriers = new[]
+            bridge = new BridgeSpec
             {
-                new BarrierSpec { name = "Ruang Tersembunyi Barrier", posGrid = new Vector3(-5.6f, 1.4f, 3.5f), sizeGrid = new Vector3(0.25f, 2.0f, 5.0f), plateIndices = new[] { 0 } }
-            },
-            bridge = new BridgeSpec { stairStartZ = 4.5f, staticStepCount = 2, dynamicStepCount = 2, targetHeightGrid = 2f, plateIndices = new[] { 1 } },
-            props = new[]
-            {
-                new PropSpec { name = "CUBE-01", shape = PrimitiveType.Cube, posGrid = new Vector3(4.5f, 0.6f, -6.0f), sizeGrid = Vector3.one * 1.2f, mass = 2f },
-                new PropSpec { name = "CUBE-02", shape = PrimitiveType.Cube, posGrid = new Vector3(-3.8f, 0.5f, -6.0f), sizeGrid = Vector3.one, mass = 1.5f }
+                centerX = 0f, stairStartZ = 0.0f, baseHeightGrid = 0f,
+                staticStepCount = 2, dynamicStepCount = 3, targetHeightGrid = 1.30f,
+                plateIndices = new[] { 0, 1 }
             },
             fragment = new FragmentSpec
             {
-                enabled = true, posGrid = new Vector3(-8.2f, 1.0f, 4.3f),
-                title = "Pita Rekaman Ruang Piano", playPianoMotif = true,
-                speaker = "MIRA", line = "Jangan hapus ruangan itu, SIM! Aku membangunnya agar dia tidak benar-benar pergi.",
-                replySpeaker = "RECT", replyLine = "Kalau sesuatu tidak ada di arsip, apakah berarti tidak pernah ada?"
+                enabled = true, posGrid = new Vector3(-5.8f, 0.52f, 3.2f),
+                title = "Partitur Tanpa Judul",
+                speaker = "HALIM", line = "Danu selalu bilang kalau musik tidak bisa diukur grid. Ia menaruhnya di sudut ruang yang tak terindeks.",
+                replySpeaker = "DANU", replyLine = "Kalau sistem mulai membekukan memori warga, nada ini akan membukanya lagi.",
+                playPianoMotif = true
             },
             openingDialogue = new[]
             {
-                Line("SIM", "PERINGATAN: Anomali ruangan tak terindeks terdeteksi di barat."),
-                Line("MIRA", "Jangan sentuh penghapusannya, SIM. Biarkan saja di situ.")
+                Line("HALIM", "Ruangan di sudut kiri itu apartemen lama Danu... bahkan di dalam simulasi, pianonya masih ada."),
+                Line("VELA", "Aktifkan kedua pelat agar jembatan naik, lalu kunci inti menghadap BARAT (270°).")
             },
             clearDialogue = new[]
             {
-                Line("DANU", "ITERATION 47 // JANGAN HAPUS. Mereka juga mencoba melindunginya."),
-                Line("SIM", "Memasuki Babak IV: Jembatan Lama & Peringatan Badai.")
+                Line("DANU", "Nada terakhir berbunyi. Kunci sistem Rekonstruksi — Fusion dan Partition — kini terbuka untukmu.")
             },
             hints = new[]
             {
-                "Aktifkan Pad Barat (>= 1.4t) untuk membuka Ruang Piano hangat dan dengarkan rekaman Adi.",
-                "Aktifkan Pad Timur (2.0t), ambil CORE-01, dan putar [R] hingga menghadap 0 deg (Utara) ke Anchor."
+                "Taruh PEMBERAT-KIRI di PAD-KUNCI dan PEMBERAT-KANAN di PAD-NADA.",
+                "Ambil CORE-01, tekan [R] dua kali (dari 90° ke 270° / menghadap BARAT, ke arah piano).",
+                "Naiki tangga jembatan di tengah dan pasang CORE-01 ke ANCHOR-01."
             }
         };
 
+        // =====================================================================
+        // CHAPTER 4 — FUSION & PARTITION (Mekanik Utama Rekonstruksi)
+        // =====================================================================
+
         private static LevelSpec Build4_1() => new LevelSpec
         {
-            chapter = 4, level = 1, title = "Dua Sisi", chapterSubtitle = "REKONSTRUKSI",
-            districtLabel = "JEMBATAN LAMA VELA", theme = ChapterTheme.Badai, parActions = 11,
-            playerSpawnGrid = new Vector3(0f, 0.05f, -8.5f),
-            anchorGrid = new Vector3(0f, 0.72f, -3.5f),
-            coreSpawnGrid = new Vector3(0f, 2.48f, 10.2f),
-            coreStartYaw = 0f,
-            requireFacingAngle = true,
-            requiredFacingYaw = 180f,
-            platforms = new[]
+            chapter = 4, level = 1,
+            title = "Dua Beban Jadi Satu",
+            chapterSubtitle = "CHAPTER 4  •  FUSION & PARTITION",
+            districtLabel = "BENGKEL FUSION // 01", theme = ChapterTheme.Rekonstruksi, parActions = 7,
+            allowFusion = true, allowPartition = false,
+            playerSpawnGrid = new Vector3(0f, 0.05f, -7.2f),
+            coreSpawnGrid = new Vector3(4.8f, 0.48f, -4.6f),
+            anchorGrid = new Vector3(0f, 0f, 6.8f),
+            extraWalls = new[]
             {
-                new PlatformSpec { name = "Dermaga Timur", centerGrid = new Vector3(7.2f, 0.5f, 1.5f), sizeGrid = new Vector3(5.0f, 1.0f, 5.2f), tier = 1, addSouthSteps = true },
-                new PlatformSpec { name = "Platform High", centerGrid = new Vector3(0f, 1f, 10.2f), sizeGrid = new Vector3(5.5f, 2f, 4.2f), tier = 2 }
+                new WallSpec { name = "Fuse Wall L", centerGrid = new Vector3(-6.8f, 1.5f, 3.6f), sizeGrid = new Vector3(7.4f, 3.0f, 0.5f) },
+                new WallSpec { name = "Fuse Wall R", centerGrid = new Vector3(6.8f, 1.5f, 3.6f), sizeGrid = new Vector3(7.4f, 3.0f, 0.5f) }
+            },
+            props = new[]
+            {
+                new PropSpec { name = "RINGAN-A", shape = PrimitiveType.Cube, posGrid = new Vector3(-1.5f, 0.48f, -3.2f), sizeGrid = new Vector3(0.88f, 0.88f, 0.88f), mass = 1.2f },
+                new PropSpec { name = "RINGAN-B", shape = PrimitiveType.Cube, posGrid = new Vector3(1.5f, 0.48f, -3.2f), sizeGrid = new Vector3(0.88f, 0.88f, 0.88f), mass = 1.2f }
             },
             plates = new[]
             {
-                new PlateSpec { name = "CONDUIT-WEST-01", posGrid = new Vector3(-5.2f, 0f, -0.5f), requiredMass = 2.0f },
-                new PlateSpec { name = "CONDUIT-EAST-02", posGrid = new Vector3(7.2f, 1.0f, 1.5f), requiredMass = 1.8f }
+                new PlateSpec { name = "PAD-BERAT", posGrid = new Vector3(0f, 0f, 1.0f), requiredMass = 2.2f }
             },
-            bridge = new BridgeSpec { stairStartZ = 4.5f, staticStepCount = 2, dynamicStepCount = 2, targetHeightGrid = 2f, plateIndices = new[] { 0, 1 } },
-            props = new[]
+            barriers = new[]
             {
-                new PropSpec { name = "CUBE-01", shape = PrimitiveType.Cube, posGrid = new Vector3(-5.2f, 0.6f, -5.5f), sizeGrid = Vector3.one * 1.2f, mass = 2f },
-                new PropSpec { name = "CUBE-06", shape = PrimitiveType.Cube, posGrid = new Vector3(2.8f, 0.6f, -5.5f), sizeGrid = Vector3.one * 1.2f, mass = 2f },
-                new PropSpec { name = "ORB-01", shape = PrimitiveType.Sphere, posGrid = new Vector3(7.2f, 1.5f, 3.2f), sizeGrid = Vector3.one, mass = 1f }
+                new BarrierSpec { name = "GERBANG-BERAT", posGrid = new Vector3(0f, 1.35f, 3.6f), sizeGrid = new Vector3(6.2f, 2.7f, 0.35f), plateIndices = new[] { 0 } }
             },
             fragment = new FragmentSpec
             {
-                enabled = true, posGrid = new Vector3(7.2f, 1.75f, 7.2f),
-                title = "Data Echo Warga Vela",
-                speaker = "DANU", line = "Dengar gema radio itu: warga saling berjanji bertemu di dermaga selatan.",
-                replySpeaker = "RECT", replyLine = "Jembatan menghubungkan dua sisi, tapi tidak bisa menggantikan yang hilang."
+                enabled = true, posGrid = new Vector3(-5.5f, 0.52f, 1.4f),
+                title = "Hukum Kekekalan Ruang",
+                speaker = "VELA", line = "Dua bagian kecil yang disatukan dengan Fusion tidak hanya bertambah ukuran, tapi juga bobotnya.",
+                replySpeaker = "SIM", replyLine = "FUSION [2] aktif: gabungkan dua benda berdekatan menjadi satu massa gabungan."
             },
             openingDialogue = new[]
             {
-                Line("MIRA", "Dua sisi Tepi berselisih antara tanggul dan taman. Kita butuh jembatan stabil sekarang."),
-                Line("SIM", "Pad Barat (2.0t) dan Pad Dermaga Timur (1.8t) menyalakan Jembatan Lama. Anchor menuntut sudut 180 deg.")
+                Line("SIM", "Pelat PAD-BERAT membutuhkan beban minimal 2.2 ton. Masing-masing balok hanya 1.2 ton."),
+                Line("VELA", "Dekatkan RINGAN-A dan RINGAN-B sampai muncul garis hijau, lalu tekan [2] FUSION.")
             },
             clearDialogue = new[]
             {
-                Line("SIM", "PERINGATAN CUACA: Badai Ibu mendekati batas kritis. Bersiap untuk kalibrasi akhir.")
+                Line("VELA", "Berhasil! Sekarang kamu menguasai FUSION [2] untuk menggabungkan beban berat.")
             },
             hints = new[]
             {
-                "Bawa CUBE-01 ke Pad Barat dan CUBE-06 menaiki tangga selatan ke Pad Dermaga Timur (+1.0 GU).",
-                "Putar CORE-01 dengan [R] dua kali (0 -> 180 deg Selatan) sebelum masuk ANCHOR-01."
+                "Dekati RINGAN-A atau RINGAN-B (atau pegang satu dan dekatkan ke pasangannya hingga muncul garis tautan hijau).",
+                "Tekan tombol [2] untuk menjalankan FUSION — keduanya akan menyatu menjadi satu blok 2.4 ton.",
+                "Bawa blok gabungan 2.4 t ke PAD-BERAT agar pagar merah padam, lalu taruh CORE-01 ke ANCHOR-01."
             }
         };
 
         private static LevelSpec Build4_2() => new LevelSpec
         {
-            chapter = 4, level = 2, title = "Ambang Badai", chapterSubtitle = "REKONSTRUKSI",
-            districtLabel = "AMBANG BADAI // TEPI", theme = ChapterTheme.Badai, parActions = 13,
-            playerSpawnGrid = new Vector3(0f, 0.05f, -9.0f),
-            anchorGrid = new Vector3(0f, 0.72f, -4.8f),
-            coreSpawnGrid = new Vector3(0f, 2.48f, 10.6f),
-            coreStartYaw = 270f,
-            requireFacingAngle = true,
-            requiredFacingYaw = 90f,
-            triggerGlitchOnClear = true,
-            playPianoOnClear = true,
+            chapter = 4, level = 2,
+            title = "Satu Dibelah Dua",
+            chapterSubtitle = "CHAPTER 4  •  FUSION & PARTITION",
+            districtLabel = "RUANG PARTITION // 02", theme = ChapterTheme.Rekonstruksi, parActions = 8,
+            allowFusion = false, allowPartition = true,
+            playerSpawnGrid = new Vector3(0f, 0.05f, -7.2f),
+            coreSpawnGrid = new Vector3(5.2f, 0.48f, -4.8f),
+            anchorGrid = new Vector3(0f, 1.40f, 6.2f),
             platforms = new[]
             {
-                new PlatformSpec { name = "Vault Gudang Timur", centerGrid = new Vector3(8.5f, 0.2f, -3.5f), sizeGrid = new Vector3(4.5f, 0.4f, 5.0f), tier = 0 },
-                new PlatformSpec { name = "Menara Arsip Tepi", centerGrid = new Vector3(0f, 1f, 10.6f), sizeGrid = new Vector3(5.6f, 2f, 4.2f), tier = 2 }
+                new PlatformSpec { name = "Dek Partition", centerGrid = new Vector3(0f, 0.70f, 5.8f), sizeGrid = new Vector3(6.6f, 1.40f, 4.4f), tier = 1 }
             },
-            extraWalls = new[]
+            props = new[]
             {
-                new WallSpec { name = "Storm Vault N", centerGrid = new Vector3(8.5f, 1.3f, -0.85f), sizeGrid = new Vector3(4.6f, 2.2f, 0.35f) },
-                new WallSpec { name = "Storm Vault S", centerGrid = new Vector3(8.5f, 1.3f, -6.15f), sizeGrid = new Vector3(4.6f, 2.2f, 0.35f) },
-                new WallSpec { name = "Storm Vault E", centerGrid = new Vector3(10.8f, 1.3f, -3.5f), sizeGrid = new Vector3(0.35f, 2.2f, 5.2f) }
+                new PropSpec { name = "MONOLIT", shape = PrimitiveType.Cube, posGrid = new Vector3(0f, 0.54f, -3.5f), sizeGrid = new Vector3(1.35f, 1.05f, 1.05f), mass = 2.4f }
             },
             plates = new[]
             {
-                new PlateSpec { name = "CONDUIT-VAULT-RELEASE", posGrid = new Vector3(-6.5f, 0f, -4.5f), requiredMass = 1.4f },
-                new PlateSpec { name = "CONDUIT-STORM-WEST", posGrid = new Vector3(-4.2f, 0f, 2.5f), requiredMass = 2.0f },
-                new PlateSpec { name = "CONDUIT-STORM-EAST", posGrid = new Vector3(4.2f, 0f, 2.5f), requiredMass = 2.0f }
+                new PlateSpec { name = "PAD-KIRI", posGrid = new Vector3(-4.4f, 0f, 0.5f), requiredMass = 1.0f },
+                new PlateSpec { name = "PAD-KANAN", posGrid = new Vector3(4.4f, 0f, 0.5f), requiredMass = 1.0f }
             },
-            barriers = new[]
+            bridge = new BridgeSpec
             {
-                new BarrierSpec { name = "Storm Vault Gate", posGrid = new Vector3(6.2f, 1.4f, -3.5f), sizeGrid = new Vector3(0.25f, 2.0f, 4.8f), plateIndices = new[] { 0 } }
-            },
-            bridge = new BridgeSpec { stairStartZ = 4.9f, staticStepCount = 2, dynamicStepCount = 2, targetHeightGrid = 2f, plateIndices = new[] { 1, 2 } },
-            props = new[]
-            {
-                new PropSpec { name = "CUBE-02", shape = PrimitiveType.Cube, posGrid = new Vector3(-3.0f, 0.5f, -7.2f), sizeGrid = Vector3.one, mass = 1.5f },
-                new PropSpec { name = "CUBE-01", shape = PrimitiveType.Cube, posGrid = new Vector3(8.5f, 0.8f, -2.5f), sizeGrid = Vector3.one * 1.2f, mass = 2f },
-                new PropSpec { name = "CUBE-06", shape = PrimitiveType.Cube, posGrid = new Vector3(8.5f, 0.8f, -4.5f), sizeGrid = Vector3.one * 1.2f, mass = 2f },
-                new PropSpec { name = "ORB-01", shape = PrimitiveType.Sphere, posGrid = new Vector3(3.0f, 0.5f, -7.2f), sizeGrid = Vector3.one, mass = 1f }
+                centerX = 0f, stairStartZ = 0.0f, baseHeightGrid = 0f,
+                staticStepCount = 2, dynamicStepCount = 3, targetHeightGrid = 1.40f,
+                plateIndices = new[] { 0, 1 }
             },
             fragment = new FragmentSpec
             {
-                enabled = true, posGrid = new Vector3(4.8f, 0.65f, 10.6f),
-                title = "Rekaman RECT-126",
-                speaker = "MIRA", line = "...Maaf. Aku memutus kill switch Dewan agar kau bisa memilih sendiri, RECT.",
-                replySpeaker = "RECT", replyLine = "Untuk pertama kalinya, ini bukan sekadar objektif. Ini keputusanku."
+                enabled = true, posGrid = new Vector3(-6.0f, 0.52f, 5.0f),
+                title = "Pecahan yang Terkendali",
+                speaker = "DANU", line = "Menyimpan seluruh data dalam satu gumpalan besar justru berbahaya. Belah ia agar bisa mengisi dua penjaga sekaligus.",
+                replySpeaker = "SIM", replyLine = "PARTITION [1] aktif: belah satu benda berat menjadi dua bagian seimbang."
             },
             openingDialogue = new[]
             {
-                Line("SIM", "Ujian Akhir Badai. Bebaskan material tanggul, aktifkan jembatan menara, dan kunci CORE pada 90 deg."),
-                Line("MIRA", "Semua bergantung pada kalibrasi terakhirmu!")
+                Line("MIRA", "Hanya ada satu blok MONOLIT seberat 2.4 ton, padahal jembatan butuh dua pelat terpisah."),
+                Line("VELA", "Arahkan atau pegang MONOLIT lalu tekan [1] PARTITION untuk membelahnya menjadi dua.")
             },
             clearDialogue = new[]
             {
-                Line("SIM", "Objektif tercapai: selamatkan mereka."),
-                Line("RECT", "Ruang untuk pulang terbuka.")
+                Line("MIRA", "Satu benda jadi dua kunci. Pembagian yang adil menyelamatkan jalur ini.")
             },
             hints = new[]
             {
-                "1) Taruh CUBE-02 (1.5t) di Pad Barat Daya untuk membebaskan CUBE-01 & CUBE-06 (2.0t).",
-                "2) Bawa keduanya ke Pad Barat & Pad Timur (masing-masing 2.0t), lalu ambil CORE-01 & putar [R] dari 270 deg -> 90 deg!"
+                "Dekati atau pegang blok besar MONOLIT (2.4 t) di tengah ruangan, lalu tekan tombol [1] untuk PARTITION.",
+                "MONOLIT akan terbelah menjadi MONOLIT-A (1.2 t) dan MONOLIT-B (1.2 t).",
+                "Taruh masing-masing pecahan di PAD-KIRI dan PAD-KANAN, lalu bawa CORE-01 naik jembatan."
+            }
+        };
+
+        private static LevelSpec Build4_3() => new LevelSpec
+        {
+            chapter = 4, level = 3,
+            title = "Harmoni Dua Arah",
+            chapterSubtitle = "CHAPTER 4  •  FUSION & PARTITION",
+            districtLabel = "SIMPUL REKONSTRUKSI", theme = ChapterTheme.Rekonstruksi, parActions = 12,
+            allowFusion = true, allowPartition = true,
+            requireFacingAngle = true, requiredFacingYaw = 180f, coreStartYaw = 0f,
+            playerSpawnGrid = new Vector3(0f, 0.05f, -7.6f),
+            coreSpawnGrid = new Vector3(0f, 0.48f, -5.6f),
+            anchorGrid = new Vector3(0f, 1.40f, 6.2f),
+            platforms = new[]
+            {
+                new PlatformSpec { name = "Dek Rekonstruksi", centerGrid = new Vector3(0f, 0.70f, 5.8f), sizeGrid = new Vector3(6.6f, 1.40f, 4.4f), tier = 1 }
+            },
+            props = new[]
+            {
+                new PropSpec { name = "BLOK-UTAMA", shape = PrimitiveType.Cube, posGrid = new Vector3(-4.2f, 0.54f, -4.0f), sizeGrid = new Vector3(1.35f, 1.05f, 1.05f), mass = 2.4f },
+                new PropSpec { name = "BLOK-TAMBAH", shape = PrimitiveType.Cube, posGrid = new Vector3(4.2f, 0.48f, -4.0f), sizeGrid = new Vector3(0.88f, 0.88f, 0.88f), mass = 1.2f }
+            },
+            plates = new[]
+            {
+                new PlateSpec { name = "PAD-RINGAN", posGrid = new Vector3(-4.4f, 0f, 0.5f), requiredMass = 1.0f },
+                new PlateSpec { name = "PAD-GABUNG", posGrid = new Vector3(4.4f, 0f, 0.5f), requiredMass = 2.2f }
+            },
+            bridge = new BridgeSpec
+            {
+                centerX = 0f, stairStartZ = 0.0f, baseHeightGrid = 0f,
+                staticStepCount = 2, dynamicStepCount = 3, targetHeightGrid = 1.40f,
+                plateIndices = new[] { 0, 1 }
+            },
+            fragment = new FragmentSpec
+            {
+                enabled = true, posGrid = new Vector3(6.0f, 0.52f, 5.0f),
+                title = "Catatan Terakhir Laboratorium",
+                speaker = "HALIM", line = "Saat Partition dan Fusion dipakai bergantian, tidak ada massa yang terbuang percuma.",
+                replySpeaker = "VELA", replyLine = "Badai di tanggul luar mulai terdengar. Bersiaplah menuju kota utama."
+            },
+            openingDialogue = new[]
+            {
+                Line("SIM", "Uji gabungan: pelat kiri butuh >= 1.0 t, pelat kanan butuh >= 2.2 t."),
+                Line("TEPI", "Gunakan Partition [1] lalu Fusion [2] secara berurutan, lalu putar CORE-01 [R] ke arah 180°.")
+            },
+            clearDialogue = new[]
+            {
+                Line("VELA", "Semua mekanik dasar telah dikuasai. Badai utama di Kota Tepi sudah di depan mata.")
+            },
+            hints = new[]
+            {
+                "Langkah 1: Belah BLOK-UTAMA (2.4 t) dengan [1] Partition -> menjadi dua potongan 1.2 t.",
+                "Langkah 2: Letakkan satu potongan 1.2 t di PAD-RINGAN (kiri). Bawa potongan kedua mendekati BLOK-TAMBAH (1.2 t), tekan [2] Fusion menjadi 2.4 t, lalu taruh di PAD-GABUNG (kanan).",
+                "Langkah 3: Putar CORE-01 dengan [R] dua kali hingga menghadap 180° (Selatan) dan pasang di ANCHOR-01."
+            }
+        };
+
+        // =====================================================================
+        // CHAPTER 5 — BADAI & PILIHAN AKHIR
+        // =====================================================================
+
+        private static LevelSpec Build5_1() => new LevelSpec
+        {
+            chapter = 5, level = 1,
+            title = "Ambang Badai",
+            chapterSubtitle = "CHAPTER 5  •  BADAI & PILIHAN AKHIR",
+            districtLabel = "AMBANG TANGGUL UTARA", theme = ChapterTheme.Badai, parActions = 13,
+            allowFusion = true, allowPartition = true,
+            requireFacingAngle = true, requiredFacingYaw = 90f, coreStartYaw = 270f,
+            triggerGlitchOnClear = true,
+            playerSpawnGrid = new Vector3(0f, 0.05f, -7.5f),
+            coreSpawnGrid = new Vector3(0f, 0.48f, -5.0f),
+            anchorGrid = new Vector3(0f, 1.40f, 6.2f),
+            platforms = new[]
+            {
+                new PlatformSpec { name = "Gardu Elevasi", centerGrid = new Vector3(-5.2f, 0.50f, -0.4f), sizeGrid = new Vector3(3.8f, 1.00f, 3.8f), tier = 0, addSouthSteps = true },
+                new PlatformSpec { name = "Menara Kendali", centerGrid = new Vector3(0f, 0.70f, 5.8f), sizeGrid = new Vector3(6.6f, 1.40f, 4.4f), tier = 1 }
+            },
+            extraWalls = new[]
+            {
+                new WallSpec { name = "Badai Wall L", centerGrid = new Vector3(-6.8f, 1.5f, 2.2f), sizeGrid = new Vector3(7.4f, 3.0f, 0.5f) },
+                new WallSpec { name = "Badai Wall R", centerGrid = new Vector3(6.8f, 1.5f, 2.2f), sizeGrid = new Vector3(7.4f, 3.0f, 0.5f) }
+            },
+            props = new[]
+            {
+                new PropSpec { name = "PENAHAN-BESAR", shape = PrimitiveType.Cube, posGrid = new Vector3(-3.0f, 0.54f, -4.5f), sizeGrid = new Vector3(1.35f, 1.05f, 1.05f), mass = 2.4f },
+                new PropSpec { name = "PENAHAN-TAMBAH", shape = PrimitiveType.Cube, posGrid = new Vector3(3.0f, 0.48f, -4.5f), sizeGrid = new Vector3(0.88f, 0.88f, 0.88f), mass = 1.2f }
+            },
+            plates = new[]
+            {
+                new PlateSpec { name = "PAD-GARDU", posGrid = new Vector3(-5.2f, 1.00f, -0.4f), requiredMass = 1.0f },
+                new PlateSpec { name = "PAD-TANGGUL", posGrid = new Vector3(4.6f, 0f, 0.2f), requiredMass = 2.2f }
+            },
+            barriers = new[]
+            {
+                new BarrierSpec { name = "SEKAM-BADAI", posGrid = new Vector3(0f, 1.35f, 2.2f), sizeGrid = new Vector3(6.2f, 2.7f, 0.35f), plateIndices = new[] { 0 } }
+            },
+            bridge = new BridgeSpec
+            {
+                centerX = 0f, stairStartZ = 0.0f, baseHeightGrid = 0f,
+                staticStepCount = 2, dynamicStepCount = 3, targetHeightGrid = 1.40f,
+                plateIndices = new[] { 1 }
+            },
+            fragment = new FragmentSpec
+            {
+                enabled = true, posGrid = new Vector3(2.4f, 1.92f, 6.2f),
+                title = "Gelombang Tanggul Utara",
+                speaker = "VELA", line = "Air badai sudah menyentuh sisi luar ruang kendali. Sebentar lagi semua jalur mengarah ke ruang keputusan akhir.",
+                replySpeaker = "HALIM", replyLine = "Ingat, kamu masih punya kendali penuh untuk membelah atau menyatukan apa yang tersisa."
+            },
+            openingDialogue = new[]
+            {
+                Line("HALIM", "Satu pagar energi dan jembatan rusak menghalangi pintu menuju inti pengendali tanggul."),
+                Line("VELA", "Gunakan seluruh kemampuanmu: Partition [1], Fusion [2], Telekinesis [F], dan Rotasi [R].")
+            },
+            clearDialogue = new[]
+            {
+                Line("SIM", "Peringatan: Ruang Pilihan Akhir telah dicapai. Bersiaplah mengambil keputusan untuk Kota Tepi.")
+            },
+            hints = new[]
+            {
+                "Belah PENAHAN-BESAR (2.4 t) dengan [1] Partition -> naikkan satu bagian 1.2 t ke PAD-GARDU di balkon kiri (pakai [SPACE] + [F] atau tangga).",
+                "Gabungkan bagian 1.2 t kedua dengan PENAHAN-TAMBAH (1.2 t) memakai [2] Fusion -> letakkan blok 2.4 t di PAD-TANGGUL (kanan).",
+                "Putar CORE-01 dengan [R] ke 90° (Timur), lalu bawa melewati pagar dan jembatan ke ANCHOR-01."
+            }
+        };
+
+        private static LevelSpec Build5_2() => new LevelSpec
+        {
+            chapter = 5, level = 2,
+            title = "Pilihan Akhir Kota Tepi",
+            chapterSubtitle = "CHAPTER 5  •  PILIHAN AKHIR",
+            districtLabel = "SIMPUL PUSAT KOTA TEPI", theme = ChapterTheme.Badai, parActions = 6,
+            allowFusion = true, allowPartition = true,
+            isEndingChamber = true,
+            playerSpawnGrid = new Vector3(0f, 0.05f, -6.8f),
+            coreSpawnGrid = new Vector3(0f, 0.48f, -1.8f),
+            coreMass = 1.4f,
+            anchorGrid = new Vector3(0f, 0f, 7.2f),
+            props = new[]
+            {
+                new PropSpec { name = "BALOK-ARSIP", shape = PrimitiveType.Cube, posGrid = new Vector3(0f, 0.54f, -4.4f), sizeGrid = new Vector3(1.30f, 1.00f, 1.00f), mass = 2.0f }
+            },
+            plates = new[]
+            {
+                new PlateSpec { name = "PAD-PEMANCAR", posGrid = new Vector3(0f, 0f, 2.2f), requiredMass = 0.8f }
+            },
+            fragment = new FragmentSpec
+            {
+                enabled = true, posGrid = new Vector3(-4.2f, 0.52f, -3.5f),
+                title = "Suara Warga Kota Tepi",
+                speaker = "VELA", line = "Kami tidak akan memaksamu memilih, Rect.",
+                replySpeaker = "DANU", replyLine = "Selamatkan tanggulnya, kunci arsipnya, atau pecah energinya agar suara kami ikut bertahan.",
+                playPianoMotif = true
+            },
+            openingDialogue = new[]
+            {
+                Line("VELA", "Tiga jalur terakhir menyala di hadapanmu. Tentukan ke mana CORE-01 akan disalurkan:"),
+                Line("MIRA", "Timur: TANGGUL UTARA (selamatkan kota fisik)  •  Utara: PEMANCAR (pecah dengan Partition [1])  •  Barat: BRANKAS ARSIP.")
+            },
+            clearDialogue = new[]
+            {
+                Line("TEPI", "Keputusan telah tercatat di sejarah Kota Tepi.")
+            },
+            hints = new[]
+            {
+                "Pilihan A (Restoration — Timur): Bawa CORE-01 langsung ke Soket Timur untuk menutup penuh tanggul kota.",
+                "Pilihan B (Preservation — Barat): Bawa CORE-01 ke Soket Barat untuk mengabadikan seluruh rekaman arsip.",
+                "Pilihan C (Archivist — Utara): Tekan [1] Partition pada CORE-01 (atau belah BALOK-ARSIP di PAD-PEMANCAR) lalu pasang ke Soket Utara!"
+            }
+        };
+
+        // =====================================================================
+        // SPECIAL SHOWCASE — LEVEL SHOWCASE (Semua Mekanik Terbuka Untuk Demo)
+        // =====================================================================
+
+        private static LevelSpec BuildShowcase() => new LevelSpec
+        {
+            chapter = 0, level = 0,
+            customSceneName = SimulationProgress.ShowcaseSceneName,
+            title = "Ruang Showcase: Semua Mekanik",
+            chapterSubtitle = "SPECIAL SHOWCASE  •  SEMUA FITUR",
+            districtLabel = "SANDBOX & DEMO", theme = ChapterTheme.Showcase, parActions = 8,
+            allowFusion = true, allowPartition = true,
+            isShowcaseChamber = true,
+            addPianoRoomProp = true,
+            requireFacingAngle = true, requiredFacingYaw = 0f, coreStartYaw = 90f,
+            playerSpawnGrid = new Vector3(0f, 0.05f, -7.2f),
+            coreSpawnGrid = new Vector3(0f, 0.48f, -4.4f),
+            coreMass = 1.4f,
+            anchorGrid = new Vector3(0f, 1.40f, 6.2f),
+            platforms = new[]
+            {
+                new PlatformSpec { name = "Dek Anchor Demo", centerGrid = new Vector3(0f, 0.70f, 5.8f), sizeGrid = new Vector3(6.6f, 1.40f, 4.4f), tier = 1 },
+                new PlatformSpec { name = "Rak Elevasi Demo", centerGrid = new Vector3(5.6f, 0.45f, -1.0f), sizeGrid = new Vector3(3.6f, 0.90f, 3.6f), tier = 0, addSouthSteps = true }
+            },
+            props = new[]
+            {
+                // Partition [1] Demo — Left Side
+                new PropSpec { name = "DEMO-PARTITION", shape = PrimitiveType.Cube, posGrid = new Vector3(-4.8f, 0.54f, -4.2f), sizeGrid = new Vector3(1.35f, 1.05f, 1.05f), mass = 2.4f },
+                // Fusion [2] Demo — Right Side
+                new PropSpec { name = "DEMO-FUSE-A", shape = PrimitiveType.Cube, posGrid = new Vector3(3.8f, 0.48f, -4.6f), sizeGrid = new Vector3(0.88f, 0.88f, 0.88f), mass = 1.2f },
+                new PropSpec { name = "DEMO-FUSE-B", shape = PrimitiveType.Cube, posGrid = new Vector3(6.0f, 0.48f, -4.6f), sizeGrid = new Vector3(0.88f, 0.88f, 0.88f), mass = 1.2f }
+            },
+            plates = new[]
+            {
+                new PlateSpec { name = "PAD-SPLIT-1", posGrid = new Vector3(-6.0f, 0f, 0.4f), requiredMass = 1.0f },
+                new PlateSpec { name = "PAD-SPLIT-2", posGrid = new Vector3(-3.2f, 0f, 0.4f), requiredMass = 1.0f },
+                new PlateSpec { name = "PAD-FUSE-ATAS", posGrid = new Vector3(5.6f, 0.90f, -1.0f), requiredMass = 2.2f }
+            },
+            bridge = new BridgeSpec
+            {
+                centerX = 0f, stairStartZ = 0.0f, baseHeightGrid = 0f,
+                staticStepCount = 2, dynamicStepCount = 3, targetHeightGrid = 1.40f,
+                plateIndices = new[] { 2 }
+            },
+            fragment = new FragmentSpec
+            {
+                enabled = true, posGrid = new Vector3(5.8f, 0.52f, 5.2f),
+                title = "Arsip Demo POLYMULATOR",
+                speaker = "TIM 8", line = "Seluruh mekanik utama aktif di ruang ini: Translasi, Elevasi, Rotasi, Fusion [2], dan Partition [1].",
+                replySpeaker = "RECT", replyLine = "Gunakan [SPACE] untuk Mode Fleksibel, [F] Telekinesis, [R] Rotasi, [1] Partition, dan [2] Fusion.",
+                playPianoMotif = true
+            },
+            openingDialogue = new[]
+            {
+                Line("TIM 8", "Selamat datang di Ruang Showcase POLYMULATOR! Semua fitur mekanik langsung aktif tanpa syarat."),
+                Line("RECT", "Kiri: uji Partition [1]  •  Kanan: uji Fusion [2] + Telekinesis [F]  •  Tengah: Rotasi [R] CORE-01.")
+            },
+            clearDialogue = new[]
+            {
+                Line("TIM 8", "Demo Showcase selesai! Semua sistem mekanik dan audio-visual terverifikasi berfungsi.")
+            },
+            hints = new[]
+            {
+                "KIRI (Partition [1]): Dekati DEMO-PARTITION (2.4 t), tekan [1] untuk membelah jadi 2 x 1.2 t dan coba di PAD-SPLIT-1 & 2.",
+                "KANAN (Fusion [2] + Elevasi [SPACE]/[F]): Dekatkan DEMO-FUSE-A & B, tekan [2] untuk menggabung jadi 2.4 t, lalu angkat ke PAD-FUSE-ATAS (Rak Elevasi) untuk menyalakan jembatan.",
+                "TENGAH (Rotasi [R]): Ambil CORE-01, tekan [R] tiga kali sampai 0° (Utara), lalu pasang ke ANCHOR-01 di puncak."
             }
         };
     }
