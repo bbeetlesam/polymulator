@@ -1,0 +1,824 @@
+/* POLYMULATOR — Main Menu & Chapter Ribbon UI Toolkit Stylesheet */
+
+.menu-root {
+    flex-grow: 1;
+    width: 100%;
+    height: 100%;
+    position: relative;
+    overflow: hidden;
+    -unity-font-definition: url("/Assets/UI/Fonts/Font_AktSemiBold.asset");
+}
+
+.menu-vignette {
+    position: absolute;
+    left: 0;
+    right: 0;
+    top: 0;
+    bottom: 0;
+    background-color: rgba(17, 17, 27, 0.18);
+}
+
+/* Title View */
+.title-view {
+    position: absolute;
+    left: 0;
+    right: 0;
+    top: 0;
+    bottom: 0;
+    align-items: center;
+    justify-content: center;
+    padding: 36px;
+    transition-property: opacity, translate;
+    transition-duration: 0.34s;
+    transition-timing-function: ease-out-cubic;
+}
+
+.title-view--up {
+    opacity: 0;
+    translate: 0 -110px;
+}
+
+.title-pill {
+    flex-direction: row;
+    align-items: center;
+    background-color: rgba(24, 24, 37, 0.84);
+    border-color: rgba(88, 91, 112, 0.55);
+    border-width: 1px;
+    border-radius: 16px;
+    padding: 6px 16px;
+    margin-bottom: 16px;
+}
+
+.title-pill-dot {
+    width: 8px;
+    height: 8px;
+    border-radius: 4px;
+    background-color: #94E2D5;
+    margin-right: 10px;
+}
+
+.title-pill-text {
+    -unity-font-definition: url("/Assets/UI/Fonts/Font_AktMedium.asset");
+    font-size: 14px;
+    color: #A6ADC8;
+    letter-spacing: 0.6px;
+}
+
+.hero-title {
+    -unity-font-definition: url("/Assets/UI/Fonts/Font_AktBold.asset");
+    font-size: 68px;
+    color: #CDD6F4;
+    letter-spacing: 5px;
+    margin-bottom: 6px;
+    -unity-text-align: middle-center;
+    text-shadow: 0 4px 18px rgba(17, 17, 27, 0.85);
+}
+
+.hero-tagline {
+    -unity-font-definition: url("/Assets/UI/Fonts/Font_AktRegular.asset");
+    font-size: 16px;
+    color: #BAC2DE;
+    letter-spacing: 0.8px;
+    margin-bottom: 30px;
+    -unity-text-align: middle-center;
+    text-shadow: 0 2px 8px rgba(17, 17, 27, 0.85);
+}
+
+.title-buttons {
+    width: 340px;
+    flex-direction: column;
+    margin-bottom: 20px;
+}
+
+.menu-action-btn {
+    -unity-font-definition: url("/Assets/UI/Fonts/Font_AktSemiBold.asset");
+    height: 48px;
+    font-size: 15px;
+    letter-spacing: 0.5px;
+    color: #CDD6F4;
+    background-color: rgba(24, 24, 37, 0.86);
+    border-color: rgba(69, 71, 90, 0.72);
+    border-width: 1px;
+    border-radius: 8px;
+    margin-bottom: 10px;
+    transition-property: background-color, border-color, color, scale, translate;
+    transition-duration: 0.16s;
+    transition-timing-function: ease-out-cubic;
+}
+
+.menu-action-btn:hover {
+    background-color: rgba(49, 50, 68, 0.94);
+    border-color: #89B4FA;
+    scale: 1.02 1.02;
+    translate: 0 -1px;
+}
+
+.menu-action-btn:focus {
+    background-color: rgba(49, 50, 68, 0.94);
+    border-color: #74C7EC;
+    color: #CDD6F4;
+    scale: 1.02 1.02;
+}
+
+.menu-action-btn:active {
+    scale: 0.98 0.98;
+    translate: 0 1px;
+}
+
+.menu-action-btn--primary {
+    background-color: rgba(30, 30, 46, 0.92);
+    border-color: rgba(116, 199, 236, 0.75);
+    color: #89DCEB;
+}
+
+.menu-action-btn--primary:hover {
+    background-color: rgba(116, 199, 236, 0.18);
+    border-color: #89B4FA;
+    color: #CDD6F4;
+}
+
+.menu-action-btn--showcase {
+    background-color: rgba(24, 24, 37, 0.90);
+    border-color: rgba(148, 226, 213, 0.55);
+    color: #94E2D5;
+}
+
+.menu-action-btn--showcase:hover {
+    background-color: rgba(148, 226, 213, 0.16);
+    border-color: #94E2D5;
+    color: #CDD6F4;
+}
+
+.menu-action-btn--danger {
+    border-color: rgba(243, 139, 168, 0.42);
+    color: #BAC2DE;
+}
+
+.menu-action-btn--danger:hover {
+    background-color: rgba(243, 139, 168, 0.15);
+    border-color: #F38BA8;
+    color: #F38BA8;
+}
+
+.footer-hint {
+    -unity-font-definition: url("/Assets/UI/Fonts/Font_AktRegular.asset");
+    font-size: 13px;
+    color: #A6ADC8;
+    letter-spacing: 0.4px;
+    -unity-text-align: middle-center;
+    text-shadow: 0 2px 6px rgba(17, 17, 27, 0.85);
+}
+
+/* Chapter Ribbon View */
+.ribbon-view {
+    position: absolute;
+    left: 0;
+    right: 0;
+    top: 0;
+    bottom: 0;
+    flex-direction: column;
+    justify-content: space-between;
+    padding: 28px 36px 26px 36px;
+    transition-property: opacity, scale;
+    transition-duration: 0.30s;
+}
+
+.ribbon-view--hidden {
+    opacity: 0;
+    display: none;
+}
+
+.ribbon-view--fading {
+    opacity: 0;
+    scale: 0.96 0.96;
+}
+
+.ribbon-topbar {
+    flex-direction: row;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.meta-badge {
+    background-color: rgba(24, 24, 37, 0.86);
+    border-color: rgba(69, 71, 90, 0.65);
+    border-width: 1px;
+    border-radius: 8px;
+    padding: 8px 16px;
+}
+
+.meta-badge-text {
+    -unity-font-definition: url("/Assets/UI/Fonts/Font_AktMedium.asset");
+    font-size: 14px;
+    color: #BAC2DE;
+    letter-spacing: 0.4px;
+}
+
+.topbar-actions {
+    flex-direction: row;
+    align-items: center;
+}
+
+.top-chip-btn {
+    -unity-font-definition: url("/Assets/UI/Fonts/Font_AktMedium.asset");
+    font-size: 14px;
+    color: #BAC2DE;
+    background-color: rgba(24, 24, 37, 0.86);
+    border-color: rgba(69, 71, 90, 0.70);
+    border-width: 1px;
+    border-radius: 7px;
+    padding: 8px 15px;
+    margin-left: 8px;
+    transition-property: background-color, border-color, color, scale;
+    transition-duration: 0.14s;
+    transition-timing-function: ease-out-cubic;
+}
+
+.top-chip-btn:hover {
+    background-color: #313244;
+    border-color: #74C7EC;
+    color: #CDD6F4;
+    scale: 1.02 1.02;
+}
+
+.top-chip-btn:active {
+    scale: 0.98 0.98;
+}
+
+.top-chip-btn--on {
+    border-color: #A6E3A1;
+    color: #A6E3A1;
+}
+
+.top-chip-btn--showcase {
+    border-color: rgba(148, 226, 213, 0.65);
+    color: #94E2D5;
+}
+
+.top-chip-btn--showcase:hover {
+    background-color: rgba(148, 226, 213, 0.16);
+    border-color: #94E2D5;
+    color: #CDD6F4;
+}
+
+.ribbon-viewport {
+    flex-grow: 1;
+    justify-content: center;
+    overflow: hidden;
+    position: relative;
+}
+
+.ribbon-track {
+    flex-direction: row;
+    align-items: center;
+    position: absolute;
+    top: 50%;
+    margin-top: -102px;
+    height: 204px;
+}
+
+.chapter-cluster {
+    flex-direction: row;
+    align-items: center;
+    height: 204px;
+}
+
+.chapter-node-card {
+    width: 146px;
+    height: 164px;
+    background-color: rgba(17, 17, 27, 0.90);
+    border-color: #45475A;
+    border-width: 1px;
+    border-top-width: 4px;
+    border-radius: 16px;
+    align-items: center;
+    justify-content: center;
+    padding: 12px 10px;
+    margin-right: 12px;
+    transition-property: scale, border-color, background-color, translate;
+    transition-duration: 0.20s;
+}
+
+.chapter-node-card--reached {
+    background-color: rgba(24, 24, 37, 0.96);
+    border-color: #585B70;
+}
+
+.chapter-node-card:hover {
+    scale: 1.04 1.04;
+    translate: 0 -3px;
+}
+
+.chapter-sector-pill {
+    -unity-font-definition: url("/Assets/UI/Fonts/Font_AktMedium.asset");
+    font-size: 11px;
+    color: #9399B2;
+    letter-spacing: 1.2px;
+    margin-bottom: 4px;
+}
+
+.chapter-node-num {
+    font-size: 40px;
+    color: #CDD6F4;
+    margin-bottom: 2px;
+}
+
+.chapter-node-theme {
+    -unity-font-definition: url("/Assets/UI/Fonts/Font_AktMedium.asset");
+    font-size: 13px;
+    color: #BAC2DE;
+    letter-spacing: 1.3px;
+    margin-bottom: 8px;
+}
+
+.chapter-node-bar-bg {
+    width: 94px;
+    height: 5px;
+    border-radius: 3px;
+    background-color: #313244;
+    position: relative;
+}
+
+.chapter-node-bar-fill {
+    height: 5px;
+    border-radius: 3px;
+    background-color: #74C7EC;
+}
+
+.segment-rail {
+    width: 416px;
+    height: 150px;
+    padding-left: 14px;
+    padding-right: 14px;
+    flex-direction: row;
+    align-items: center;
+    justify-content: space-evenly;
+    position: relative;
+}
+
+.segment-line-bg {
+    position: absolute;
+    left: 0;
+    right: 0;
+    height: 6px;
+    border-radius: 3px;
+    background-color: rgba(49, 50, 68, 0.85);
+}
+
+.segment-line-fill {
+    position: absolute;
+    left: 0;
+    height: 6px;
+    border-radius: 3px;
+    background-color: #89B4FA;
+}
+
+.level-dot-wrap {
+    width: 84px;
+    height: 140px;
+    align-items: center;
+    justify-content: center;
+    position: relative;
+}
+
+.level-dot-badge {
+    position: absolute;
+    top: 4px;
+    -unity-font-definition: url("/Assets/UI/Fonts/Font_AktMedium.asset");
+    font-size: 10px;
+    color: #11111B;
+    background-color: #89DCEB;
+    border-radius: 4px;
+    padding: 1px 6px;
+    letter-spacing: 0.8px;
+}
+
+.level-dot-code {
+    position: absolute;
+    top: 22px;
+    -unity-font-definition: url("/Assets/UI/Fonts/Font_AktMedium.asset");
+    font-size: 15px;
+    color: #BAC2DE;
+}
+
+.level-dot-stars {
+    position: absolute;
+    bottom: 14px;
+    font-size: 16px;
+    color: #F9E2AF;
+    letter-spacing: 2px;
+}
+
+.level-dot-halo {
+    position: absolute;
+    width: 56px;
+    height: 56px;
+    border-radius: 28px;
+    border-width: 2px;
+    border-color: rgba(137, 220, 235, 0.65);
+    background-color: rgba(137, 220, 235, 0.14);
+}
+
+.level-dot-btn {
+    width: 34px;
+    height: 34px;
+    border-radius: 17px;
+    background-color: #313244;
+    border-color: #585B70;
+    border-width: 2px;
+    padding: 0;
+    margin: 0;
+    transition-property: scale, background-color, border-color;
+    transition-duration: 0.16s;
+    transition-timing-function: ease-out-cubic;
+}
+
+.level-dot-btn--unlocked {
+    background-color: #89B4FA;
+    border-color: #CDD6F4;
+}
+
+.level-dot-btn--cleared {
+    background-color: #A6E3A1;
+    border-color: #CDD6F4;
+}
+
+.level-dot-btn--current {
+    width: 40px;
+    height: 40px;
+    border-radius: 20px;
+    background-color: #74C7EC;
+    border-color: #F9E2AF;
+    border-width: 3px;
+}
+
+.level-dot-btn--unlocked:hover,
+.level-dot-btn--cleared:hover,
+.level-dot-btn--current:hover {
+    scale: 1.32 1.32;
+    border-color: #F9E2AF;
+}
+
+.level-dot-btn:active {
+    scale: 0.92 0.92;
+}
+
+.ribbon-footer {
+    align-items: center;
+}
+
+.chamber-preview-card {
+    min-width: 680px;
+    flex-direction: row;
+    align-items: center;
+    background-color: rgba(24, 24, 37, 0.90);
+    border-color: rgba(69, 71, 90, 0.72);
+    border-width: 1px;
+    border-radius: 10px;
+    margin-bottom: 14px;
+    padding-right: 16px;
+}
+
+.preview-accent {
+    width: 3px;
+    align-self: stretch;
+    background-color: #74C7EC;
+    border-top-left-radius: 9px;
+    border-bottom-left-radius: 9px;
+}
+
+.preview-content {
+    flex-grow: 1;
+    padding: 12px 18px;
+    flex-direction: column;
+}
+
+.preview-chapter {
+    -unity-font-definition: url("/Assets/UI/Fonts/Font_AktMedium.asset");
+    font-size: 12px;
+    color: #94E2D5;
+    letter-spacing: 0.6px;
+    margin-bottom: 2px;
+}
+
+.preview-title {
+    -unity-font-definition: url("/Assets/UI/Fonts/Font_AktBold.asset");
+    font-size: 21px;
+    color: #CDD6F4;
+    margin-bottom: 2px;
+}
+
+.preview-status {
+    -unity-font-definition: url("/Assets/UI/Fonts/Font_AktRegular.asset");
+    font-size: 14px;
+    color: #BAC2DE;
+}
+
+.preview-launch-btn {
+    -unity-font-definition: url("/Assets/UI/Fonts/Font_AktSemiBold.asset");
+    height: 42px;
+    padding: 0 20px;
+    font-size: 14px;
+    letter-spacing: 0.5px;
+    color: #11111B;
+    background-color: #74C7EC;
+    border-width: 0;
+    border-radius: 7px;
+    transition-property: scale, background-color;
+    transition-duration: 0.14s;
+}
+
+.chapter-node-card--showcase {
+    background-color: rgba(24, 24, 37, 0.92);
+    border-color: rgba(148, 226, 213, 0.60);
+    border-top-width: 3px;
+    border-top-color: #94E2D5;
+}
+
+.showcase-launch-btn {
+    -unity-font-definition: url("/Assets/UI/Fonts/Font_AktSemiBold.asset");
+    font-size: 13px;
+    color: #11111B;
+    background-color: #94E2D5;
+    border-width: 0;
+    border-radius: 6px;
+    padding: 7px 14px;
+    margin-top: 8px;
+    transition-property: scale, background-color;
+    transition-duration: 0.14s;
+}
+
+.showcase-launch-btn:hover {
+    background-color: #89DCEB;
+    scale: 1.03 1.03;
+}
+
+.preview-launch-btn:hover {
+    background-color: #89DCEB;
+    scale: 1.04 1.04;
+}
+
+.preview-launch-btn:active {
+    scale: 0.96 0.96;
+}
+
+/* Smash + Sphere Drop + Portal Zoom FX Layer */
+.fx-layer {
+    position: absolute;
+    left: 0;
+    right: 0;
+    top: 0;
+    bottom: 0;
+}
+
+.impact-shockwave {
+    position: absolute;
+    width: 120px;
+    height: 120px;
+    border-radius: 60px;
+    border-width: 4px;
+    border-color: #89DCEB;
+    background-color: rgba(116, 199, 236, 0.16);
+}
+
+.impact-shockwave--hidden {
+    display: none;
+}
+
+.falling-node {
+    position: absolute;
+    width: 96px;
+    height: 96px;
+    border-radius: 48px;
+    background-color: #74C7EC;
+    border-color: #CDD6F4;
+    border-width: 3px;
+    align-items: center;
+    justify-content: center;
+}
+
+.falling-node--hidden {
+    display: none;
+}
+
+.falling-node-ring {
+    position: absolute;
+    width: 118px;
+    height: 118px;
+    border-radius: 59px;
+    border-width: 2px;
+    border-color: rgba(148, 226, 213, 0.72);
+    background-color: rgba(137, 180, 250, 0.14);
+}
+
+.falling-node-highlight {
+    position: absolute;
+    left: 16px;
+    top: 14px;
+    width: 24px;
+    height: 16px;
+    border-radius: 10px;
+    background-color: rgba(205, 214, 244, 0.65);
+}
+
+.falling-node-label {
+    font-size: 28px;
+    color: #11111B;
+}
+
+.orb-trail-mote {
+    position: absolute;
+    border-radius: 999px;
+    background-color: rgba(137, 220, 235, 0.85);
+}
+
+.break-shard {
+    position: absolute;
+    background-color: rgba(49, 50, 68, 0.96);
+    border-color: #89DCEB;
+    border-width: 1px;
+    border-radius: 4px;
+}
+
+.portal-zoom-orb {
+    position: absolute;
+    width: 44px;
+    height: 44px;
+    border-radius: 999px;
+    background-color: #74C7EC;
+    border-color: #CDD6F4;
+    border-width: 4px;
+    align-items: center;
+    justify-content: center;
+}
+
+.portal-zoom-orb--hidden {
+    display: none;
+}
+
+.portal-zoom-ring {
+    position: absolute;
+    left: -14%;
+    right: -14%;
+    top: -14%;
+    bottom: -14%;
+    border-radius: 999px;
+    border-width: 3px;
+    border-color: rgba(148, 226, 213, 0.78);
+    background-color: rgba(116, 199, 236, 0.12);
+}
+
+.portal-zoom-core {
+    position: absolute;
+    left: 14%;
+    right: 14%;
+    top: 14%;
+    bottom: 14%;
+    border-radius: 999px;
+    background-color: #11111B;
+    border-width: 2px;
+    border-color: rgba(180, 190, 254, 0.65);
+}
+
+.portal-zoom-label {
+    -unity-font-definition: url("/Assets/UI/Fonts/Font_AktMedium.asset");
+    font-size: 16px;
+    color: #CDD6F4;
+}
+
+/* Settings Modal */
+.settings-overlay {
+    position: absolute;
+    left: 0;
+    right: 0;
+    top: 0;
+    bottom: 0;
+    background-color: rgba(17, 17, 27, 0.82);
+    align-items: center;
+    justify-content: center;
+    transition-property: opacity;
+    transition-duration: 0.18s;
+}
+
+.settings-overlay--hidden {
+    display: none;
+    opacity: 0;
+}
+
+.settings-card {
+    width: 520px;
+    background-color: #1E1E2E;
+    border-color: #585B70;
+    border-width: 1px;
+    border-radius: 12px;
+    padding: 30px 32px 26px 32px;
+}
+
+.settings-topbar {
+    position: absolute;
+    left: 0;
+    right: 0;
+    top: 0;
+    height: 5px;
+    background-color: #74C7EC;
+    border-top-left-radius: 11px;
+    border-top-right-radius: 11px;
+}
+
+.settings-title {
+    font-size: 26px;
+    color: #CDD6F4;
+    letter-spacing: 1.5px;
+    margin-bottom: 4px;
+}
+
+.settings-subtitle {
+    -unity-font-definition: url("/Assets/UI/Fonts/Font_AktRegular.asset");
+    font-size: 14px;
+    color: #BAC2DE;
+    margin-bottom: 22px;
+}
+
+.setting-row {
+    flex-direction: row;
+    align-items: center;
+    justify-content: space-between;
+    background-color: rgba(24, 24, 37, 0.88);
+    border-color: #313244;
+    border-width: 1px;
+    border-radius: 8px;
+    padding: 13px 16px;
+    margin-bottom: 12px;
+}
+
+.setting-label {
+    -unity-font-definition: url("/Assets/UI/Fonts/Font_AktMedium.asset");
+    font-size: 14px;
+    color: #CDD6F4;
+    min-width: 215px;
+}
+
+.setting-slider {
+    flex-grow: 1;
+    margin-left: 10px;
+    margin-right: 12px;
+}
+
+.setting-slider .unity-base-slider__tracker {
+    background-color: #45475A;
+    height: 6px;
+    border-radius: 3px;
+}
+
+.setting-slider .unity-base-slider__dragger {
+    background-color: #74C7EC;
+    border-color: #CDD6F4;
+    border-width: 2px;
+    width: 16px;
+    height: 16px;
+    border-radius: 8px;
+    margin-top: -5px;
+}
+
+.setting-value {
+    -unity-font-definition: url("/Assets/UI/Fonts/Font_AktMedium.asset");
+    font-size: 14px;
+    color: #94E2D5;
+    min-width: 52px;
+    -unity-text-align: middle-right;
+}
+
+.setting-toggle {
+    margin: 0;
+}
+
+.setting-toggle .unity-toggle__checkmark {
+    width: 22px;
+    height: 22px;
+    background-color: #313244;
+    border-color: #585B70;
+    border-width: 1px;
+    border-radius: 5px;
+    -unity-background-image-tint-color: #11111B;
+}
+
+.setting-toggle:checked .unity-toggle__checkmark {
+    background-color: #74C7EC;
+    border-color: #89B4FA;
+    -unity-background-image-tint-color: #11111B;
+}
+
+.settings-actions {
+    flex-direction: row;
+    justify-content: space-between;
+    margin-top: 14px;
+}
+
+.settings-actions .menu-action-btn {
+    flex-grow: 1;
+    margin-bottom: 0;
+    margin-left: 6px;
+    margin-right: 6px;
+    height: 48px;
+    font-size: 15px;
+}
