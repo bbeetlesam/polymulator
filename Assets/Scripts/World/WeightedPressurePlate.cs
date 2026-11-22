@@ -92,6 +92,11 @@ namespace Polymulator
             movingDeck.localPosition = pos;
         }
 
+        public void UnregisterBody(Rigidbody rb)
+        {
+            if (rb != null) bodiesOnPlate.Remove(rb);
+        }
+
         private void OnTriggerEnter(Collider other)
         {
             Rigidbody rb = other.attachedRigidbody;
