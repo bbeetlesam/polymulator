@@ -31,7 +31,7 @@ namespace Polymulator
         [SerializeField] private Color green = Hex(0xA6, 0xE3, 0xA1);
         [SerializeField] private Color red = Hex(0xF3, 0x8B, 0xA8);
         [SerializeField] private Color peach = Hex(0xFA, 0xB3, 0x87);
-        [SerializeField] private Color lavender = Hex(0xB4, 0xBE, 0xFE);
+        [SerializeField] private Color lavender = Hex(0xB4, 0xBE, 0xFF);
 
         [Header("Interactive Object Palette")]
         [SerializeField] private Color rosewater = Hex(0xF5, 0xE0, 0xDC);
@@ -164,7 +164,7 @@ namespace Polymulator
             sky = Hex(0x89, 0xDC, 0xEB);
             sapphire = Hex(0x74, 0xC7, 0xEC);
             blue = Hex(0x89, 0xB4, 0xFA);
-            lavender = Hex(0xB4, 0xBE, 0xFE);
+            lavender = Hex(0xB4, 0xBE, 0xFF);
             ClearCache();
         }
 
