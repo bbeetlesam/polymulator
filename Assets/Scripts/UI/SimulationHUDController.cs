@@ -313,8 +313,7 @@ namespace Polymulator
                 string tag = SimulationProgress.IsSpecialShowcase(SceneManager.GetActiveScene().name)
                     ? "Ruang Showcase"
                     : "Ruangan " + levelNumberLabel;
-                chamberSubtitleLabel.text = tag + "  •  " + levelDisplayName +
-                    "  •  Iterasi #" + SimulationProgress.IterationNumber;
+                chamberSubtitleLabel.text = tag + "  •  " + levelDisplayName;
             }
             if (btnNext != null && !string.IsNullOrEmpty(nextSceneName))
                 btnNext.text = "Ruangan " + nextSceneName.Replace("Level", "") + "   [ ENTER ]";
@@ -1239,8 +1238,8 @@ namespace Polymulator
 
             string splitAxisTag = partitionFusionController != null ? partitionFusionController.CutAxisShortLabel : "OTOMATIS";
             string cutRuleInfo = hasCutPreview
-                ? "\nPotong: " + partitionFusionController.CutAxisRuleLabel + " -> 2x " +
-                  partitionFusionController.PreviewSplitHalfMass.ToString("0.0", CultureInfo.InvariantCulture) + "t"
+                ? "Potong: " + partitionFusionController.CutAxisRuleLabel + " -> 2x " +
+                  partitionFusionController.PreviewSplitHalfMass.ToString("0.0", CultureInfo.InvariantCulture) + " t"
                 : string.Empty;
 
             string fusePartnerInfo = string.Empty;
@@ -1265,13 +1264,13 @@ namespace Polymulator
                 InteractableObject held = carryController.CarriedObject;
                 stateText = "DIBAWA";
                 objName = carryController.CarriedObjectName;
-                metaText = "Arah " + Mathf.RoundToInt(carryController.CurrentHeldYawDegrees) +
-                           "°  •  Jangkauan " + carryController.CurrentDropDistanceGrid.ToString("0.0", CultureInfo.InvariantCulture) + " m" +
+                metaText = "Hadap " + FormatCompassHeading(carryController.CurrentHeldYawDegrees) +
+                           "  •  Jarak Taruh " + carryController.CurrentDropDistanceGrid.ToString("0.0", CultureInfo.InvariantCulture) + " m" +
                            fusePartnerInfo;
-                string rangeSuffix = carryController.TryGetPredictedThrowLanding(out _, out float rangeGu)
-                    ? "  •  Lempar ~" + rangeGu.ToString("0.0", CultureInfo.InvariantCulture) + " m"
-                    : string.Empty;
-                vectorText = FormatGridPos(held != null ? held.transform.position : Vector3.zero) + rangeSuffix + cutRuleInfo;
+                string throwCue = carryController.TryGetPredictedThrowLanding(out _, out float rangeGu)
+                    ? "Estimasi Lempar ~" + rangeGu.ToString("0.0", CultureInfo.InvariantCulture) + " m"
+                    : "Siap ditaruh di pelat / soket";
+                vectorText = string.IsNullOrEmpty(cutRuleInfo) ? throwCue : throwCue + "\n" + cutRuleInfo;
                 swatchColor = held != null ? held.AssignedColor : PaletteSettings.Green;
                 barColor = canFusePair ? PaletteSettings.Green : PaletteSettings.Sapphire;
 
@@ -1284,11 +1283,12 @@ namespace Polymulator
                 InteractableObject tethered = telekinesisController.TetheredObject;
                 stateText = "TELEKINESIS";
                 objName = tethered != null ? tethered.displayName : "OBJEK";
-                metaText = "Tinggi " + telekinesisController.CurrentElevationGrid.ToString("0.0", CultureInfo.InvariantCulture) + " m" +
+                metaText = "Elevasi " + telekinesisController.CurrentElevationGrid.ToString("0.0", CultureInfo.InvariantCulture) + " m" +
                            fusePartnerInfo;
-                vectorText = FormatGridPos(tethered != null ? tethered.transform.position : Vector3.zero) +
-                             (tethered != null ? "  •  Massa " + (tethered.Body != null ? tethered.Body.mass.ToString("0.0", CultureInfo.InvariantCulture) : "1.0") + " t" : "") +
-                             cutRuleInfo;
+                string massLine = tethered != null
+                    ? "Bobot " + (tethered.Body != null ? tethered.Body.mass.ToString("0.0", CultureInfo.InvariantCulture) : "1.0") + " t  •  [Klik] Dorong"
+                    : "[Q/Z] Atur Elevasi";
+                vectorText = string.IsNullOrEmpty(cutRuleInfo) ? massLine : massLine + "\n" + cutRuleInfo;
                 swatchColor = tethered != null ? tethered.AssignedColor : PaletteSettings.BeamTelekinesis;
                 barColor = PaletteSettings.BeamTelekinesis;
 
@@ -1307,17 +1307,21 @@ namespace Polymulator
                     float mass = target != null && target.Body != null ? target.Body.mass : 1f;
                     stateText = isFlexible ? "JANGKAUAN SINAR" : "SIAP ANGKAT";
                     metaText = (isFlexible ? "[E] Angkat atau [F] Telekinesis" : "[E] Angkat objek") +
-                               "  •  Massa " + mass.ToString("0.0", CultureInfo.InvariantCulture) + " t" + fusePartnerInfo;
-                    vectorText = (target != null ? FormatGridPos(target.transform.position) : string.Empty) + cutRuleInfo;
+                               "  •  Bobot " + mass.ToString("0.0", CultureInfo.InvariantCulture) + " t" + fusePartnerInfo;
+                    vectorText = !string.IsNullOrEmpty(cutRuleInfo)
+                        ? cutRuleInfo
+                        : (canFusePair ? "Tekan [ 2 ] untuk menggabungkan objek" : "Arahkan ke pelat beban atau dek Anchor");
                     barColor = canFusePair ? PaletteSettings.Green : (hasCutPreview ? PaletteSettings.Peach : modeColor);
                     prompt = (isFlexible ? "[ E ] Angkat  •  [ F ] Telekinesis  " : "[ E ] Angkat  ") + objName + cutPromptTag + fusePromptInfo;
                     promptColor = canFusePair ? PaletteSettings.Green : (hasCutPreview ? PaletteSettings.Peach : modeColor);
                 }
                 else
                 {
-                    stateText = "SOKET TETAP";
-                    metaText = "Dudukan Anchor permanen";
-                    vectorText = target != null ? FormatGridPos(target.transform.position) : string.Empty;
+                    stateText = "SOKET ANCHOR";
+                    metaText = "Dudukan Kunci Energi";
+                    vectorText = anchorObjective != null && anchorObjective.requireFacingAngle
+                        ? "Wajib hadap " + FormatCompassHeading(anchorObjective.requiredFacingYaw)
+                        : "Letakkan CORE-01 ke dudukan";
                     barColor = PaletteSettings.Peach;
                     prompt = objName + "  •  Letakkan CORE-01 di sini";
                     promptColor = PaletteSettings.Peach;
@@ -1358,14 +1362,13 @@ namespace Polymulator
             el.RegisterCallback<PointerLeaveEvent>(_ => interactiveHoverCount = Mathf.Max(0, interactiveHoverCount - 1));
         }
 
-        private static string FormatGridPos(Vector3 worldPos)
+        private static string FormatCompassHeading(float yawDegrees)
         {
-            float gx = GridSettings.ToGrid(worldPos.x);
-            float gy = GridSettings.ToGrid(worldPos.y);
-            float gz = GridSettings.ToGrid(worldPos.z);
-            return "Pos (" + gx.ToString("0.0", CultureInfo.InvariantCulture) + ", " +
-                   gy.ToString("0.0", CultureInfo.InvariantCulture) + ", " +
-                   gz.ToString("0.0", CultureInfo.InvariantCulture) + ") GU";
+            float yaw = Mathf.Repeat(yawDegrees, 360f);
+            if (yaw < 45f || yaw >= 315f) return "Utara (0°)";
+            if (yaw < 135f) return "Timur (90°)";
+            if (yaw < 225f) return "Selatan (180°)";
+            return "Barat (270°)";
         }
     }
 }

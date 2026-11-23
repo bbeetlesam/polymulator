@@ -293,16 +293,16 @@
 
 .story-feed {
     flex-direction: column;
-    min-width: 520px;
-    max-width: 760px;
-    background-color: rgba(24, 24, 37, 0.92);
+    min-width: 620px;
+    max-width: 880px;
+    background-color: rgba(24, 24, 37, 0.94);
     border-color: rgba(69, 71, 90, 0.72);
     border-width: 1px;
     border-left-width: 3px;
     border-left-color: #74C7EC;
     border-radius: 2px;
-    padding: 13px 18px 14px 18px;
-    margin-bottom: 10px;
+    padding: 16px 22px 18px 22px;
+    margin-bottom: 12px;
     transition-property: opacity, translate;
     transition-duration: 0.22s;
     transition-timing-function: ease-out-cubic;
@@ -318,29 +318,29 @@
     flex-direction: row;
     justify-content: space-between;
     align-items: center;
-    margin-bottom: 5px;
+    margin-bottom: 7px;
 }
 
 .story-speaker {
     -unity-font-definition: url("/Assets/UI/Fonts/Font_AktSemiBold.asset");
-    font-size: 13px;
+    font-size: 16px;
     color: #74C7EC;
-    letter-spacing: 0.6px;
+    letter-spacing: 0.8px;
 }
 
 .story-progress {
     -unity-font-definition: url("/Assets/UI/Fonts/Font_AktMedium.asset");
-    font-size: 12px;
+    font-size: 14px;
     color: #9399B2;
     letter-spacing: 0.4px;
 }
 
 .story-text {
-    -unity-font-definition: url("/Assets/UI/Fonts/Font_AktRegular.asset");
-    font-size: 17px;
+    -unity-font-definition: url("/Assets/UI/Fonts/Font_AktMedium.asset");
+    font-size: 24px;
     color: #CDD6F4;
     white-space: normal;
-    letter-spacing: 0.1px;
+    letter-spacing: 0.15px;
 }
 
 .context-prompt {
