@@ -280,12 +280,26 @@ namespace Polymulator.EditorTools
             Transform root, ArchMats am, Material platformMidMat, CampaignLevelCatalog.ChapterTheme theme, float gu)
         {
             Transform g = CreateGroup("Thematic Environment Dressing", root);
+            Material accentTeal = LoadMatByName("Sim_Accent_Teal", am.chapterAccent);
+            Material accentGreen = LoadMatByName("Sim_Accent_Green", am.chapterAccent);
+            Material objLight = LoadMatByName("Sim_ObjectLight", am.trimMetal);
+
             switch (theme)
             {
                 case CampaignLevelCatalog.ChapterTheme.Translasi:
                     Box(g, "Crane Bridge Rail", am.chamferCube, am.trimMetal, new Vector3(4.5f, 7.4f, 12.8f), new Vector3(16.0f, 0.36f, 0.65f), gu);
                     Box(g, "Crane Trolley", am.chamferCube, am.darkSteel, new Vector3(7.5f, 7.1f, 12.8f), new Vector3(1.6f, 0.72f, 1.0f), gu);
                     Box(g, "Crane Indicator", am.chamferCube, am.chapterAccent, new Vector3(7.5f, 6.72f, 12.8f), new Vector3(0.95f, 0.08f, 0.35f), gu);
+
+                    PlaceFbxProp(g, "Pasar Stalls N", "PasarStall.fbx",
+                        new[] { ("Pasar_Frame", am.darkSteel), ("Pasar_Awning", am.chapterAccent), ("Pasar_Lantern", am.warmWindow) },
+                        new Vector3(-11.8f, 0f, 11.6f) * gu, 0f, gu * 1.10f);
+                    PlaceFbxProp(g, "Pasar Stalls NE", "PasarStall.fbx",
+                        new[] { ("Pasar_Frame", am.darkSteel), ("Pasar_Awning", accentTeal), ("Pasar_Lantern", am.warmWindow) },
+                        new Vector3(11.8f, 0f, 11.6f) * gu, -35f, gu * 1.10f);
+                    PlaceFbxProp(g, "Pasar Stalls E", "PasarStall.fbx",
+                        new[] { ("Pasar_Frame", am.darkSteel), ("Pasar_Awning", am.chapterAccent), ("Pasar_Lantern", am.warmWindow) },
+                        new Vector3(12.2f, 0f, -6.8f) * gu, -90f, gu * 1.10f);
                     break;
 
                 case CampaignLevelCatalog.ChapterTheme.Elevasi:
@@ -294,27 +308,96 @@ namespace Polymulator.EditorTools
                         float by = 2.6f + lvl * 3.1f;
                         Box(g, "Rusun Balcony " + lvl, am.chamferSlab, platformMidMat, new Vector3(-9.6f, by, 16.0f), new Vector3(3.8f, 0.24f, 1.4f), gu);
                         Box(g, "Rusun DoorGlow " + lvl, am.chamferSlab, am.warmWindow, new Vector3(-9.6f, by + 1.0f, 16.82f), new Vector3(1.1f, 1.85f, 0.10f), gu);
+                        PlaceFbxProp(g, "Rusun Unit " + lvl, "RusunBalconyUnit.fbx",
+                            new[] { ("Rusun_Structure", platformMidMat), ("Rusun_ACUnit", am.trimMetal), ("Rusun_PlanterGreens", accentGreen) },
+                            new Vector3(-9.6f, by + 0.12f, 15.85f) * gu, 0f, gu * 1.10f);
                     }
+                    PlaceFbxProp(g, "Rusun North Corner", "RusunBalconyUnit.fbx",
+                        new[] { ("Rusun_Structure", platformMidMat), ("Rusun_ACUnit", am.trimMetal), ("Rusun_PlanterGreens", accentGreen) },
+                        new Vector3(-11.8f, 0f, 11.8f) * gu, 0f, gu * 1.15f);
+                    PlaceFbxProp(g, "Rusun East Bay", "RusunBalconyUnit.fbx",
+                        new[] { ("Rusun_Structure", platformMidMat), ("Rusun_ACUnit", am.trimMetal), ("Rusun_PlanterGreens", accentGreen) },
+                        new Vector3(12.2f, 0f, -6.2f) * gu, -90f, gu * 1.15f);
                     break;
 
                 case CampaignLevelCatalog.ChapterTheme.Rotasi:
-                    for (int k = -1; k <= 1; k++)
+                    for (int k = 0; k < 2; k++)
                     {
-                        float kz = k * 4.8f;
-                        Box(g, "Archive Rack " + k, am.chamferCube, am.darkSteel, new Vector3(16.4f, 2.4f, kz), new Vector3(0.85f, 3.8f, 2.2f), gu);
-                        Box(g, "Archive Strip " + k, am.chamferCube, am.chapterAccent, new Vector3(15.95f, 2.4f, kz), new Vector3(0.05f, 2.9f, 0.14f), gu);
+                        float kz = (k == 0) ? -6.0f : 11.0f;
+                        PlaceFbxProp(g, "Archive Rack E " + k, "ArchiveMonolithRack.fbx",
+                            new[] { ("Archive_Cabinet", am.darkSteel), ("Archive_TapeModules", am.trimMetal), ("Archive_IndicatorNodes", am.chapterAccent) },
+                            new Vector3(12.2f, 0f, kz) * gu, 90f, gu * 1.12f);
                     }
+                    PlaceFbxProp(g, "Archive Rack NW", "ArchiveMonolithRack.fbx",
+                        new[] { ("Archive_Cabinet", am.darkSteel), ("Archive_TapeModules", am.trimMetal), ("Archive_IndicatorNodes", accentTeal) },
+                        new Vector3(-11.8f, 0f, 11.8f) * gu, 0f, gu * 1.12f);
                     Box(g, "Archive Gimbal Pillar", am.chamferCube, am.trimMetal, new Vector3(13.2f, 6.2f, 13.2f), new Vector3(0.32f, 5.2f, 0.32f), gu);
                     Box(g, "Archive Gimbal Frame", am.chamferCube, am.chapterAccent, new Vector3(13.2f, 7.6f, 13.2f), new Vector3(2.8f, 0.14f, 2.8f), gu);
+                    break;
+
+                case CampaignLevelCatalog.ChapterTheme.Rekonstruksi:
+                    PlaceFbxProp(g, "Archive Bank NW", "ArchiveMonolithRack.fbx",
+                        new[] { ("Archive_Cabinet", am.darkSteel), ("Archive_TapeModules", am.trimMetal), ("Archive_IndicatorNodes", accentTeal) },
+                        new Vector3(-11.8f, 0f, 11.8f) * gu, 0f, gu * 1.12f);
+                    PlaceFbxProp(g, "Archive Bank NE", "ArchiveMonolithRack.fbx",
+                        new[] { ("Archive_Cabinet", am.darkSteel), ("Archive_TapeModules", am.trimMetal), ("Archive_IndicatorNodes", accentTeal) },
+                        new Vector3(11.8f, 0f, 11.8f) * gu, -35f, gu * 1.12f);
+                    PlaceFbxProp(g, "Archive Bank E", "ArchiveMonolithRack.fbx",
+                        new[] { ("Archive_Cabinet", am.darkSteel), ("Archive_TapeModules", am.trimMetal), ("Archive_IndicatorNodes", accentTeal) },
+                        new Vector3(12.2f, 0f, -6.2f) * gu, 90f, gu * 1.12f);
                     break;
 
                 case CampaignLevelCatalog.ChapterTheme.Badai:
                     Box(g, "Broken Span Girder 1", am.steelTruss, am.darkSteel, new Vector3(18.8f, 0.4f, -3.5f), new Vector3(4.8f, 0.85f, 1.4f), gu);
                     Box(g, "Broken Span Girder 2", am.chamferCube, am.trimMetal, new Vector3(19.6f, 1.2f, 6.2f), new Vector3(3.6f, 0.42f, 1.1f), gu);
-                    Box(g, "Storm Beacon Mast", am.chamferCube, am.darkSteel, new Vector3(15.2f, 3.6f, -11.8f), new Vector3(0.45f, 7.2f, 0.45f), gu);
-                    Box(g, "Storm Beacon Tip", am.chamferCube, am.chapterAccent, new Vector3(15.2f, 7.35f, -11.8f), new Vector3(0.62f, 0.42f, 0.62f), gu);
+                    PlaceFbxProp(g, "Flood Turbine E1", "FloodTurbinePylon.fbx",
+                        new[] { ("Storm_Pylon", am.darkSteel), ("Storm_TurbineShroud", am.trimMetal), ("Storm_WarningCap", am.chapterAccent) },
+                        new Vector3(12.2f, 0f, -6.2f) * gu, 90f, gu * 1.20f);
+                    PlaceFbxProp(g, "Flood Turbine E2", "FloodTurbinePylon.fbx",
+                        new[] { ("Storm_Pylon", am.darkSteel), ("Storm_TurbineShroud", am.trimMetal), ("Storm_WarningCap", am.chapterAccent) },
+                        new Vector3(12.2f, 0f, 10.8f) * gu, 90f, gu * 1.20f);
+                    PlaceFbxProp(g, "Flood Turbine NW", "FloodTurbinePylon.fbx",
+                        new[] { ("Storm_Pylon", am.darkSteel), ("Storm_TurbineShroud", am.trimMetal), ("Storm_WarningCap", accentTeal) },
+                        new Vector3(-11.8f, 0f, 11.8f) * gu, 0f, gu * 1.15f);
+                    break;
+
+                case CampaignLevelCatalog.ChapterTheme.Showcase:
+                    PlaceFbxProp(g, "Showcase Pasar NW", "PasarStall.fbx",
+                        new[] { ("Pasar_Frame", am.darkSteel), ("Pasar_Awning", am.warmWindow), ("Pasar_Lantern", objLight) },
+                        new Vector3(-11.6f, 0f, 11.6f) * gu, 0f, gu * 1.05f);
+                    PlaceFbxProp(g, "Showcase Rusun NE", "RusunBalconyUnit.fbx",
+                        new[] { ("Rusun_Structure", platformMidMat), ("Rusun_ACUnit", am.trimMetal), ("Rusun_PlanterGreens", accentGreen) },
+                        new Vector3(11.6f, 0f, 11.6f) * gu, -35f, gu * 1.10f);
+                    PlaceFbxProp(g, "Showcase Archive E", "ArchiveMonolithRack.fbx",
+                        new[] { ("Archive_Cabinet", am.darkSteel), ("Archive_TapeModules", am.trimMetal), ("Archive_IndicatorNodes", accentTeal) },
+                        new Vector3(12.2f, 0f, 2.0f) * gu, 90f, gu * 1.12f);
+                    PlaceFbxProp(g, "Showcase Turbine SE", "FloodTurbinePylon.fbx",
+                        new[] { ("Storm_Pylon", am.darkSteel), ("Storm_TurbineShroud", am.trimMetal), ("Storm_WarningCap", am.chapterAccent) },
+                        new Vector3(12.0f, 0f, -7.2f) * gu, 90f, gu * 1.15f);
                     break;
             }
+        }
+
+        private static Material LoadMatByName(string name, Material fallback)
+        {
+            Material mat = AssetDatabase.LoadAssetAtPath<Material>("Assets/Materials/" + name + ".mat");
+            return mat != null ? mat : fallback;
+        }
+
+        private static void PlaceFbxProp(
+            Transform parent,
+            string groupName,
+            string fbxFileName,
+            (string subMesh, Material mat)[] parts,
+            Vector3 localPos,
+            float yawDeg,
+            float scale)
+        {
+            Transform group = CreateGroup(groupName, parent);
+            group.localPosition = localPos;
+            group.localRotation = Quaternion.Euler(0f, yawDeg, 0f);
+            for (int i = 0; i < parts.Length; i++)
+                FbxModelLibrary.CreateSubMeshObject(parts[i].subMesh, fbxFileName, parts[i].subMesh, parts[i].mat, group, scale, true);
         }
 
         private static Transform CreateGroup(string name, Transform parent)

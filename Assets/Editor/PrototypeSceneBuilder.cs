@@ -95,6 +95,7 @@ namespace Polymulator.EditorTools
         public static void BuildAllCampaignScenes()
         {
             if (!EnsureEditMode()) return;
+            FbxModelLibrary.ClearCache();
             List<CampaignLevelCatalog.LevelSpec> catalog = CampaignLevelCatalog.BuildCatalog();
             Mats mats = PrepareSharedAssets();
 
@@ -130,15 +131,19 @@ namespace Polymulator.EditorTools
             ChamberArchitectureBuilder.BuildMainMenuShowcase(
                 env, m.floor, m.plinth, m.platformLow, m.dark, m.trimMetal, m.accentTeal, m.accentLimited, gridUnit);
 
-            // Hero crate & glowing pad accent inside MainMenu diorama
-            GameObject crate = Primitive("Diorama Cube", PrimitiveType.Cube, new Vector3(-2.6f, 0.55f, 1.5f), new Vector3(1.1f, 1.1f, 1.1f), m.interactivePalette[2], env, false, true);
-            crate.transform.localRotation = Quaternion.Euler(0f, 18f, 0f);
-            CreateUnscaledChildTrim("Diorama Cube Band", PrimitiveType.Cube, Vector3.zero, new Vector3(1.03f, 0.14f, 1.03f), m.trimMetal, crate.transform);
+            // Hero CORE-01 unit inside MainMenu diorama (CoreUnit.fbx scaled 1.15x rests flush at floor)
+            Transform menuCorePivot = new GameObject("Diorama CoreUnit").transform;
+            menuCorePivot.SetParent(env, false);
+            menuCorePivot.localPosition = new Vector3(-2.6f, W(0.51f), 1.5f);
+            menuCorePivot.localRotation = Quaternion.Euler(0f, 18f, 0f);
+            FbxModelLibrary.CreateSubMeshObject("Core Inner", "CoreUnit.fbx", "Core_InnerChamber", m.interactivePalette[2], menuCorePivot, W(1.15f), true);
+            FbxModelLibrary.CreateSubMeshObject("Core Cage Frame", "CoreUnit.fbx", "Core_CageFrame", m.trimMetal, menuCorePivot, W(1.15f), true);
+            FbxModelLibrary.CreateSubMeshObject("Core Front Visor", "CoreUnit.fbx", "Core_FrontVisor", m.accentLimited, menuCorePivot, W(1.15f), true);
 
             // Decorative pulsing ANCHOR-01 pedestal + faceted crystal gem
             var anchorSpec = new CampaignLevelCatalog.LevelSpec
             {
-                anchorGrid = new Vector3(2.4f, 0.72f, 2.2f),
+                anchorGrid = new Vector3(2.4f, 0.0f, 2.2f),
                 requireFacingAngle = false
             };
             GameObject showcaseAnchor = BuildAnchorStation(env, m, anchorSpec);
@@ -190,7 +195,7 @@ namespace Polymulator.EditorTools
             if (oldRectCam != null) Object.DestroyImmediate(oldRectCam);
             MainMenuCameraOrbit orbit = camGo.GetComponent<MainMenuCameraOrbit>();
             if (orbit == null) orbit = camGo.AddComponent<MainMenuCameraOrbit>();
-            orbit.focusPoint = new Vector3(0.4f, 0.9f, 1.0f) * gridUnit;
+            orbit.focusPoint = new Vector3(-1.45f, 0.85f, 1.95f) * gridUnit;
             orbit.rectFocusPoint = showcaseBot.transform.position + Vector3.up * W(0.70f);
             orbit.baseYaw = 32f;
             orbit.basePitch = 18f;
@@ -953,45 +958,44 @@ namespace Polymulator.EditorTools
         private static void BuildPianoAlcoveDecor(Transform env, Mats m)
         {
             Transform alcove = Group("Piano Alcove Decor", env);
-            alcove.localPosition = new Vector3(-8.4f, 0.5f, 4.9f) * gridUnit;
+            alcove.localPosition = new Vector3(-8.4f, 0.0f, 4.9f) * gridUnit;
 
-            // Acoustic dark Mocha rug under piano & bench (clear vertical step so trim never Z-fights)
-            Primitive("Piano Rug Trim", PrimitiveType.Cube, new Vector3(0f, 0.008f, -0.45f), new Vector3(2.48f, 0.016f, 2.02f), m.accentRosewater, alcove, false, true);
-            Primitive("Piano Rug", PrimitiveType.Cube, new Vector3(0f, 0.024f, -0.45f), new Vector3(2.36f, 0.018f, 1.90f), m.dark, alcove, false, true);
+            // Acoustic dark Mocha rug under grand piano & bench
+            Primitive("Piano Rug Trim", PrimitiveType.Cube, new Vector3(0f, 0.008f, -0.35f), new Vector3(2.75f, 0.016f, 2.85f), m.accentRosewater, alcove, false, true);
+            Primitive("Piano Rug", PrimitiveType.Cube, new Vector3(0f, 0.024f, -0.35f), new Vector3(2.60f, 0.018f, 2.70f), m.dark, alcove, false, true);
 
-            // Sculpted upright piano body, side cheeks, keybed & music desk
-            Primitive("Piano Soundboard", PrimitiveType.Cube, new Vector3(0f, 0.62f, 0.14f), new Vector3(1.62f, 1.24f, 0.44f), m.plinth, alcove, true, true);
-            Primitive("Piano Lower Apron", PrimitiveType.Cube, new Vector3(0f, 0.24f, -0.18f), new Vector3(1.48f, 0.48f, 0.24f), m.dark, alcove, true, true);
-            Primitive("Piano Keybed", PrimitiveType.Cube, new Vector3(0f, 0.50f, -0.26f), new Vector3(1.62f, 0.09f, 0.36f), m.plinth, alcove, false, true);
-            Primitive("Piano White Keys", PrimitiveType.Cube, new Vector3(0f, 0.55f, -0.31f), new Vector3(1.42f, 0.04f, 0.22f), m.objectLight, alcove, false, true);
-            for (int k = -3; k <= 3; k++)
+            // Sculpted S-curved Grand Piano from GrandPiano.fbx resting atop rug (with collision footprint)
+            Transform pianoRoot = Group("Grand Piano", alcove);
+            pianoRoot.localPosition = new Vector3(0f, W(0.032f), 0f);
+            pianoRoot.localRotation = Quaternion.Euler(0f, -12f, 0f);
+            BoxCollider pianoCol = pianoRoot.gameObject.AddComponent<BoxCollider>();
+            pianoCol.center = new Vector3(0f, W(0.68f), W(-0.22f));
+            pianoCol.size = new Vector3(W(1.68f), W(1.36f), W(2.45f));
+            pianoRoot.gameObject.isStatic = true;
+
+            GameObject pianoCase = FbxModelLibrary.CreateSubMeshObject("Piano Case", "GrandPiano.fbx", "Piano_Case", m.plinth, pianoRoot, gridUnit, true);
+            FbxModelLibrary.CreateSubMeshObject("Piano Brass", "GrandPiano.fbx", "Piano_Brass", m.accentPeach, pianoRoot, gridUnit, true);
+            FbxModelLibrary.CreateSubMeshObject("Piano Keys", "GrandPiano.fbx", "Piano_Keys", m.objectLight, pianoRoot, gridUnit, true);
+            if (pianoCase == null)
             {
-                if (k == 0) continue;
-                Primitive("Sharp Key " + k, PrimitiveType.Cube, new Vector3(k * 0.18f, 0.578f, -0.26f),
-                    new Vector3(0.06f, 0.032f, 0.12f), m.plinth, alcove, false, true);
+                // Fallback only if FBX absent
+                Primitive("Piano Soundboard", PrimitiveType.Cube, new Vector3(0f, 0.62f, 0.14f), new Vector3(1.62f, 1.24f, 0.44f), m.plinth, pianoRoot, false, true);
             }
-            Primitive("Piano Upper Trim", PrimitiveType.Cube, new Vector3(0f, 1.25f, 0.04f), new Vector3(1.66f, 0.06f, 0.48f), m.trimMetal, alcove, false, true);
-            Primitive("Piano Brass Fillet", PrimitiveType.Cube, new Vector3(0f, 1.21f, -0.21f), new Vector3(1.52f, 0.022f, 0.02f), m.accentPeach, alcove, false, false);
-            GameObject sheetMusic = Primitive("Sheet Music Page", PrimitiveType.Cube, new Vector3(0f, 0.78f, -0.11f), new Vector3(0.46f, 0.28f, 0.03f), m.platformHigh, alcove, false, true);
-            sheetMusic.transform.localRotation = Quaternion.Euler(-16f, 0f, 0f);
 
-            // Warm vintage brass desk lamp perched on top corner + bench with cushion
-            Primitive("Lamp Base", PrimitiveType.Cylinder, new Vector3(-0.56f, 1.29f, 0.08f), new Vector3(0.18f, 0.05f, 0.18f), m.trimMetal, alcove, false, true);
-            Primitive("Lamp Stem", PrimitiveType.Cylinder, new Vector3(-0.56f, 1.44f, 0.08f), new Vector3(0.04f, 0.28f, 0.04f), m.trimMetal, alcove, false, true);
-            Primitive("Lamp Shade", PrimitiveType.Cube, new Vector3(-0.54f, 1.60f, 0.04f), new Vector3(0.24f, 0.12f, 0.24f), m.dark, alcove, false, true);
-            Primitive("Lamp Bulb", PrimitiveType.Sphere, new Vector3(-0.54f, 1.54f, 0.04f), new Vector3(0.09f, 0.07f, 0.09f), m.accentPeach, alcove, false, false);
-
-            Primitive("Piano Bench Legs", PrimitiveType.Cube, new Vector3(0f, 0.18f, -0.96f), new Vector3(0.92f, 0.36f, 0.34f), m.plinth, alcove, true, true);
-            Primitive("Piano Bench Cushion", PrimitiveType.Cube, new Vector3(0f, 0.40f, -0.96f), new Vector3(0.98f, 0.10f, 0.40f), m.platformMid, alcove, false, true);
+            // Warm standing brass alcove lamp beside the piano curve
+            Primitive("Lamp Base", PrimitiveType.Cylinder, new Vector3(-1.05f, 0.05f, 0.55f), new Vector3(0.32f, 0.06f, 0.32f), m.trimMetal, alcove, false, true);
+            Primitive("Lamp Stem", PrimitiveType.Cylinder, new Vector3(-1.05f, 0.85f, 0.55f), new Vector3(0.05f, 1.56f, 0.05f), m.trimMetal, alcove, false, true);
+            Primitive("Lamp Shade", PrimitiveType.Cube, new Vector3(-1.05f, 1.66f, 0.55f), new Vector3(0.34f, 0.18f, 0.34f), m.dark, alcove, false, true);
+            Primitive("Lamp Bulb", PrimitiveType.Sphere, new Vector3(-1.05f, 1.56f, 0.55f), new Vector3(0.11f, 0.09f, 0.11f), m.accentPeach, alcove, false, false);
 
             GameObject lightGo = new GameObject("Warm Piano Light");
             lightGo.transform.SetParent(alcove, false);
-            lightGo.transform.localPosition = new Vector3(-0.45f, 1.85f, -0.35f) * gridUnit;
+            lightGo.transform.localPosition = new Vector3(-0.65f, 1.85f, -0.20f) * gridUnit;
             Light l = lightGo.AddComponent<Light>();
             l.type = LightType.Point;
             l.color = PaletteSettings.Peach;
-            l.range = W(5.4f);
-            l.intensity = 1.45f;
+            l.range = W(5.6f);
+            l.intensity = 1.55f;
             l.shadows = LightShadows.None;
         }
 
@@ -1051,21 +1055,8 @@ namespace Polymulator.EditorTools
             InteractivePaletteAssigner.AssignAll(PaletteSettings.InteractivePalette, m.interactivePalette);
 
             float resolvedCoreMass = spec.coreMass > 0f ? spec.coreMass : 1.2f;
-            GameObject coreGo = Prop("CORE-01", PrimitiveType.Cube, spec.coreSpawnGrid,
-                new Vector3(0.92f, 0.92f, 0.92f), m.coreGold, m, props, resolvedCoreMass);
+            GameObject coreGo = BuildCoreUnitProp(props, m, spec.coreSpawnGrid, resolvedCoreMass, spec.isEndingChamber);
             coreGo.transform.rotation = Quaternion.Euler(0f, spec.coreStartYaw, 0f);
-            InteractableObject coreInteract = coreGo.GetComponent<InteractableObject>();
-            if (coreInteract != null)
-            {
-                coreInteract.canFuse = false;
-                coreInteract.canPartition = spec.isEndingChamber;
-            }
-
-            CreateUnscaledChildTrim("Core Halo", PrimitiveType.Cylinder, Vector3.zero,
-                new Vector3(1.18f, 0.08f, 1.18f), m.accentYellow, coreGo.transform);
-            // Crisp front direction visor (+Z face) for Rotation orientation puzzles
-            CreateUnscaledChildTrim("Core Front Visor", PrimitiveType.Cube, new Vector3(0f, 0.12f, 0.518f),
-                new Vector3(0.46f, 0.16f, 0.055f), m.accentLimited, coreGo.transform);
 
             GameObject beaconGo = CreateUnscaledChildTrim("Core Beacon", PrimitiveType.Cylinder,
                 new Vector3(0f, 1.15f, 0f), new Vector3(0.048f, 2.2f, 0.048f), null, coreGo.transform);
@@ -1080,6 +1071,54 @@ namespace Polymulator.EditorTools
             return anchor.transform;
         }
 
+        private static GameObject BuildCoreUnitProp(Transform parent, Mats m, Vector3 spawnGrid, float mass, bool allowPartition)
+        {
+            Mesh innerMesh = FbxModelLibrary.LoadSubMesh("CoreUnit.fbx", "Core_InnerChamber");
+            if (innerMesh == null)
+            {
+                GameObject fb = Prop("CORE-01", PrimitiveType.Cube, spawnGrid, new Vector3(0.92f, 0.92f, 0.92f), m.coreGold, m, parent, mass);
+                InteractableObject fbIo = fb.GetComponent<InteractableObject>();
+                if (fbIo != null) { fbIo.canFuse = false; fbIo.canPartition = allowPartition; }
+                return fb;
+            }
+
+            GameObject coreGo = new GameObject("CORE-01");
+            coreGo.transform.SetParent(parent, false);
+            coreGo.transform.localPosition = spawnGrid * gridUnit;
+            coreGo.transform.localScale = Vector3.one * gridUnit;
+
+            MeshFilter mf = coreGo.AddComponent<MeshFilter>();
+            mf.sharedMesh = innerMesh;
+            MeshRenderer mr = coreGo.AddComponent<MeshRenderer>();
+            mr.sharedMaterial = m.coreGold;
+
+            BoxCollider col = coreGo.AddComponent<BoxCollider>();
+            col.center = Vector3.zero;
+            col.size = new Vector3(0.92f, 0.88f, 0.92f);
+
+            Rigidbody body = coreGo.AddComponent<Rigidbody>();
+            body.mass = mass;
+            body.linearDamping = 0.14f;
+            body.angularDamping = 0.08f;
+            body.interpolation = RigidbodyInterpolation.Interpolate;
+            body.collisionDetectionMode = CollisionDetectionMode.ContinuousDynamic;
+
+            GameObject cage = FbxModelLibrary.CreateSubMeshObject("Core Cage Frame", "CoreUnit.fbx", "Core_CageFrame", m.trimMetal, coreGo.transform, 1f, false);
+            if (cage != null) cage.AddComponent<ObjectTrim>();
+
+            GameObject visor = FbxModelLibrary.CreateSubMeshObject("Core Front Visor", "CoreUnit.fbx", "Core_FrontVisor", m.accentLimited, coreGo.transform, 1f, false);
+            if (visor != null) visor.AddComponent<ObjectTrim>();
+
+            InteractableObject coreInteract = coreGo.AddComponent<InteractableObject>();
+            coreInteract.displayName = "CORE-01";
+            coreInteract.canBePickedUp = true;
+            coreInteract.canFuse = false;
+            coreInteract.canPartition = allowPartition;
+            coreInteract.SetAssignedColor(PaletteSettings.Yellow, m.coreGold);
+            coreGo.AddComponent<ImpactAudioEmitter>();
+            return coreGo;
+        }
+
         private static GameObject BuildAnchorStation(Transform props, Mats m, CampaignLevelCatalog.LevelSpec spec)
         {
             GameObject anchor = new GameObject("ANCHOR-01");
@@ -1087,36 +1126,27 @@ namespace Polymulator.EditorTools
             anchor.transform.localPosition = spec.anchorGrid * gridUnit;
 
             BoxCollider col = anchor.AddComponent<BoxCollider>();
-            col.size = new Vector3(W(1.4f), W(1.4f), W(1.4f));
+            col.center = new Vector3(0f, W(0.55f), 0f);
+            col.size = new Vector3(W(1.45f), W(1.10f), W(1.45f));
 
-            AddTrimPrimitive("Base Pedestal", PrimitiveType.Cylinder, new Vector3(0f, -0.58f, 0f), new Vector3(1.55f, 0.24f, 1.55f), m.plinth, anchor.transform);
-            AddTrimPrimitive("Receptacle Collar", PrimitiveType.Cylinder, new Vector3(0f, -0.43f, 0f), new Vector3(1.24f, 0.12f, 1.24f), m.anchor, anchor.transform);
-            AddTrimPrimitive("Receptacle Dish", PrimitiveType.Cylinder, new Vector3(0f, -0.36f, 0f), new Vector3(0.86f, 0.04f, 0.86f), m.plinth, anchor.transform);
+            // AnchorPedestal.fbx plinth base is at local Y = -0.70; shift +0.70 so base rests flush on floor/deck surface
+            Transform modelPivot = Group("Anchor Pedestal Mesh", anchor.transform);
+            modelPivot.localPosition = new Vector3(0f, W(0.70f), 0f);
 
-            float prongDist = 0.56f;
-            float[] signs = { -1f, 1f };
-            int pIdx = 1;
-            foreach (float sx in signs)
-            {
-                foreach (float sz in signs)
-                {
-                    AddTrimPrimitive("Prong " + pIdx, PrimitiveType.Cube, new Vector3(sx * prongDist, -0.06f, sz * prongDist), new Vector3(0.20f, 0.72f, 0.20f), m.trimMetal, anchor.transform);
-                    AddTrimPrimitive("Prong Tip " + pIdx, PrimitiveType.Cube, new Vector3(sx * prongDist, 0.35f, sz * prongDist), new Vector3(0.15f, 0.10f, 0.15f), m.accentGreen, anchor.transform);
-                    pIdx++;
-                }
-            }
+            GameObject plinthObj = FbxModelLibrary.CreateSubMeshObject("Base Pedestal", "AnchorPedestal.fbx", "Anchor_Plinth", m.plinth, modelPivot, gridUnit, false);
+            if (plinthObj != null) plinthObj.AddComponent<ObjectTrim>();
+            GameObject clawsObj = FbxModelLibrary.CreateSubMeshObject("Containment Claws", "AnchorPedestal.fbx", "Anchor_Claws", m.trimMetal, modelPivot, gridUnit, false);
+            if (clawsObj != null) clawsObj.AddComponent<ObjectTrim>();
+            GameObject haloObj = FbxModelLibrary.CreateSubMeshObject("Anchor Outer Halo", "AnchorPedestal.fbx", "Anchor_Halo", m.accentTeal, modelPivot, gridUnit, false);
+            if (haloObj != null) haloObj.AddComponent<ObjectTrim>();
 
-            Transform haloRing = Group("Anchor Outer Halo", anchor.transform);
-            haloRing.localPosition = new Vector3(0f, W(-0.24f), 0f);
-            AddTrimPrimitive("Halo N", PrimitiveType.Cube, new Vector3(0f, 0f, 0.54f), new Vector3(1.12f, 0.03f, 0.045f), m.accentTeal, haloRing);
-            AddTrimPrimitive("Halo S", PrimitiveType.Cube, new Vector3(0f, 0f, -0.54f), new Vector3(1.12f, 0.03f, 0.045f), m.accentTeal, haloRing);
-            AddTrimPrimitive("Halo E", PrimitiveType.Cube, new Vector3(0.54f, 0f, 0f), new Vector3(0.045f, 0.03f, 1.08f), m.accentTeal, haloRing);
-            AddTrimPrimitive("Halo W", PrimitiveType.Cube, new Vector3(-0.54f, 0f, 0f), new Vector3(0.045f, 0.03f, 1.08f), m.accentTeal, haloRing);
+            if (plinthObj == null)
+                AddTrimPrimitive("Base Pedestal", PrimitiveType.Cylinder, new Vector3(0f, 0.12f, 0f), new Vector3(1.55f, 0.24f, 1.55f), m.plinth, anchor.transform);
 
             if (spec.requireFacingAngle)
             {
                 Transform chevronPivot = Group("Anchor Direction Chevron", anchor.transform);
-                chevronPivot.localPosition = new Vector3(0f, W(-0.62f), 0f);
+                chevronPivot.localPosition = new Vector3(0f, W(0.06f), 0f);
                 chevronPivot.localRotation = Quaternion.Euler(0f, spec.requiredFacingYaw, 0f);
                 AddTrimPrimitive("Chevron Stem", PrimitiveType.Cube, new Vector3(0f, 0f, 1.08f), new Vector3(0.14f, 0.06f, 0.55f), m.accentLimited, chevronPivot);
                 AddTrimPrimitive("Chevron Wing L", PrimitiveType.Cube, new Vector3(-0.14f, 0f, 1.24f), new Vector3(0.28f, 0.07f, 0.14f), m.accentLimited, chevronPivot)
@@ -1125,20 +1155,20 @@ namespace Polymulator.EditorTools
                     .transform.localRotation = Quaternion.Euler(0f, -45f, 0f);
             }
 
-            GameObject core = Primitive("Anchor Crystal Core", PrimitiveType.Cube, new Vector3(0f, 0.28f, 0f),
-                new Vector3(0.40f, 0.54f, 0.40f), m.accentTeal, anchor.transform, false, false);
+            GameObject core = Primitive("Anchor Crystal Core", PrimitiveType.Cube, new Vector3(0f, 0.92f, 0f),
+                new Vector3(0.38f, 0.50f, 0.38f), m.accentTeal, anchor.transform, false, false);
             core.GetComponent<MeshFilter>().sharedMesh = ChamberMeshFactory.GetFacetedCrystalGem();
             core.transform.localRotation = Quaternion.Euler(12f, 45f, 0f);
             core.AddComponent<ObjectTrim>();
 
             GameObject lightGo = new GameObject("Anchor Point Light");
             lightGo.transform.SetParent(anchor.transform, false);
-            lightGo.transform.localPosition = new Vector3(0f, W(0.45f), 0f);
+            lightGo.transform.localPosition = new Vector3(0f, W(1.05f), 0f);
             Light anchorLight = lightGo.AddComponent<Light>();
             anchorLight.type = LightType.Point;
             anchorLight.color = PaletteSettings.Teal;
-            anchorLight.range = W(6.0f);
-            anchorLight.intensity = 1.45f;
+            anchorLight.range = W(6.2f);
+            anchorLight.intensity = 1.55f;
             anchorLight.shadows = LightShadows.None;
 
             InteractableObject info = anchor.AddComponent<InteractableObject>();
@@ -1152,13 +1182,13 @@ namespace Polymulator.EditorTools
 
             AnchorVisualRig rig = anchor.AddComponent<AnchorVisualRig>();
             rig.targetCore = core.transform;
-            rig.outerRing = haloRing.gameObject.transform;
+            rig.outerRing = haloObj != null ? haloObj.transform : modelPivot;
             rig.anchorLight = anchorLight;
 
             SphereCollider socketTrigger = anchor.AddComponent<SphereCollider>();
             socketTrigger.isTrigger = true;
-            socketTrigger.center = new Vector3(0f, W(0.28f), 0f);
-            socketTrigger.radius = W(1.35f);
+            socketTrigger.center = new Vector3(0f, W(0.75f), 0f);
+            socketTrigger.radius = W(1.38f);
 
             AnchorSocketObjective objective = anchor.AddComponent<AnchorSocketObjective>();
             objective.visualRig = rig;
@@ -1251,40 +1281,34 @@ namespace Polymulator.EditorTools
             Transform visualRoot = Group("VisualRoot", player.transform);
             visualRoot.gameObject.layer = 2;
 
-            GameObject hoverChassis = Primitive("Hover Base", PrimitiveType.Cylinder, new Vector3(0f, 0.08f, 0f), new Vector3(0.76f, 0.11f, 0.76f), m.playerDark, visualRoot, false, false);
-            hoverChassis.layer = 2;
-            GameObject hoverGlow = Primitive("Hover Glow Ring", PrimitiveType.Cylinder, new Vector3(0f, 0.025f, 0f), new Vector3(0.64f, 0.03f, 0.64f), m.accentLimited, visualRoot, false, false);
-            hoverGlow.layer = 2;
-            GameObject torso = Primitive("Torso Chassis", PrimitiveType.Cube, new Vector3(0f, 0.38f, 0f), new Vector3(0.66f, 0.44f, 0.54f), m.player, visualRoot, false, false);
-            torso.GetComponent<MeshFilter>().sharedMesh = ChamberMeshFactory.GetTaperedChassis();
-            torso.layer = 2;
-            GameObject bolsterL = Primitive("Shoulder Bolster L", PrimitiveType.Cube, new Vector3(-0.34f, 0.40f, 0f), new Vector3(0.10f, 0.32f, 0.40f), m.playerDark, visualRoot, false, false);
-            bolsterL.layer = 2;
-            GameObject bolsterR = Primitive("Shoulder Bolster R", PrimitiveType.Cube, new Vector3(0.34f, 0.40f, 0f), new Vector3(0.10f, 0.32f, 0.40f), m.playerDark, visualRoot, false, false);
-            bolsterR.layer = 2;
-            GameObject chestCore = Primitive("Chest Core", PrimitiveType.Cube, new Vector3(0f, 0.40f, 0.27f), new Vector3(0.16f, 0.16f, 0.04f), m.accentLimited, visualRoot, false, false);
-            chestCore.transform.localRotation = Quaternion.Euler(0f, 0f, 45f);
-            chestCore.layer = 2;
-            GameObject backpack = Primitive("Back Pack", PrimitiveType.Cube, new Vector3(0f, 0.42f, -0.27f), new Vector3(0.32f, 0.30f, 0.08f), m.playerDark, visualRoot, false, false);
-            backpack.layer = 2;
-            GameObject backFin = Primitive("Mode Fin", PrimitiveType.Cube, new Vector3(0f, 0.42f, -0.315f), new Vector3(0.08f, 0.22f, 0.03f), m.accentLimited, visualRoot, false, false);
-            backFin.layer = 2;
+            // Load sculpted multi-part FBX character rig cleanly onto VisualRoot & HeadPivot
+            FbxModelLibrary.CreateSubMeshObject("Hover Base", "RectCharacter.fbx", "Rect_HoverBase", m.playerDark, visualRoot, gridUnit, false, 2);
+            GameObject hoverGlow = FbxModelLibrary.CreateSubMeshObject("Hover Glow Ring", "RectCharacter.fbx", "Rect_HoverGlowRing", m.accentLimited, visualRoot, gridUnit, false, 2);
+            GameObject torso = FbxModelLibrary.CreateSubMeshObject("Torso Chassis", "RectCharacter.fbx", "Rect_Torso", m.player, visualRoot, gridUnit, false, 2);
+            FbxModelLibrary.CreateSubMeshObject("Torso Dark Trim", "RectCharacter.fbx", "Rect_TorsoDarkTrim", m.playerDark, visualRoot, gridUnit, false, 2);
+            GameObject chestCore = FbxModelLibrary.CreateSubMeshObject("Chest Core", "RectCharacter.fbx", "Rect_ChestCore", m.accentLimited, visualRoot, gridUnit, false, 2);
+            GameObject backFin = FbxModelLibrary.CreateSubMeshObject("Mode Fin", "RectCharacter.fbx", "Rect_ModeFin", m.accentLimited, visualRoot, gridUnit, false, 2);
+
+            if (torso == null)
+            {
+                torso = Primitive("Torso Chassis", PrimitiveType.Cube, new Vector3(0f, 0.38f, 0f), new Vector3(0.66f, 0.44f, 0.54f), m.player, visualRoot, false, false);
+                torso.layer = 2;
+            }
 
             Transform headPivot = Group("Head Pivot", visualRoot);
             headPivot.gameObject.layer = 2;
             headPivot.localPosition = new Vector3(0f, W(0.78f), 0f);
 
-            GameObject headCowl = Primitive("Head Cowl", PrimitiveType.Cube, Vector3.zero, new Vector3(0.58f, 0.35f, 0.50f), m.player, headPivot, false, false);
-            headCowl.GetComponent<MeshFilter>().sharedMesh = ChamberMeshFactory.GetTaperedChassis();
-            headCowl.layer = 2;
-            GameObject visorMask = Primitive("Visor Recess", PrimitiveType.Cube, new Vector3(0f, 0.01f, 0.225f), new Vector3(0.48f, 0.16f, 0.05f), m.playerDark, headPivot, false, false);
-            visorMask.layer = 2;
-            GameObject visor = Primitive("Optic Visor", PrimitiveType.Cube, new Vector3(0f, 0.01f, 0.245f), new Vector3(0.40f, 0.085f, 0.04f), m.accentLimited, headPivot, false, false);
-            visor.layer = 2;
-            GameObject antennaStem = Primitive("Antenna Stem", PrimitiveType.Cylinder, new Vector3(0.18f, 0.24f, -0.06f), new Vector3(0.04f, 0.18f, 0.04f), m.trimMetal, headPivot, false, false);
-            antennaStem.layer = 2;
-            GameObject antennaTip = Primitive("Antenna Beacon", PrimitiveType.Sphere, new Vector3(0.18f, 0.36f, -0.06f), new Vector3(0.11f, 0.11f, 0.11f), m.accentLimited, headPivot, false, false);
-            antennaTip.layer = 2;
+            GameObject headCowl = FbxModelLibrary.CreateSubMeshObject("Head Cowl", "RectCharacter.fbx", "Rect_HeadCowl", m.player, headPivot, gridUnit, false, 2);
+            FbxModelLibrary.CreateSubMeshObject("Visor Recess", "RectCharacter.fbx", "Rect_VisorRecess", m.playerDark, headPivot, gridUnit, false, 2);
+            GameObject visor = FbxModelLibrary.CreateSubMeshObject("Optic Visor", "RectCharacter.fbx", "Rect_OpticVisor", m.accentLimited, headPivot, gridUnit, false, 2);
+            GameObject antennaTip = FbxModelLibrary.CreateSubMeshObject("Antenna Beacon", "RectCharacter.fbx", "Rect_AntennaBeacon", m.accentLimited, headPivot, gridUnit, false, 2);
+
+            if (headCowl == null)
+            {
+                headCowl = Primitive("Head Cowl", PrimitiveType.Cube, Vector3.zero, new Vector3(0.58f, 0.35f, 0.50f), m.player, headPivot, false, false);
+                headCowl.layer = 2;
+            }
 
             GameObject carryAnchor = new GameObject("Carry Anchor");
             carryAnchor.transform.SetParent(player.transform, false);
@@ -1331,11 +1355,11 @@ namespace Polymulator.EditorTools
             rig.flexibleAccentMaterial = m.accentFlexible;
             rig.modeAccentRenderers = new[]
             {
-                hoverGlow.GetComponent<Renderer>(),
-                chestCore.GetComponent<Renderer>(),
-                backFin.GetComponent<Renderer>(),
-                visor.GetComponent<Renderer>(),
-                antennaTip.GetComponent<Renderer>()
+                hoverGlow != null ? hoverGlow.GetComponent<Renderer>() : null,
+                chestCore != null ? chestCore.GetComponent<Renderer>() : null,
+                backFin != null ? backFin.GetComponent<Renderer>() : null,
+                visor != null ? visor.GetComponent<Renderer>() : null,
+                antennaTip != null ? antennaTip.GetComponent<Renderer>() : null
             };
 
             return player;
@@ -1384,6 +1408,14 @@ namespace Polymulator.EditorTools
             controller.focusHeight = 0f;
             controller.followTarget = true;
             controller.followSmoothTime = 0.14f;
+            controller.introZoomOnStart = true;
+            controller.introStartBehindRect = true;
+            controller.introStartPitch = 22f;
+            controller.introStartDistance = 5.6f;
+            controller.introStartHeight = 3.0f;
+            controller.introStartOrthoSize = 2.65f;
+            controller.introHoldSeconds = 0.08f;
+            controller.introZoomOutSeconds = 1.05f;
 
             Quaternion rotation = Quaternion.Euler(controller.pitch, controller.yaw, 0f);
             Vector3 horizontal = Quaternion.Euler(0f, controller.yaw, 0f) * Vector3.back * W(controller.cameraDistance);
