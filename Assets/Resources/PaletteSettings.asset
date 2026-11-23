@@ -12,8 +12,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: da75361ecae9bc01f9402bd5f87e60ca, type: 3}
   m_Name: PaletteSettings
   m_EditorClassIdentifier: Assembly-CSharp::Polymulator.PaletteSettings
-  crust: {r: 0.06666667, g: 0.06666667, b: 0.105882354, a: 1}
-  mantle: {r: 0.09411765, g: 0.09411765, b: 0.14509805, a: 1}
+  crust: {r: 0.09411765, g: 0.09411765, b: 0.14509805, a: 1}
+  mantle: {r: 0.06666667, g: 0.06666667, b: 0.105882354, a: 1}
   baseSurface: {r: 0.11764706, g: 0.11764706, b: 0.18039216, a: 1}
   surface0: {r: 0.19215687, g: 0.19607843, b: 0.26666668, a: 1}
   surface1: {r: 0.27058825, g: 0.2784314, b: 0.3529412, a: 1}

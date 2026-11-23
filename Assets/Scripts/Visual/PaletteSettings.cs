@@ -14,8 +14,8 @@ namespace Polymulator
         public const string ResourceName = "PaletteSettings";
 
         [Header("Base & Surfaces (Catppuccin Mocha)")]
-        [SerializeField] private Color crust = Hex(0x11, 0x11, 0x1B);
-        [SerializeField] private Color mantle = Hex(0x18, 0x18, 0x25);
+        [SerializeField] private Color crust = Hex(0x18, 0x18, 0x25);
+        [SerializeField] private Color mantle = Hex(0x11, 0x11, 0x1B);
         [SerializeField] private Color baseSurface = Hex(0x1E, 0x1E, 0x2E);
         [SerializeField] private Color surface0 = Hex(0x31, 0x32, 0x44);
         [SerializeField] private Color surface1 = Hex(0x45, 0x47, 0x5A);
@@ -31,7 +31,7 @@ namespace Polymulator
         [SerializeField] private Color green = Hex(0xA6, 0xE3, 0xA1);
         [SerializeField] private Color red = Hex(0xF3, 0x8B, 0xA8);
         [SerializeField] private Color peach = Hex(0xFA, 0xB3, 0x87);
-        [SerializeField] private Color lavender = Hex(0xB4, 0xBE, 0xFE);
+        [SerializeField] private Color lavender = Hex(0xB4, 0xBE, 0xFF);
 
         [Header("Interactive Object Palette")]
         [SerializeField] private Color rosewater = Hex(0xF5, 0xE0, 0xDC);
@@ -136,8 +136,8 @@ namespace Polymulator
         [ContextMenu("Reset to Official Catppuccin Mocha")]
         public void ApplyCatppuccinMochaDefaults()
         {
-            crust = Hex(0x11, 0x11, 0x1B);
-            mantle = Hex(0x18, 0x18, 0x25);
+            crust = Hex(0x18, 0x18, 0x25);
+            mantle = Hex(0x11, 0x11, 0x1B);
             baseSurface = Hex(0x1E, 0x1E, 0x2E);
             surface0 = Hex(0x31, 0x32, 0x44);
             surface1 = Hex(0x45, 0x47, 0x5A);
@@ -164,7 +164,7 @@ namespace Polymulator
             sky = Hex(0x89, 0xDC, 0xEB);
             sapphire = Hex(0x74, 0xC7, 0xEC);
             blue = Hex(0x89, 0xB4, 0xFA);
-            lavender = Hex(0xB4, 0xBE, 0xFE);
+            lavender = Hex(0xB4, 0xBE, 0xFF);
             ClearCache();
         }
 
