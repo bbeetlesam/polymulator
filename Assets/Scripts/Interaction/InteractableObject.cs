@@ -395,6 +395,7 @@ namespace Polymulator
             if (src == null) return null;
             if (SmoothedOutlineMeshes.TryGetValue(src, out Mesh cached) && cached != null)
                 return cached;
+            if (!src.isReadable) return src;
 
             Vector3[] verts = src.vertices;
             Vector3[] norms = src.normals;
