@@ -18,16 +18,16 @@
     background-color: rgba(17, 17, 27, 0.18);
 }
 
-/* Title View */
+/* Title View — Editorial Left Rail + Unobstructed Right 3D Stage */
 .title-view {
     position: absolute;
     left: 0;
     right: 0;
     top: 0;
     bottom: 0;
-    align-items: center;
-    justify-content: center;
-    padding: 36px;
+    align-items: flex-start;
+    justify-content: space-between;
+    padding: 68px 64px 52px 76px;
     transition-property: opacity, translate;
     transition-duration: 0.34s;
     transition-timing-function: ease-out-cubic;
@@ -38,134 +38,152 @@
     translate: 0 -110px;
 }
 
-.title-pill {
-    flex-direction: row;
-    align-items: center;
-    background-color: rgba(24, 24, 37, 0.84);
-    border-color: rgba(88, 91, 112, 0.55);
-    border-width: 1px;
-    border-radius: 2px;
-    padding: 6px 16px;
-    margin-bottom: 16px;
+.brand-block {
+    flex-direction: column;
+    align-items: flex-start;
 }
 
-.title-pill-dot {
-    width: 8px;
-    height: 8px;
-    border-radius: 4px;
-    background-color: #94E2D5;
-    margin-right: 10px;
+.title-kicker {
+    flex-direction: row;
+    align-items: center;
+    margin-bottom: 12px;
+}
+
+.title-kicker-bar {
+    width: 28px;
+    height: 3px;
+    background-color: #74C7EC;
+    margin-right: 12px;
 }
 
 .title-pill-text {
-    -unity-font-definition: url("/Assets/UI/Fonts/Font_AktMedium.asset");
-    font-size: 14px;
-    color: #A6ADC8;
-    letter-spacing: 0.6px;
+    -unity-font-definition: url("/Assets/UI/Fonts/Font_AktSemiBold.asset");
+    font-size: 13px;
+    color: #94E2D5;
+    letter-spacing: 2.6px;
 }
 
 .hero-title {
     -unity-font-definition: url("/Assets/UI/Fonts/Font_AktBold.asset");
-    font-size: 68px;
+    font-size: 62px;
     color: #CDD6F4;
-    letter-spacing: 5px;
-    margin-bottom: 6px;
-    -unity-text-align: middle-center;
-    text-shadow: 0 4px 18px rgba(17, 17, 27, 0.85);
+    letter-spacing: 2.5px;
+    margin-bottom: 4px;
+    margin-left: -2px;
+    -unity-text-align: middle-left;
+    text-shadow: 0 4px 20px rgba(17, 17, 27, 0.90);
 }
 
 .hero-tagline {
     -unity-font-definition: url("/Assets/UI/Fonts/Font_AktRegular.asset");
     font-size: 16px;
-    color: #BAC2DE;
-    letter-spacing: 0.8px;
-    margin-bottom: 30px;
-    -unity-text-align: middle-center;
-    text-shadow: 0 2px 8px rgba(17, 17, 27, 0.85);
+    color: #A6ADC8;
+    letter-spacing: 0.6px;
+    -unity-text-align: middle-left;
+    text-shadow: 0 2px 10px rgba(17, 17, 27, 0.90);
+}
+
+.title-nav-block {
+    flex-direction: column;
+    align-items: flex-start;
 }
 
 .title-buttons {
-    width: 340px;
+    width: 316px;
     flex-direction: column;
-    margin-bottom: 20px;
+    margin-bottom: 22px;
 }
 
 .menu-action-btn {
     -unity-font-definition: url("/Assets/UI/Fonts/Font_AktSemiBold.asset");
-    height: 48px;
+    height: 42px;
     font-size: 15px;
-    letter-spacing: 0.5px;
-    color: #CDD6F4;
-    background-color: rgba(24, 24, 37, 0.86);
-    border-color: rgba(69, 71, 90, 0.72);
-    border-width: 1px;
-    border-radius: 2px;
-    margin-bottom: 10px;
-    transition-property: background-color, border-color, color, scale, translate;
+    letter-spacing: 0.4px;
+    color: #BAC2DE;
+    background-color: rgba(17, 17, 27, 0.56);
+    border-width: 0;
+    border-left-width: 2px;
+    border-left-color: rgba(88, 91, 112, 0.65);
+    border-radius: 0px;
+    padding-left: 18px;
+    padding-right: 16px;
+    margin-bottom: 6px;
+    -unity-text-align: middle-left;
+    transition-property: background-color, border-color, color, translate;
     transition-duration: 0.16s;
     transition-timing-function: ease-out-cubic;
 }
 
 .menu-action-btn:hover {
-    background-color: rgba(49, 50, 68, 0.94);
-    border-color: #89B4FA;
-    scale: 1.02 1.02;
-    translate: 0 -1px;
+    background-color: rgba(49, 50, 68, 0.78);
+    border-left-color: #89B4FA;
+    border-left-width: 3px;
+    color: #CDD6F4;
+    translate: 6px 0;
 }
 
 .menu-action-btn:focus {
-    background-color: rgba(49, 50, 68, 0.94);
-    border-color: #74C7EC;
+    background-color: rgba(49, 50, 68, 0.82);
+    border-left-color: #74C7EC;
+    border-left-width: 3px;
     color: #CDD6F4;
-    scale: 1.02 1.02;
+    translate: 6px 0;
 }
 
 .menu-action-btn:active {
-    scale: 0.98 0.98;
-    translate: 0 1px;
+    translate: 3px 0;
 }
 
 .menu-action-btn--primary {
-    background-color: rgba(30, 30, 46, 0.92);
-    border-color: rgba(116, 199, 236, 0.75);
-    color: #89DCEB;
+    height: 52px;
+    font-size: 16px;
+    margin-bottom: 12px;
+    background-color: rgba(30, 30, 46, 0.88);
+    border-width: 1px;
+    border-color: rgba(116, 199, 236, 0.42);
+    border-left-width: 4px;
+    border-left-color: #74C7EC;
+    color: #CDD6F4;
 }
 
-.menu-action-btn--primary:hover {
-    background-color: rgba(116, 199, 236, 0.18);
-    border-color: #89B4FA;
+.menu-action-btn--primary:hover,
+.menu-action-btn--primary:focus {
+    background-color: rgba(116, 199, 236, 0.22);
+    border-color: #89DCEB;
+    border-left-color: #89DCEB;
     color: #CDD6F4;
 }
 
 .menu-action-btn--showcase {
-    background-color: rgba(24, 24, 37, 0.90);
-    border-color: rgba(148, 226, 213, 0.55);
+    border-left-color: rgba(148, 226, 213, 0.65);
     color: #94E2D5;
 }
 
-.menu-action-btn--showcase:hover {
-    background-color: rgba(148, 226, 213, 0.16);
-    border-color: #94E2D5;
+.menu-action-btn--showcase:hover,
+.menu-action-btn--showcase:focus {
+    background-color: rgba(148, 226, 213, 0.14);
+    border-left-color: #94E2D5;
     color: #CDD6F4;
 }
 
 .menu-action-btn--danger {
-    border-color: rgba(243, 139, 168, 0.42);
-    color: #BAC2DE;
+    border-left-color: rgba(243, 139, 168, 0.45);
+    color: #A6ADC8;
 }
 
-.menu-action-btn--danger:hover {
-    background-color: rgba(243, 139, 168, 0.15);
-    border-color: #F38BA8;
+.menu-action-btn--danger:hover,
+.menu-action-btn--danger:focus {
+    background-color: rgba(243, 139, 168, 0.14);
+    border-left-color: #F38BA8;
     color: #F38BA8;
 }
 
 .footer-hint {
     -unity-font-definition: url("/Assets/UI/Fonts/Font_AktRegular.asset");
-    font-size: 13px;
-    color: #A6ADC8;
-    letter-spacing: 0.4px;
-    -unity-text-align: middle-center;
+    font-size: 12px;
+    color: #9399B2;
+    letter-spacing: 0.6px;
+    -unity-text-align: middle-left;
     text-shadow: 0 2px 6px rgba(17, 17, 27, 0.85);
 }
 
@@ -483,8 +501,8 @@
     width: 3px;
     align-self: stretch;
     background-color: #74C7EC;
-    border-top-left-radius: 9px;
-    border-bottom-left-radius: 9px;
+    border-top-left-radius: 0px;
+    border-bottom-left-radius: 0px;
 }
 
 .preview-content {
@@ -719,10 +737,10 @@
     left: 0;
     right: 0;
     top: 0;
-    height: 5px;
+    height: 4px;
     background-color: #74C7EC;
-    border-top-left-radius: 11px;
-    border-top-right-radius: 11px;
+    border-top-left-radius: 0px;
+    border-top-right-radius: 0px;
 }
 
 .settings-title {
@@ -821,4 +839,15 @@
     margin-right: 6px;
     height: 48px;
     font-size: 15px;
+    padding-left: 16px;
+    padding-right: 16px;
+    -unity-text-align: middle-center;
+    border-width: 1px;
+    border-color: rgba(69, 71, 90, 0.72);
+    border-radius: 2px;
+}
+
+.settings-actions .menu-action-btn:hover,
+.settings-actions .menu-action-btn:focus {
+    translate: 0 0;
 }

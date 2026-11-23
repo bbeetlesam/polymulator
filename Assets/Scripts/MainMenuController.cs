@@ -285,12 +285,12 @@ namespace Polymulator
         private void UpdateTitleAndMetaLabels()
         {
             if (titleIterLabel != null)
-                titleIterLabel.text = "Kota Tepi  •  Iterasi #" + SimulationProgress.IterationNumber;
+                titleIterLabel.text = "ARSIP KOTA TEPI";
 
             if (btnEnter != null)
             {
                 btnEnter.text = currentChapter > 1 || currentLevel > 1
-                    ? string.Format("Lanjutkan  •  Ruangan {0}.{1}", currentChapter, currentLevel)
+                    ? string.Format("Lanjutkan  —  Ruangan {0}.{1}", currentChapter, currentLevel)
                     : "Mulai Simulasi";
             }
 
@@ -306,8 +306,8 @@ namespace Polymulator
             }
 
             if (ribbonMetaLabel != null)
-                ribbonMetaLabel.text = string.Format("Iterasi #{0}  •  {1}/{2} Ruangan  •  {3} Memori",
-                    SimulationProgress.IterationNumber, totalCleared, totalLevels, SimulationProgress.GetCollectedFragmentCount());
+                ribbonMetaLabel.text = string.Format("{0}/{1} Ruangan  •  {2} Memori",
+                    totalCleared, totalLevels, SimulationProgress.GetCollectedFragmentCount());
 
             if (btnDemoToggle != null)
             {
