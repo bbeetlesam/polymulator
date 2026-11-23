@@ -8,15 +8,17 @@ namespace Polymulator
     /// </summary>
     public static class SimulationPhysicsBootstrap
     {
-        [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.BeforeSceneLoad)]
+        private static readonly int[] GameplayLayers = { 0, 2 };
+
+        [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.AfterSceneLoad)]
         private static void EnsureCollisionMatrixIntegrity()
         {
-            for (int a = 0; a < 32; a++)
+            for (int i = 0; i < GameplayLayers.Length; i++)
             {
-                if (string.IsNullOrEmpty(LayerMask.LayerToName(a))) continue;
-                for (int b = a; b < 32; b++)
+                int a = GameplayLayers[i];
+                for (int j = i; j < GameplayLayers.Length; j++)
                 {
-                    if (string.IsNullOrEmpty(LayerMask.LayerToName(b))) continue;
+                    int b = GameplayLayers[j];
                     if (Physics.GetIgnoreLayerCollision(a, b))
                         Physics.IgnoreLayerCollision(a, b, false);
                 }
