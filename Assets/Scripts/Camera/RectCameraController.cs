@@ -27,12 +27,12 @@ namespace Polymulator
         [Header("Spawn Arrival Zoom")]
         public bool introZoomOnStart = true;
         public bool introStartBehindRect = true;
-        [Range(5f, 40f)] public float introStartPitch = 14f;
-        [Min(1.5f)] public float introStartDistance = 3.6f;
-        [Min(0.4f)] public float introStartHeight = 1.55f;
-        [Min(0.8f)] public float introStartOrthoSize = 1.62f;
-        [Min(0f)] public float introHoldSeconds = 0.14f;
-        [Min(0.2f)] public float introZoomOutSeconds = 1.24f;
+        [Range(5f, 40f)] public float introStartPitch = 22f;
+        [Min(1.5f)] public float introStartDistance = 5.6f;
+        [Min(0.4f)] public float introStartHeight = 3.0f;
+        [Min(0.8f)] public float introStartOrthoSize = 2.65f;
+        [Min(0f)] public float introHoldSeconds = 0.08f;
+        [Min(0.2f)] public float introZoomOutSeconds = 1.05f;
 
         public float CurrentActiveYaw { get; private set; }
         public float CurrentActivePitch { get; private set; }
