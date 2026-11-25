@@ -1,46 +1,42 @@
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.EventSystems;
 using UnityEngine.InputSystem;
+using UnityEngine.InputSystem.UI;
 using UnityEngine.UIElements;
 
 namespace Polymulator
 {
     /// <summary>
-    /// Modern UI Toolkit Main Menu & Chapter Ribbon controller layered atop a live 3D facility diorama.
-    /// Orchestrates the Player-POV camera & sphere smash-and-descend into an interactive chapter ribbon,
-    /// and a 1/3-to-1/2 screen portal orb zoom transition directly into RECT's arrival camera.
+    /// Controls the POLYMULATOR Title Screen, Chapter Index, Settings modal, and direct
+    /// chamber launch transition atop the live 3D Kota Tepi diorama.
     /// </summary>
     [RequireComponent(typeof(UIDocument))]
     public sealed class MainMenuController : MonoBehaviour
     {
-        private enum MenuState { Title, FallingSmash, LevelMenu, PortalZoom, Done }
-
-        private sealed class RibbonShard
-        {
-            public VisualElement element;
-            public float x, y, vx, vy, angle, angularVel, life, maxLife;
-        }
+        private enum MenuState { Title, LevelMenu, PortalLaunch, Done }
 
         private const int ChapterCount = 5;
-        private const float ClusterStride = 574f; // 146 card + 12 margin + 416 rail
+        private const float ClusterStride = 602f;
 
         [SerializeField] private string levelSceneFormat = "Level{0}.{1}";
-
-        [Header("Transitions (seconds)")]
-        [SerializeField] private float fallDuration = 0.92f;
-        [SerializeField] private float portalZoomDuration = 0.58f;
-        [SerializeField] private float sceneFadeDuration = 0.36f;
+        [SerializeField] private float portalLaunchDuration = 0.44f;
 
         private UIDocument uiDocument;
         private VisualElement boundRoot;
+        private VisualElement menuRoot;
         private MainMenuCameraOrbit cameraOrbit;
 
         private VisualElement titleView;
         private Label titleIterLabel;
+        private Label titleProgressLabel;
         private Button btnEnter;
+        private Button btnChapters;
         private Button btnTitleShowcase;
         private Button btnTitleSettings;
         private Button btnShutdown;
+        private Button[] titleNavButtons;
+        private int focusedTitleIndex;
 
         private VisualElement ribbonView;
         private VisualElement ribbonViewport;
@@ -51,19 +47,10 @@ namespace Polymulator
         private Button btnRibbonSettings;
         private Button btnRibbonBack;
 
-        private VisualElement previewAccent;
         private Label previewChapterLabel;
         private Label previewTitleLabel;
         private Label previewStatusLabel;
         private Button btnPreviewLaunch;
-
-        private VisualElement fxLayer;
-        private VisualElement impactShockwave;
-        private VisualElement fallingNode;
-        private Label fallingNodeLabel;
-        private VisualElement portalZoomOrb;
-        private VisualElement portalZoomRing;
-        private Label portalZoomLabel;
 
         private VisualElement settingsOverlay;
         private Slider sliderVolume;
@@ -73,12 +60,10 @@ namespace Polymulator
         private Toggle toggleReduceMotion;
         private Button btnResetSave;
         private Button btnSettingsClose;
+        private Button settingsReturnFocus;
 
-        private readonly List<VisualElement> chapterCards = new List<VisualElement>(ChapterCount + 1);
         private readonly Dictionary<string, Button> dotButtonsByScene = new Dictionary<string, Button>();
-        private VisualElement currentHalo;
         private readonly string[,] levelTitles = new string[ChapterCount + 1, 5];
-        private readonly List<RibbonShard> activeShards = new List<RibbonShard>();
 
         private MenuState state = MenuState.Title;
         private int currentChapter = 1;
@@ -94,31 +79,17 @@ namespace Polymulator
         private float dragStartX;
         private float dragStartScroll;
 
-        // Smash state
-        private float smashStartTime;
-        private float smashStartX;
-        private float smashStartY;
-        private float smashTargetX;
-        private float smashTargetY;
-        private float enterSmashThresholdY;
-        private Rect enterWorldRect;
-        private Button hiddenLandingDot;
-        private bool buttonShattered;
-        private bool landingPlayed;
-        private float nextTrailMoteAt;
-        private float shockwaveElapsed = -1f;
-        private Vector2 shockwaveOrigin;
-
-        // Portal zoom state
         private float portalStartTime;
-        private Vector2 portalStartCenter;
-        private float portalStartSize;
-        private float portalTargetSize;
         private string portalSceneName;
         private bool portalSceneDispatched;
 
         private void Awake()
         {
+            Time.timeScale = 1f;
+            UnityEngine.Cursor.lockState = CursorLockMode.None;
+            UnityEngine.Cursor.visible = true;
+
+            EnsureEventSystem();
             SimulationSettings.ApplyAudioVolume();
             SimulationAudio.EnsureInstance();
             uiDocument = GetComponent<UIDocument>();
@@ -132,27 +103,60 @@ namespace Polymulator
 
         private void OnEnable()
         {
+            TryBindAndRefresh();
+        }
+
+        private void Start()
+        {
+            TryBindAndRefresh();
+        }
+
+        private void EnsureEventSystem()
+        {
+            EventSystem es = Object.FindFirstObjectByType<EventSystem>();
+            if (es == null)
+            {
+                GameObject esGo = new GameObject("EventSystem");
+                es = esGo.AddComponent<EventSystem>();
+            }
+
+            // Input System package requires InputSystemUIInputModule for runtime pointer and keyboard events.
+            StandaloneInputModule legacy = es.GetComponent<StandaloneInputModule>();
+            if (legacy != null) Destroy(legacy);
+            if (es.GetComponent<InputSystemUIInputModule>() == null)
+                es.gameObject.AddComponent<InputSystemUIInputModule>();
+        }
+
+        private void TryBindAndRefresh()
+        {
+            if (uiDocument == null) uiDocument = GetComponent<UIDocument>();
+            if (uiDocument == null || uiDocument.rootVisualElement == null) return;
+            if (boundRoot == uiDocument.rootVisualElement) return;
+
             BindUI();
             RebuildRibbonNodes();
             ApplySettingsValuesToUI();
             UpdateTitleAndMetaLabels();
             UpdatePreviewCard(selectedChapter, selectedLevel);
-            if (btnEnter != null) btnEnter.Focus();
+            FocusTitleButton(0);
         }
 
         private void BindUI()
         {
-            if (uiDocument == null || uiDocument.rootVisualElement == null) return;
             VisualElement root = uiDocument.rootVisualElement;
-            bool firstBind = boundRoot != root;
             boundRoot = root;
+            menuRoot = root.Q<VisualElement>("menu-root");
+            ApplyReduceMotionClass();
 
             titleView = root.Q<VisualElement>("title-view");
             titleIterLabel = root.Q<Label>("title-iter-label");
+            titleProgressLabel = root.Q<Label>("title-progress-label");
             btnEnter = root.Q<Button>("btn-enter");
+            btnChapters = root.Q<Button>("btn-chapters");
             btnTitleShowcase = root.Q<Button>("btn-title-showcase");
             btnTitleSettings = root.Q<Button>("btn-title-settings");
             btnShutdown = root.Q<Button>("btn-shutdown");
+            titleNavButtons = new[] { btnEnter, btnChapters, btnTitleShowcase, btnTitleSettings, btnShutdown };
 
             ribbonView = root.Q<VisualElement>("ribbon-view");
             ribbonViewport = root.Q<VisualElement>("ribbon-viewport");
@@ -163,19 +167,10 @@ namespace Polymulator
             btnRibbonSettings = root.Q<Button>("btn-ribbon-settings");
             btnRibbonBack = root.Q<Button>("btn-ribbon-back");
 
-            previewAccent = root.Q<VisualElement>("preview-accent");
             previewChapterLabel = root.Q<Label>("preview-chapter-label");
             previewTitleLabel = root.Q<Label>("preview-title-label");
             previewStatusLabel = root.Q<Label>("preview-status-label");
             btnPreviewLaunch = root.Q<Button>("btn-preview-launch");
-
-            fxLayer = root.Q<VisualElement>("fx-layer");
-            impactShockwave = root.Q<VisualElement>("impact-shockwave");
-            fallingNode = root.Q<VisualElement>("falling-node");
-            fallingNodeLabel = root.Q<Label>("falling-node-label");
-            portalZoomOrb = root.Q<VisualElement>("portal-zoom-orb");
-            portalZoomRing = root.Q<VisualElement>("portal-zoom-ring");
-            portalZoomLabel = root.Q<Label>("portal-zoom-label");
 
             settingsOverlay = root.Q<VisualElement>("settings-overlay");
             sliderVolume = root.Q<Slider>("slider-volume");
@@ -186,43 +181,32 @@ namespace Polymulator
             btnResetSave = root.Q<Button>("btn-reset-save");
             btnSettingsClose = root.Q<Button>("btn-settings-close");
 
-            if (!firstBind) return;
+            for (int i = 0; i < titleNavButtons.Length; i++)
+            {
+                int idx = i;
+                Button b = titleNavButtons[i];
+                if (b == null) continue;
+                b.RegisterCallback<PointerEnterEvent>(_ =>
+                {
+                    focusedTitleIndex = idx;
+                    SimulationAudio.PlayMenuHover();
+                });
+                b.RegisterCallback<FocusInEvent>(_ => focusedTitleIndex = idx);
+            }
 
-            if (btnEnter != null)
-            {
-                btnEnter.clicked += BeginEnterSmash;
-                btnEnter.RegisterCallback<PointerEnterEvent>(_ => SimulationAudio.PlayMenuHover());
-            }
-            if (btnTitleShowcase != null)
-            {
-                btnTitleShowcase.clicked += () => LaunchShowcase(btnTitleShowcase);
-                btnTitleShowcase.RegisterCallback<PointerEnterEvent>(_ => SimulationAudio.PlayMenuHover());
-            }
-            if (btnTitleSettings != null)
-            {
-                btnTitleSettings.clicked += OpenSettings;
-                btnTitleSettings.RegisterCallback<PointerEnterEvent>(_ => SimulationAudio.PlayMenuHover());
-            }
-            if (btnShutdown != null)
-            {
-                btnShutdown.clicked += BeginShutdown;
-                btnShutdown.RegisterCallback<PointerEnterEvent>(_ => SimulationAudio.PlayMenuHover());
-            }
-            if (btnRibbonShowcase != null)
-            {
-                btnRibbonShowcase.clicked += () => LaunchShowcase(btnRibbonShowcase);
-                btnRibbonShowcase.RegisterCallback<PointerEnterEvent>(_ => SimulationAudio.PlayMenuHover());
-            }
+            if (btnEnter != null) btnEnter.clicked += LaunchActiveChamberFromTitle;
+            if (btnChapters != null) btnChapters.clicked += OpenChapterIndex;
+            if (btnTitleShowcase != null) btnTitleShowcase.clicked += LaunchShowcase;
+            if (btnTitleSettings != null) btnTitleSettings.clicked += () => OpenSettings(btnTitleSettings);
+            if (btnShutdown != null) btnShutdown.clicked += BeginShutdown;
+
+            if (btnRibbonShowcase != null) btnRibbonShowcase.clicked += LaunchShowcase;
             if (btnDemoToggle != null) btnDemoToggle.clicked += ToggleDemoAccess;
-            if (btnRibbonSettings != null) btnRibbonSettings.clicked += OpenSettings;
+            if (btnRibbonSettings != null) btnRibbonSettings.clicked += () => OpenSettings(btnRibbonSettings);
             if (btnRibbonBack != null) btnRibbonBack.clicked += ReturnToTitle;
             if (btnSettingsClose != null) btnSettingsClose.clicked += CloseSettings;
             if (btnResetSave != null) btnResetSave.clicked += HandleResetSaveClicked;
-            if (btnPreviewLaunch != null)
-            {
-                btnPreviewLaunch.clicked += LaunchSelectedChamber;
-                btnPreviewLaunch.RegisterCallback<PointerEnterEvent>(_ => SimulationAudio.PlayMenuHover());
-            }
+            if (btnPreviewLaunch != null) btnPreviewLaunch.clicked += LaunchSelectedChamber;
 
             if (sliderVolume != null) sliderVolume.RegisterValueChangedCallback(evt =>
             {
@@ -237,6 +221,7 @@ namespace Polymulator
             if (toggleReduceMotion != null) toggleReduceMotion.RegisterValueChangedCallback(evt =>
             {
                 SimulationSettings.ReduceMotion = evt.newValue;
+                ApplyReduceMotionClass();
                 SimulationAudio.PlayMenuHover();
             });
 
@@ -247,6 +232,24 @@ namespace Polymulator
                 ribbonViewport.RegisterCallback<PointerUpEvent>(OnRibbonPointerUp);
                 ribbonViewport.RegisterCallback<WheelEvent>(OnRibbonWheel);
             }
+        }
+
+        private void FocusTitleButton(int index)
+        {
+            if (titleNavButtons == null || titleNavButtons.Length == 0) return;
+            focusedTitleIndex = (index + titleNavButtons.Length) % titleNavButtons.Length;
+            titleNavButtons[focusedTitleIndex]?.Focus();
+        }
+
+        private void ActivateTitleButton(int index)
+        {
+            if (titleNavButtons == null || index < 0 || index >= titleNavButtons.Length) return;
+            Button target = titleNavButtons[index];
+            if (target == btnEnter) LaunchActiveChamberFromTitle();
+            else if (target == btnChapters) OpenChapterIndex();
+            else if (target == btnTitleShowcase) LaunchShowcase();
+            else if (target == btnTitleSettings) OpenSettings(btnTitleSettings);
+            else if (target == btnShutdown) BeginShutdown();
         }
 
         private void LoadLevelCatalogTitles()
@@ -285,13 +288,13 @@ namespace Polymulator
         private void UpdateTitleAndMetaLabels()
         {
             if (titleIterLabel != null)
-                titleIterLabel.text = "ARSIP KOTA TEPI";
+                titleIterLabel.text = "KOTA TEPI  /  ARSIP SPASIAL";
 
             if (btnEnter != null)
             {
                 btnEnter.text = currentChapter > 1 || currentLevel > 1
-                    ? string.Format("Lanjutkan  —  Ruangan {0}.{1}", currentChapter, currentLevel)
-                    : "Mulai Simulasi";
+                    ? string.Format("Lanjutkan Ruangan {0}.{1}", currentChapter, currentLevel)
+                    : "Mulai Simulasi  1.1";
             }
 
             int totalLevels = SimulationProgress.Catalog.Length;
@@ -305,15 +308,19 @@ namespace Polymulator
                 }
             }
 
+            int fragments = SimulationProgress.GetCollectedFragmentCount();
+            if (titleProgressLabel != null)
+                titleProgressLabel.text = string.Format("{0}/{1} Ruangan Selesai  •  {2} Memori",
+                    totalCleared, totalLevels, fragments);
             if (ribbonMetaLabel != null)
                 ribbonMetaLabel.text = string.Format("{0}/{1} Ruangan  •  {2} Memori",
-                    totalCleared, totalLevels, SimulationProgress.GetCollectedFragmentCount());
+                    totalCleared, totalLevels, fragments);
 
             if (btnDemoToggle != null)
             {
                 bool on = SimulationProgress.IsDemoUnlocked;
                 btnDemoToggle.text = on ? "[F2] Buka Semua: Nyala" : "[F2] Buka Semua: Mati";
-                btnDemoToggle.EnableInClassList("top-chip-btn--on", on);
+                btnDemoToggle.EnableInClassList("top-action-btn--on", on);
             }
         }
 
@@ -321,9 +328,7 @@ namespace Polymulator
         {
             if (ribbonTrack == null) return;
             ribbonTrack.Clear();
-            chapterCards.Clear();
             dotButtonsByScene.Clear();
-            currentHalo = null;
 
             for (int c = 1; c <= ChapterCount; c++)
             {
@@ -360,6 +365,7 @@ namespace Polymulator
                 {
                     if (SimulationProgress.IsCleared(LevelSceneName(c, k))) clearedInChap++;
                 }
+
                 VisualElement barBg = new VisualElement();
                 barBg.AddToClassList("chapter-node-bar-bg");
                 VisualElement barFill = new VisualElement();
@@ -370,7 +376,6 @@ namespace Polymulator
                 card.Add(barBg);
 
                 cluster.Add(card);
-                chapterCards.Add(card);
 
                 VisualElement rail = new VisualElement();
                 rail.AddToClassList("segment-rail");
@@ -402,17 +407,10 @@ namespace Polymulator
 
                     if (isTarget)
                     {
-                        Label nowBadge = new Label("NOW");
+                        Label nowBadge = new Label("AKTIF");
                         nowBadge.AddToClassList("level-dot-badge");
                         nowBadge.style.backgroundColor = chapColor;
                         dotWrap.Add(nowBadge);
-
-                        VisualElement halo = new VisualElement();
-                        halo.AddToClassList("level-dot-halo");
-                        halo.pickingMode = PickingMode.Ignore;
-                        SetBorderColor(halo, chapColor);
-                        dotWrap.Add(halo);
-                        currentHalo = halo;
                     }
 
                     Label codeLbl = new Label(chap + "." + lvl);
@@ -441,7 +439,7 @@ namespace Polymulator
                             return;
                         }
                         SelectChamberPreview(chap, lvl);
-                        LaunchChamber(sceneName, dotBtn);
+                        LaunchChamber(sceneName);
                     };
 
                     dotWrap.Add(dotBtn);
@@ -465,7 +463,7 @@ namespace Polymulator
             VisualElement scCard = new VisualElement();
             scCard.AddToClassList("chapter-node-card");
             scCard.AddToClassList("chapter-node-card--showcase");
-            Label scSec = new Label("DEMO TERBUKA");
+            Label scSec = new Label("SANDBOX");
             scSec.AddToClassList("chapter-sector-pill");
             scSec.style.color = PaletteSettings.Teal;
             scCard.Add(scSec);
@@ -476,10 +474,8 @@ namespace Polymulator
             Label scTheme = new Label("SHOWCASE");
             scTheme.AddToClassList("chapter-node-theme");
             scCard.Add(scTheme);
-            Button scBtn = new Button();
-            scBtn.text = "Buka Demo";
+            Button scBtn = new Button(LaunchShowcase) { text = "Buka Demo" };
             scBtn.AddToClassList("showcase-launch-btn");
-            scBtn.clicked += () => LaunchShowcase(scBtn);
             scBtn.RegisterCallback<PointerEnterEvent>(_ =>
             {
                 SimulationAudio.PlayMenuHover();
@@ -487,23 +483,12 @@ namespace Polymulator
             });
             scCard.Add(scBtn);
             ribbonTrack.Add(scCard);
-            chapterCards.Add(scCard);
+        }
 
-            VisualElement epCard = new VisualElement();
-            epCard.AddToClassList("chapter-node-card");
-            epCard.style.borderTopColor = PaletteSettings.Rosewater;
-            Label epSec = new Label("AKHIR");
-            epSec.AddToClassList("chapter-sector-pill");
-            epSec.style.color = PaletteSettings.Rosewater;
-            epCard.Add(epSec);
-            Label epNum = new Label("N");
-            epNum.AddToClassList("chapter-node-num");
-            epCard.Add(epNum);
-            Label epTheme = new Label("ARSIP KOTA");
-            epTheme.AddToClassList("chapter-node-theme");
-            epCard.Add(epTheme);
-            ribbonTrack.Add(epCard);
-            chapterCards.Add(epCard);
+        private void ApplyReduceMotionClass()
+        {
+            if (menuRoot != null)
+                menuRoot.EnableInClassList("menu-root--reduce-motion", SimulationSettings.ReduceMotion);
         }
 
         private void UpdateShowcasePreview()
@@ -511,18 +496,18 @@ namespace Polymulator
             Color teal = PaletteSettings.Teal;
             if (previewChapterLabel != null)
             {
-                previewChapterLabel.text = "RUANG SHOWCASE  •  SEMUA MEKANIK TERBUKA";
+                previewChapterLabel.text = "Ruang Showcase  •  Semua Mekanik Terbuka";
                 previewChapterLabel.style.color = teal;
             }
             if (previewTitleLabel != null)
                 previewTitleLabel.text = "Demo Lengkap POLYMULATOR";
             if (previewStatusLabel != null)
-                previewStatusLabel.text = "Partition [1], Fusion [2], Telekinesis [F], Rotasi [R] & Mode Fleksibel langsung aktif";
-            if (previewAccent != null) previewAccent.style.backgroundColor = teal;
+                previewStatusLabel.text = "Partition [1], Fusion [2], Telekinesis [F], Rotasi [R], dan Mode Fleksibel langsung aktif";
             if (btnPreviewLaunch != null)
             {
                 btnPreviewLaunch.SetEnabled(true);
                 btnPreviewLaunch.style.backgroundColor = teal;
+                btnPreviewLaunch.style.color = PaletteSettings.Crust;
                 btnPreviewLaunch.text = "Buka Showcase";
             }
         }
@@ -540,10 +525,10 @@ namespace Polymulator
             bool unlocked = SimulationProgress.IsUnlocked(chapter, level);
             bool cleared = SimulationProgress.IsCleared(sceneName);
             string title = levelTitles[chapter, level];
-            if (string.IsNullOrEmpty(title)) title = "SECTOR " + chapter + "." + level;
+            if (string.IsNullOrEmpty(title)) title = "Ruangan " + chapter + "." + level;
 
             string chapterTheme = chapter < SimulationProgress.ChapterNames.Length
-                ? SimulationProgress.ChapterNames[chapter] : "ARCHIVE";
+                ? SimulationProgress.ChapterNames[chapter] : "ARSIP";
             Color chapColor = ChapterAccentColor(chapter);
 
             if (previewChapterLabel != null)
@@ -558,6 +543,7 @@ namespace Polymulator
             {
                 btnPreviewLaunch.SetEnabled(unlocked);
                 btnPreviewLaunch.style.backgroundColor = unlocked ? chapColor : PaletteSettings.Surface1;
+                btnPreviewLaunch.style.color = unlocked ? PaletteSettings.Crust : PaletteSettings.Subtext0;
                 btnPreviewLaunch.text = cleared ? "Main Ulang" : (unlocked ? "Mulai" : "Terkunci");
             }
 
@@ -565,8 +551,7 @@ namespace Polymulator
             {
                 if (!unlocked)
                 {
-                    previewStatusLabel.text = "Sektor terkunci  •  Selesaikan ruangan sebelumnya terlebih dahulu";
-                    if (previewAccent != null) previewAccent.style.backgroundColor = PaletteSettings.Overlay1;
+                    previewStatusLabel.text = "Ruangan terkunci: selesaikan ruangan sebelumnya lebih dulu";
                 }
                 else if (cleared)
                 {
@@ -574,35 +559,24 @@ namespace Polymulator
                     string starStr = new string('★', stars) + new string('☆', 3 - stars);
                     string mem = SimulationProgress.HasFragment(sceneName) ? "  •  Memori tersimpan" : "";
                     previewStatusLabel.text = string.Format("Selesai  [{0}]{1}", starStr, mem);
-                    if (previewAccent != null) previewAccent.style.backgroundColor = PaletteSettings.Green;
                 }
                 else
                 {
-                    previewStatusLabel.text = "Siap dimulai  •  Klik titik level atau tekan Enter";
-                    if (previewAccent != null) previewAccent.style.backgroundColor = chapColor;
+                    previewStatusLabel.text = "Siap dimulai  •  Klik titik ruangan atau tekan Enter";
                 }
             }
         }
 
         private void Update()
         {
+            if (boundRoot == null) TryBindAndRefresh();
+
             HandleKeyboard();
             float dt = Time.unscaledDeltaTime;
-            UpdateShards(dt);
-            UpdateShockwave();
 
-            if (currentHalo != null && state == MenuState.LevelMenu && !SimulationSettings.ReduceMotion)
-            {
-                float s = 1f + 0.14f * Mathf.Sin(Time.unscaledTime * 3.8f);
-                currentHalo.style.scale = new Scale(new Vector3(s, s, 1f));
-                currentHalo.style.opacity = 0.55f + 0.35f * Mathf.Sin(Time.unscaledTime * 3.8f);
-            }
-
-            if (state == MenuState.FallingSmash)
-                UpdateFallingSmash();
-            else if (state == MenuState.LevelMenu && !draggingRibbon)
+            if (state == MenuState.LevelMenu && !draggingRibbon)
                 UpdateRibbonScrollSmoothing(dt);
-            else if (state == MenuState.PortalZoom)
+            else if (state == MenuState.PortalLaunch)
                 UpdateStaticPortalLaunch();
 
             if (resetConfirmUntil > 0f && Time.unscaledTime > resetConfirmUntil)
@@ -625,8 +599,20 @@ namespace Polymulator
 
             if (state == MenuState.Title)
             {
-                if (kb.enterKey.wasPressedThisFrame || kb.numpadEnterKey.wasPressedThisFrame)
-                    BeginEnterSmash();
+                if (kb.downArrowKey.wasPressedThisFrame || kb.sKey.wasPressedThisFrame)
+                {
+                    FocusTitleButton(focusedTitleIndex + 1);
+                    SimulationAudio.PlayMenuHover();
+                }
+                else if (kb.upArrowKey.wasPressedThisFrame || kb.wKey.wasPressedThisFrame)
+                {
+                    FocusTitleButton(focusedTitleIndex - 1);
+                    SimulationAudio.PlayMenuHover();
+                }
+                else if (kb.enterKey.wasPressedThisFrame || kb.numpadEnterKey.wasPressedThisFrame || kb.spaceKey.wasPressedThisFrame)
+                {
+                    ActivateTitleButton(focusedTitleIndex);
+                }
                 return;
             }
 
@@ -646,10 +632,49 @@ namespace Polymulator
                 LaunchSelectedChamber();
         }
 
-        private void LaunchShowcase(Button sourceBtn)
+        private void LaunchActiveChamberFromTitle()
         {
+            if (state != MenuState.Title || settingsOpen) return;
+            selectedChapter = currentChapter;
+            selectedLevel = currentLevel;
+            LaunchChamber(LevelSceneName(currentChapter, currentLevel));
+        }
+
+        private void OpenChapterIndex()
+        {
+            if (state != MenuState.Title || settingsOpen) return;
+            SimulationAudio.PlayMenuClick();
+            state = MenuState.LevelMenu;
+
+            if (cameraOrbit != null) cameraOrbit.SetRibbonOpen(true);
+            if (titleView != null) titleView.AddToClassList("title-view--hidden");
+            if (ribbonView != null)
+            {
+                ribbonView.RemoveFromClassList("ribbon-view--hidden");
+                ribbonView.RemoveFromClassList("ribbon-view--fading");
+            }
+
+            Vector2 panelSize = GetPanelSize();
+            float viewW = Mathf.Max(400f, panelSize.x - 88f);
+            int levelCount = Mathf.Max(1, SimulationProgress.GetLevelsInChapter(currentChapter));
+            float dotOffset = 420f * (currentLevel / (float)(levelCount + 1));
+            float targetX = (currentChapter - 1) * ClusterStride + 182f + dotOffset;
+            horizontalScroll = targetScroll = ClampScroll(targetX - viewW * 0.45f, viewW);
+            if (ribbonTrack != null) ribbonTrack.style.left = -horizontalScroll;
+            UpdateCameraScrollParallax(viewW);
+
+            string curScene = LevelSceneName(currentChapter, currentLevel);
+            if (dotButtonsByScene.TryGetValue(curScene, out Button activeDot))
+                activeDot.Focus();
+            else if (btnPreviewLaunch != null)
+                btnPreviewLaunch.Focus();
+        }
+
+        private void LaunchShowcase()
+        {
+            if (state == MenuState.PortalLaunch || state == MenuState.Done || settingsOpen) return;
             selectedChapter = 5;
-            LaunchChamber(SimulationProgress.ShowcaseSceneName, sourceBtn);
+            LaunchChamber(SimulationProgress.ShowcaseSceneName);
         }
 
         private void LaunchSelectedChamber()
@@ -659,476 +684,41 @@ namespace Polymulator
                 SimulationAudio.PlayAnchorReject(Vector3.zero);
                 return;
             }
-            string sceneName = LevelSceneName(selectedChapter, selectedLevel);
-            dotButtonsByScene.TryGetValue(sceneName, out Button sourceDot);
-            LaunchChamber(sceneName, sourceDot);
+            LaunchChamber(LevelSceneName(selectedChapter, selectedLevel));
         }
 
-        public void BeginEnterSmash()
+        private void LaunchChamber(string sceneName)
         {
-            if (state != MenuState.Title || settingsOpen) return;
-            SimulationAudio.PlayMenuClick();
-            state = MenuState.FallingSmash;
-            smashStartTime = Time.unscaledTime;
-            buttonShattered = false;
-            landingPlayed = false;
-            nextTrailMoteAt = 0f;
-
-            if (cameraOrbit != null)
-            {
-                cameraOrbit.SetRibbonOpen(true);
-                cameraOrbit.SetSmashDescent(0f);
-            }
-
-            if (titleView != null) titleView.AddToClassList("title-view--up");
-            if (ribbonView != null)
-            {
-                ribbonView.RemoveFromClassList("ribbon-view--hidden");
-                ribbonView.RemoveFromClassList("ribbon-view--fading");
-            }
-
-            Vector2 panelSize = GetPanelSize();
-            enterWorldRect = btnEnter != null
-                ? btnEnter.worldBound
-                : new Rect(panelSize.x * 0.5f - 180f, panelSize.y * 0.5f, 360f, 54f);
-            float viewW = Mathf.Max(400f, panelSize.x - 72f);
-
-            int levelCount = Mathf.Max(1, SimulationProgress.GetLevelsInChapter(currentChapter));
-            float approxDotInRail = 416f * (currentLevel / (float)(levelCount + 1));
-            float approxTargetLocalX = (currentChapter - 1) * ClusterStride + 158f + approxDotInRail;
-            float desiredLeftInViewport = enterWorldRect.center.x - 36f;
-            horizontalScroll = targetScroll = ClampScroll(approxTargetLocalX - desiredLeftInViewport, viewW);
-
-            if (ribbonTrack != null) ribbonTrack.style.left = -horizontalScroll;
-            UpdateCameraScrollParallax(viewW);
-
-            smashStartX = enterWorldRect.center.x - 48f;
-            smashStartY = -128f;
-            smashTargetX = (approxTargetLocalX - horizontalScroll) + 36f - 48f;
-            smashTargetY = panelSize.y * 0.5f - 48f;
-            enterSmashThresholdY = enterWorldRect.yMin;
-
-            string curScene = LevelSceneName(currentChapter, currentLevel);
-            dotButtonsByScene.TryGetValue(curScene, out hiddenLandingDot);
-            if (hiddenLandingDot != null)
-                hiddenLandingDot.style.visibility = Visibility.Hidden;
-
-            Color chapColor = ChapterAccentColor(currentChapter);
-            if (fallingNodeLabel != null)
-                fallingNodeLabel.text = currentChapter + "." + currentLevel;
-            if (fallingNode != null)
-            {
-                fallingNode.style.backgroundColor = chapColor;
-                fallingNode.style.left = smashStartX;
-                fallingNode.style.top = smashStartY;
-                fallingNode.RemoveFromClassList("falling-node--hidden");
-            }
-        }
-
-        private void UpdateFallingSmash()
-        {
-            if (hiddenLandingDot != null && hiddenLandingDot.worldBound.width > 1f)
-            {
-                Vector2 dotCenter = hiddenLandingDot.worldBound.center;
-                smashTargetX = dotCenter.x - 48f;
-                smashTargetY = dotCenter.y - 48f;
-            }
-            else if (ribbonViewport != null && ribbonViewport.worldBound.height > 10f)
-            {
-                smashTargetY = ribbonViewport.worldBound.center.y - 48f;
-            }
-
-            float t = Mathf.Clamp01((Time.unscaledTime - smashStartTime) / Mathf.Max(0.15f, fallDuration));
-            if (SimulationSettings.ReduceMotion) t = 1f;
-
-            // Phase 1 (0..0.28): fast plunge into ENTER block; Phase 2 (0.28..1): tracking descent to Ribbon orb slot
-            float y;
-            float x;
-            if (t < 0.28f)
-            {
-                float k = t / 0.28f;
-                float easeIn = k * k;
-                y = Mathf.Lerp(smashStartY, enterSmashThresholdY - 48f, easeIn);
-                x = Mathf.Lerp(smashStartX, enterWorldRect.center.x - 48f, easeIn);
-            }
-            else
-            {
-                float k = (t - 0.28f) / 0.72f;
-                float easeOut = 1f - Mathf.Pow(1f - k, 3f);
-                y = Mathf.Lerp(enterSmashThresholdY - 48f, smashTargetY, easeOut);
-                x = Mathf.Lerp(enterWorldRect.center.x - 48f, smashTargetX, easeOut);
-                if (cameraOrbit != null) cameraOrbit.SetSmashDescent(k);
-            }
-
-            if (!buttonShattered && t >= 0.27f)
-            {
-                SpawnEnterShards(enterWorldRect, ChapterAccentColor(currentChapter));
-                TriggerImpactShockwave(enterWorldRect.center, ChapterAccentColor(currentChapter));
-                SimulationAudio.PlayMenuSmash();
-                SimulationVFX.Burst(new Vector3(-0.4f, 0.9f, 0.3f), ChapterAccentColor(currentChapter), 26, 3.4f);
-                SimulationVisualBridge.TriggerFloorRipple(new Vector3(-0.4f, 0f, 0.3f), ChapterAccentColor(currentChapter), 7.5f, 1.35f, 0.78f);
-                if (cameraOrbit != null) cameraOrbit.TriggerImpactPunch(0.28f);
-                buttonShattered = true;
-            }
-
-            if (fallingNode != null)
-            {
-                fallingNode.style.left = x;
-                fallingNode.style.top = y;
-                float spinScale = t < 0.28f ? 1.08f : Mathf.Lerp(1.12f, 0.65f, (t - 0.28f) / 0.72f);
-                fallingNode.style.scale = new Scale(new Vector3(spinScale, spinScale, 1f));
-            }
-
-            if (Time.unscaledTime >= nextTrailMoteAt && fxLayer != null && t < 0.96f)
-            {
-                nextTrailMoteAt = Time.unscaledTime + 0.028f;
-                SpawnTrailMote(new Vector2(x + 48f, y + 48f), ChapterAccentColor(currentChapter));
-            }
-
-            if (t < 1f) return;
-
-            if (!landingPlayed)
-            {
-                SimulationAudio.PlayMenuNodeLand();
-                SimulationVFX.Ring(new Vector3(-0.7f, 0.08f, -0.5f), ChapterAccentColor(currentChapter), 2.8f, 0.48f);
-                TriggerImpactShockwave(new Vector2(smashTargetX + 48f, smashTargetY + 48f), ChapterAccentColor(currentChapter));
-                landingPlayed = true;
-            }
-
-            if (cameraOrbit != null) cameraOrbit.ClearSmashDescent();
-            if (fallingNode != null)
-            {
-                fallingNode.AddToClassList("falling-node--hidden");
-                fallingNode.style.scale = new Scale(Vector3.one);
-            }
-            if (hiddenLandingDot != null)
-            {
-                hiddenLandingDot.style.visibility = Visibility.Visible;
-                hiddenLandingDot = null;
-            }
-
-            if (titleView != null) titleView.style.display = DisplayStyle.None;
-            state = MenuState.LevelMenu;
-        }
-
-        private void TriggerImpactShockwave(Vector2 center, Color color)
-        {
-            if (impactShockwave == null) return;
-            shockwaveOrigin = center;
-            shockwaveElapsed = 0f;
-            impactShockwave.style.left = center.x - 60f;
-            impactShockwave.style.top = center.y - 60f;
-            SetBorderColor(impactShockwave, color);
-            impactShockwave.style.scale = new Scale(new Vector3(0.45f, 0.45f, 1f));
-            impactShockwave.style.opacity = 1f;
-            impactShockwave.RemoveFromClassList("impact-shockwave--hidden");
-        }
-
-        private void UpdateShockwave()
-        {
-            if (shockwaveElapsed < 0f || impactShockwave == null) return;
-            shockwaveElapsed += Time.unscaledDeltaTime;
-            float u = Mathf.Clamp01(shockwaveElapsed / 0.28f);
-            float s = Mathf.Lerp(0.45f, 2.75f, 1f - Mathf.Pow(1f - u, 3f));
-            impactShockwave.style.left = shockwaveOrigin.x - 60f;
-            impactShockwave.style.top = shockwaveOrigin.y - 60f;
-            impactShockwave.style.scale = new Scale(new Vector3(s, s, 1f));
-            impactShockwave.style.opacity = (1f - u) * (1f - u);
-            if (u >= 1f)
-            {
-                shockwaveElapsed = -1f;
-                impactShockwave.AddToClassList("impact-shockwave--hidden");
-            }
-        }
-
-        private void SpawnTrailMote(Vector2 center, Color color)
-        {
-            if (fxLayer == null) return;
-            VisualElement mote = new VisualElement();
-            mote.AddToClassList("orb-trail-mote");
-            mote.pickingMode = PickingMode.Ignore;
-            float sz = Random.Range(10f, 18f);
-            float sx = center.x - sz * 0.5f + Random.Range(-10f, 10f);
-            float sy = center.y - sz * 0.5f + Random.Range(-10f, 10f);
-            mote.style.width = sz;
-            mote.style.height = sz;
-            mote.style.left = sx;
-            mote.style.top = sy;
-            mote.style.backgroundColor = Color.Lerp(color, PaletteSettings.Text, 0.35f);
-            fxLayer.Add(mote);
-
-            activeShards.Add(new RibbonShard
-            {
-                element = mote,
-                x = sx,
-                y = sy,
-                vx = Random.Range(-38f, 38f),
-                vy = Random.Range(-90f, -20f),
-                angle = 0f,
-                angularVel = 0f,
-                life = 0.34f,
-                maxLife = 0.34f
-            });
-        }
-
-        private void SpawnEnterShards(Rect rect, Color accentColor)
-        {
-            if (fxLayer == null) return;
-            const int cols = 6;
-            const int rows = 2;
-            float w = Mathf.Max(22f, rect.width / cols);
-            float h = Mathf.Max(14f, rect.height / rows);
-
-            for (int r = 0; r < rows; r++)
-            {
-                for (int c = 0; c < cols; c++)
-                {
-                    VisualElement shard = new VisualElement();
-                    shard.AddToClassList("break-shard");
-                    shard.pickingMode = PickingMode.Ignore;
-                    SetBorderColor(shard, accentColor);
-                    float sx = rect.x + c * w;
-                    float sy = rect.y + r * h;
-                    shard.style.left = sx;
-                    shard.style.top = sy;
-                    shard.style.width = w - 2f;
-                    shard.style.height = h - 2f;
-                    fxLayer.Add(shard);
-
-                    Vector2 outDir = new Vector2((c - 2.5f) * 0.85f, r - 0.5f).normalized;
-                    float maxLife = Random.Range(0.50f, 0.80f);
-                    activeShards.Add(new RibbonShard
-                    {
-                        element = shard,
-                        x = sx,
-                        y = sy,
-                        vx = outDir.x * Random.Range(220f, 440f) + Random.Range(-65f, 65f),
-                        vy = outDir.y * Random.Range(90f, 220f) - Random.Range(90f, 240f),
-                        angle = Random.Range(-15f, 15f),
-                        angularVel = Random.Range(-420f, 420f),
-                        life = maxLife,
-                        maxLife = maxLife
-                    });
-                }
-            }
-        }
-
-        private void UpdateShards(float dt)
-        {
-            for (int i = activeShards.Count - 1; i >= 0; i--)
-            {
-                RibbonShard s = activeShards[i];
-                s.life -= dt;
-                if (s.life <= 0f)
-                {
-                    s.element.RemoveFromHierarchy();
-                    activeShards.RemoveAt(i);
-                    continue;
-                }
-                bool hasGravity = Mathf.Abs(s.angularVel) > 0.01f;
-                if (hasGravity) s.vy += 1480f * dt;
-                s.x += s.vx * dt;
-                s.y += s.vy * dt;
-                s.angle += s.angularVel * dt;
-                s.element.style.left = s.x;
-                s.element.style.top = s.y;
-                if (hasGravity) s.element.style.rotate = new Rotate(s.angle);
-                s.element.style.opacity = Mathf.Clamp01(s.life / Mathf.Max(0.1f, s.maxLife));
-            }
-        }
-
-        private void LaunchChamber(string sceneName, Button sourceDot)
-        {
-            if (state == MenuState.PortalZoom || state == MenuState.Done) return;
-            state = MenuState.PortalZoom;
+            if (state == MenuState.PortalLaunch || state == MenuState.Done) return;
+            state = MenuState.PortalLaunch;
             portalSceneName = sceneName;
             portalStartTime = Time.unscaledTime;
             portalSceneDispatched = false;
 
             SimulationAudio.PlayModeSwitch(true);
             SimulationVFX.PlaySpawnAperture(new Vector3(-0.7f, 0.3f, -0.5f), ChapterAccentColor(selectedChapter));
-            SimulationVisualBridge.TriggerFloorRipple(new Vector3(-0.7f, 0f, -0.5f), ChapterAccentColor(selectedChapter), 9.0f, 1.4f, 0.72f);
+            SimulationVisualBridge.TriggerFloorRipple(new Vector3(-0.7f, 0f, -0.5f), ChapterAccentColor(selectedChapter), 8.5f, 1.3f, 0.65f);
 
-            if (titleView != null) titleView.AddToClassList("title-view--up");
+            if (titleView != null) titleView.AddToClassList("title-view--hidden");
             if (ribbonView != null) ribbonView.AddToClassList("ribbon-view--fading");
-
-            Vector2 panelSize = GetPanelSize();
-            portalStartCenter = sourceDot != null && sourceDot.worldBound.width > 1f
-                ? sourceDot.worldBound.center
-                : panelSize * 0.5f;
-            portalStartSize = sourceDot != null && sourceDot.worldBound.width > 1f
-                ? sourceDot.worldBound.width
-                : 40f;
-            Color chapColor = ChapterAccentColor(selectedChapter);
-            if (portalZoomLabel != null)
-                portalZoomLabel.text = string.IsNullOrEmpty(portalSceneName) || SimulationProgress.IsSpecialShowcase(portalSceneName)
-                    ? "DEMO"
-                    : selectedChapter + "." + selectedLevel;
-            if (portalZoomRing != null)
-                SetBorderColor(portalZoomRing, chapColor);
-
-            if (portalZoomOrb != null)
-            {
-                portalZoomOrb.RemoveFromClassList("portal-zoom-orb--hidden");
-                portalZoomOrb.style.backgroundColor = chapColor;
-                portalZoomOrb.style.left = portalStartCenter.x - portalStartSize * 0.5f;
-                portalZoomOrb.style.top = portalStartCenter.y - portalStartSize * 0.5f;
-                portalZoomOrb.style.width = portalStartSize;
-                portalZoomOrb.style.height = portalStartSize;
-                portalZoomOrb.style.borderTopLeftRadius = portalStartSize * 0.5f;
-                portalZoomOrb.style.borderTopRightRadius = portalStartSize * 0.5f;
-                portalZoomOrb.style.borderBottomLeftRadius = portalStartSize * 0.5f;
-                portalZoomOrb.style.borderBottomRightRadius = portalStartSize * 0.5f;
-                portalZoomOrb.style.scale = new Scale(Vector3.one);
-                portalZoomOrb.style.opacity = 1f;
-            }
         }
-
-        private void UpdatePortalLaunch()
-        {
-            float duration = SimulationSettings.ReduceMotion ? 0.16f : Mathf.Max(0.25f, portalZoomDuration);
-            float t = Mathf.Clamp01((Time.unscaledTime - portalStartTime) / duration);
-            float eased = 1f - Mathf.Pow(1f - t, 3f);
-
-            Vector2 panelSize = GetPanelSize();
-            Vector2 centerNow = Vector2.Lerp(portalStartCenter, panelSize * 0.5f, eased);
-            float sizeNow = Mathf.Lerp(portalStartSize, portalTargetSize, eased);
-
-            if (cameraOrbit != null) cameraOrbit.SetPortalDive(eased);
-
-            if (portalZoomOrb != null)
-            {
-                portalZoomOrb.style.width = sizeNow;
-                portalZoomOrb.style.height = sizeNow;
-                portalZoomOrb.style.left = centerNow.x - sizeNow * 0.5f;
-                portalZoomOrb.style.top = centerNow.y - sizeNow * 0.5f;
-                if (portalZoomRing != null) portalZoomRing.style.rotate = new Rotate(eased * 140f);
-                if (portalZoomLabel != null) portalZoomLabel.style.fontSize = Mathf.Lerp(14f, 64f, eased);
-            }
-
-            if (!portalSceneDispatched && t >= 0.72f)
-            {
-                portalSceneDispatched = true;
-                state = MenuState.Done;
-                SceneTransition.Begin(portalSceneName, 0f, sceneFadeDuration, PaletteSettings.Crust);
-            }
-        }
-
-        private Vector2 GetPanelSize()
-        {
-            Vector2 panelSize = uiDocument != null && uiDocument.rootVisualElement != null
-                ? uiDocument.rootVisualElement.worldBound.size : new Vector2(1920f, 1080f);
-            return panelSize.x < 100f ? new Vector2(1920f, 1080f) : panelSize;
-        }
-
-        private void OnRibbonPointerDown(PointerDownEvent evt)
-        {
-            if (state != MenuState.LevelMenu || evt.button != 0) return;
-            if (evt.target is Button) return;
-            draggingRibbon = true;
-            dragStartX = evt.position.x;
-            dragStartScroll = horizontalScroll;
-            targetScroll = horizontalScroll;
-            ribbonViewport.CapturePointer(evt.pointerId);
-        }
-
-        private void OnRibbonPointerMove(PointerMoveEvent evt)
-        {
-            if (!draggingRibbon) return;
-            float viewW = ribbonViewport != null ? ribbonViewport.resolvedStyle.width : 1848f;
-            float next = dragStartScroll - (evt.position.x - dragStartX);
-            horizontalScroll = targetScroll = ClampScroll(next, viewW);
-            if (ribbonTrack != null) ribbonTrack.style.left = -horizontalScroll;
-            UpdateCameraScrollParallax(viewW);
-        }
-
-        private void OnRibbonPointerUp(PointerUpEvent evt)
-        {
-            if (!draggingRibbon) return;
-            draggingRibbon = false;
-            if (ribbonViewport.HasPointerCapture(evt.pointerId))
-                ribbonViewport.ReleasePointer(evt.pointerId);
-        }
-
-        private void OnRibbonWheel(WheelEvent evt)
-        {
-            if (state != MenuState.LevelMenu) return;
-            float delta = Mathf.Abs(evt.delta.y) >= Mathf.Abs(evt.delta.x) ? evt.delta.y : evt.delta.x;
-            NudgeRibbonScroll(delta * 65f);
-            evt.StopPropagation();
-        }
-
-        private void NudgeRibbonScroll(float delta)
-        {
-            float viewW = ribbonViewport != null ? ribbonViewport.resolvedStyle.width : 1848f;
-            targetScroll = ClampScroll(targetScroll + delta, viewW);
-        }
-
-        private void UpdateRibbonScrollSmoothing(float dt)
-        {
-            if (ribbonTrack == null || Mathf.Approximately(horizontalScroll, targetScroll)) return;
-            float blend = 1f - Mathf.Exp(-14f * dt);
-            horizontalScroll = Mathf.Lerp(horizontalScroll, targetScroll, blend);
-            if (Mathf.Abs(targetScroll - horizontalScroll) < 0.5f) horizontalScroll = targetScroll;
-            ribbonTrack.style.left = -horizontalScroll;
-            float viewW = ribbonViewport != null ? ribbonViewport.resolvedStyle.width : 1848f;
-            UpdateCameraScrollParallax(viewW);
-        }
-
-        private void UpdateCameraScrollParallax(float viewportWidth)
-        {
-            if (cameraOrbit == null) return;
-            float max = MaxScroll(viewportWidth);
-            cameraOrbit.SetScrollFraction(Mathf.InverseLerp(-120f, max, horizontalScroll));
-        }
-
-        private static float MaxScroll(float viewportWidth)
-        {
-            float contentW = (ChapterCount + 1) * ClusterStride + 220f;
-            return Mathf.Max(120f, contentW - Mathf.Max(400f, viewportWidth) + 120f);
-        }
-
-        private static float ClampScroll(float value, float viewportWidth)
-            => Mathf.Clamp(value, -120f, MaxScroll(viewportWidth));
 
         private void UpdateStaticPortalLaunch()
         {
-            const float cameraSettleDuration = 0.50f;
-            const float shrinkDuration = 0.38f;
+            float duration = SimulationSettings.ReduceMotion ? 0.08f : Mathf.Max(0.24f, portalLaunchDuration);
             float elapsed = Time.unscaledTime - portalStartTime;
+            float camProgress = Mathf.Clamp01(elapsed / duration);
+            float eased = 1f - Mathf.Pow(1f - camProgress, 3f);
 
-            float camProgress = SimulationSettings.ReduceMotion ? 1f : Mathf.Clamp01(elapsed / cameraSettleDuration);
-            float easedCam = 1f - Mathf.Pow(1f - camProgress, 3f);
             if (cameraOrbit != null)
-                cameraOrbit.SetPortalDive(easedCam);
+                cameraOrbit.SetPortalDive(eased);
 
-            // Smoothly shrink the clicked level circle instead of expanding/popping abruptly
-            if (portalZoomOrb != null)
-            {
-                float shrinkT = SimulationSettings.ReduceMotion ? 1f : Mathf.Clamp01(elapsed / shrinkDuration);
-                float shrinkEase = shrinkT * shrinkT * (3f - 2f * shrinkT);
-                float curSize = Mathf.Lerp(portalStartSize, 2f, shrinkEase);
-                portalZoomOrb.style.left = portalStartCenter.x - curSize * 0.5f;
-                portalZoomOrb.style.top = portalStartCenter.y - curSize * 0.5f;
-                portalZoomOrb.style.width = curSize;
-                portalZoomOrb.style.height = curSize;
-                portalZoomOrb.style.borderTopLeftRadius = curSize * 0.5f;
-                portalZoomOrb.style.borderTopRightRadius = curSize * 0.5f;
-                portalZoomOrb.style.borderBottomLeftRadius = curSize * 0.5f;
-                portalZoomOrb.style.borderBottomRightRadius = curSize * 0.5f;
-                portalZoomOrb.style.opacity = Mathf.Clamp01(1f - shrinkT * 0.85f);
-                if (portalZoomLabel != null)
-                    portalZoomLabel.style.opacity = Mathf.Clamp01(1f - shrinkT * 2.2f);
-                if (shrinkT >= 1f)
-                    portalZoomOrb.AddToClassList("portal-zoom-orb--hidden");
-            }
-
-            if (!portalSceneDispatched && elapsed >= cameraSettleDuration + 0.04f)
+            if (!portalSceneDispatched && elapsed >= duration)
             {
                 portalSceneDispatched = true;
                 state = MenuState.Done;
                 Texture2D staticSnapshot = CaptureRearRectCameraSnapshot();
-                StaticPortalTransition.Begin(portalSceneName, staticSnapshot, 0.06f, 0.28f);
+                StaticPortalTransition.Begin(portalSceneName, staticSnapshot, 0.05f, 0.26f);
             }
         }
 
@@ -1165,14 +755,82 @@ namespace Polymulator
             return capture;
         }
 
-        private static void SetBorderColor(VisualElement el, Color c)
+        private Vector2 GetPanelSize()
         {
-            if (el == null) return;
-            el.style.borderTopColor = c;
-            el.style.borderRightColor = c;
-            el.style.borderBottomColor = c;
-            el.style.borderLeftColor = c;
+            Vector2 panelSize = uiDocument != null && uiDocument.rootVisualElement != null
+                ? uiDocument.rootVisualElement.worldBound.size : new Vector2(1920f, 1080f);
+            return panelSize.x < 100f ? new Vector2(1920f, 1080f) : panelSize;
         }
+
+        private void OnRibbonPointerDown(PointerDownEvent evt)
+        {
+            if (state != MenuState.LevelMenu || evt.button != 0) return;
+            if (evt.target is Button) return;
+            draggingRibbon = true;
+            dragStartX = evt.position.x;
+            dragStartScroll = horizontalScroll;
+            targetScroll = horizontalScroll;
+            ribbonViewport.CapturePointer(evt.pointerId);
+        }
+
+        private void OnRibbonPointerMove(PointerMoveEvent evt)
+        {
+            if (!draggingRibbon) return;
+            float viewW = ribbonViewport != null ? ribbonViewport.resolvedStyle.width : 1832f;
+            float next = dragStartScroll - (evt.position.x - dragStartX);
+            horizontalScroll = targetScroll = ClampScroll(next, viewW);
+            if (ribbonTrack != null) ribbonTrack.style.left = -horizontalScroll;
+            UpdateCameraScrollParallax(viewW);
+        }
+
+        private void OnRibbonPointerUp(PointerUpEvent evt)
+        {
+            if (!draggingRibbon) return;
+            draggingRibbon = false;
+            if (ribbonViewport.HasPointerCapture(evt.pointerId))
+                ribbonViewport.ReleasePointer(evt.pointerId);
+        }
+
+        private void OnRibbonWheel(WheelEvent evt)
+        {
+            if (state != MenuState.LevelMenu) return;
+            float delta = Mathf.Abs(evt.delta.y) >= Mathf.Abs(evt.delta.x) ? evt.delta.y : evt.delta.x;
+            NudgeRibbonScroll(delta * 65f);
+            evt.StopPropagation();
+        }
+
+        private void NudgeRibbonScroll(float delta)
+        {
+            float viewW = ribbonViewport != null ? ribbonViewport.resolvedStyle.width : 1832f;
+            targetScroll = ClampScroll(targetScroll + delta, viewW);
+        }
+
+        private void UpdateRibbonScrollSmoothing(float dt)
+        {
+            if (ribbonTrack == null || Mathf.Approximately(horizontalScroll, targetScroll)) return;
+            float blend = 1f - Mathf.Exp(-14f * dt);
+            horizontalScroll = Mathf.Lerp(horizontalScroll, targetScroll, blend);
+            if (Mathf.Abs(targetScroll - horizontalScroll) < 0.5f) horizontalScroll = targetScroll;
+            ribbonTrack.style.left = -horizontalScroll;
+            float viewW = ribbonViewport != null ? ribbonViewport.resolvedStyle.width : 1832f;
+            UpdateCameraScrollParallax(viewW);
+        }
+
+        private void UpdateCameraScrollParallax(float viewportWidth)
+        {
+            if (cameraOrbit == null) return;
+            float max = MaxScroll(viewportWidth);
+            cameraOrbit.SetScrollFraction(Mathf.InverseLerp(-80f, max, horizontalScroll));
+        }
+
+        private static float MaxScroll(float viewportWidth)
+        {
+            float contentW = ChapterCount * ClusterStride + 260f;
+            return Mathf.Max(120f, contentW - Mathf.Max(400f, viewportWidth) + 80f);
+        }
+
+        private static float ClampScroll(float value, float viewportWidth)
+            => Mathf.Clamp(value, -80f, MaxScroll(viewportWidth));
 
         private static Color ChapterAccentColor(int chapter)
         {
@@ -1213,17 +871,18 @@ namespace Polymulator
             if (resetConfirmUntil <= Time.unscaledTime)
             {
                 resetConfirmUntil = Time.unscaledTime + 3.0f;
-                if (btnResetSave != null) btnResetSave.text = "Konfirmasi Hapus?";
+                if (btnResetSave != null) btnResetSave.text = "Klik Lagi untuk Hapus";
                 SimulationAudio.PlayMenuHover();
                 return;
             }
             resetConfirmUntil = 0f;
-            if (btnResetSave != null) btnResetSave.text = "RESET PROGRESS DATA";
+            if (btnResetSave != null) btnResetSave.text = "Reset Progres";
             ExecuteResetProgress();
         }
 
-        private void OpenSettings()
+        private void OpenSettings(Button triggerButton)
         {
+            settingsReturnFocus = triggerButton;
             settingsOpen = true;
             ApplySettingsValuesToUI();
             if (settingsOverlay != null) settingsOverlay.RemoveFromClassList("settings-overlay--hidden");
@@ -1235,10 +894,11 @@ namespace Polymulator
         {
             settingsOpen = false;
             resetConfirmUntil = 0f;
-            if (btnResetSave != null) btnResetSave.text = "RESET PROGRESS DATA";
+            if (btnResetSave != null) btnResetSave.text = "Reset Progres";
             if (settingsOverlay != null) settingsOverlay.AddToClassList("settings-overlay--hidden");
             SimulationAudio.PlayMenuHover();
-            if (state == MenuState.Title && btnEnter != null) btnEnter.Focus();
+            if (settingsReturnFocus != null) settingsReturnFocus.Focus();
+            else if (state == MenuState.Title) FocusTitleButton(focusedTitleIndex);
         }
 
         private void ApplySettingsValuesToUI()
@@ -1260,21 +920,17 @@ namespace Polymulator
             state = MenuState.Title;
             if (cameraOrbit != null) cameraOrbit.SetRibbonOpen(false);
             if (ribbonView != null) ribbonView.AddToClassList("ribbon-view--hidden");
-            if (titleView != null)
-            {
-                titleView.style.display = DisplayStyle.Flex;
-                titleView.RemoveFromClassList("title-view--up");
-            }
+            if (titleView != null) titleView.RemoveFromClassList("title-view--hidden");
             SimulationAudio.PlayMenuHover();
-            if (btnEnter != null) btnEnter.Focus();
+            FocusTitleButton(1);
         }
 
         private void BeginShutdown()
         {
             if (state != MenuState.Title || settingsOpen) return;
             state = MenuState.Done;
-            SimulationAudio.PlayMenuSmash();
-            SceneTransition.Quit(0.25f, 0.45f);
+            SimulationAudio.PlayMenuClick();
+            SceneTransition.Quit(0.18f, 0.35f);
         }
 
         private string LevelSceneName(int chapter, int level) => string.Format(levelSceneFormat, chapter, level);

@@ -10,13 +10,13 @@ namespace Polymulator
     /// </summary>
     public sealed class MainMenuCameraOrbit : MonoBehaviour
     {
-        public Vector3 focusPoint = new Vector3(-1.45f, 0.85f, 1.95f);
+        public Vector3 focusPoint = new Vector3(-2.65f, 0.80f, 1.45f);
         public Vector3 rectFocusPoint = new Vector3(-0.7f, 0.65f, -0.5f);
-        public float baseYaw = 32f;
-        public float basePitch = 18f;
-        public float orbitDistance = 9.2f;
-        public float swayAmplitude = 5.5f;
-        public float swaySpeed = 0.24f;
+        public float baseYaw = 30f;
+        public float basePitch = 19f;
+        public float orbitDistance = 9.8f;
+        public float swayAmplitude = 3.2f;
+        public float swaySpeed = 0.22f;
 
         private Transform showcaseRectTransform;
         private float ribbonBlend;
@@ -30,8 +30,14 @@ namespace Polymulator
         {
             GameObject bot = GameObject.Find("Showcase Rect");
             if (bot != null) showcaseRectTransform = bot.transform;
-            if (Mathf.Approximately(focusPoint.x, 0.4f) && Mathf.Approximately(focusPoint.z, 1.0f))
-                focusPoint = new Vector3(-1.45f, 0.85f, 1.95f);
+            if ((Mathf.Approximately(focusPoint.x, 0.4f) && Mathf.Approximately(focusPoint.z, 1.0f)) ||
+                (Mathf.Approximately(focusPoint.x, -1.45f) && Mathf.Approximately(focusPoint.z, 1.95f)))
+            {
+                focusPoint = new Vector3(-2.65f, 0.80f, 1.45f);
+                orbitDistance = 9.8f;
+                baseYaw = 30f;
+                basePitch = 19f;
+            }
         }
 
         public void SetRibbonOpen(bool open)

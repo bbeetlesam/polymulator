@@ -1,4 +1,4 @@
-/* POLYMULATOR — Main Menu & Chapter Ribbon UI Toolkit Stylesheet */
+/* POLYMULATOR: Main Menu & Chapter Index (Catppuccin Mocha) */
 
 .menu-root {
     flex-grow: 1;
@@ -9,33 +9,39 @@
     -unity-font-definition: url("/Assets/UI/Fonts/Font_AktSemiBold.asset");
 }
 
-.menu-vignette {
-    position: absolute;
-    left: 0;
-    right: 0;
-    top: 0;
-    bottom: 0;
-    background-color: rgba(17, 17, 27, 0.18);
-}
-
-/* Title View — Editorial Left Rail + Unobstructed Right 3D Stage */
+/* Title View: Architectural Left Rail + Open 3D Stage */
 .title-view {
     position: absolute;
     left: 0;
     right: 0;
     top: 0;
     bottom: 0;
-    align-items: flex-start;
-    justify-content: space-between;
-    padding: 68px 64px 52px 76px;
+    flex-direction: row;
+    align-items: stretch;
     transition-property: opacity, translate;
-    transition-duration: 0.34s;
+    transition-duration: 0.22s;
     transition-timing-function: ease-out-cubic;
 }
 
-.title-view--up {
+.title-view--hidden {
     opacity: 0;
-    translate: 0 -110px;
+    translate: -24px 0;
+    display: none;
+}
+
+.title-rail {
+    width: 580px;
+    height: 100%;
+    background-color: rgba(17, 17, 27, 0.94);
+    border-right-width: 1px;
+    border-right-color: #6C7086;
+    padding: 72px 56px 52px 64px;
+    flex-direction: column;
+    justify-content: space-between;
+}
+
+.stage-spacer {
+    flex-grow: 1;
 }
 
 .brand-block {
@@ -43,151 +49,194 @@
     align-items: flex-start;
 }
 
-.title-kicker {
+.brand-kicker {
     flex-direction: row;
     align-items: center;
-    margin-bottom: 12px;
+    margin-bottom: 16px;
 }
 
-.title-kicker-bar {
-    width: 28px;
-    height: 3px;
+/* Two-part geometric motif referencing Partition and Fusion */
+.brand-mark-a {
+    width: 10px;
+    height: 10px;
     background-color: #74C7EC;
+    border-radius: 1px;
+    margin-right: 4px;
+}
+
+.brand-mark-b {
+    width: 10px;
+    height: 10px;
+    background-color: #94E2D5;
+    border-radius: 1px;
     margin-right: 12px;
 }
 
-.title-pill-text {
-    -unity-font-definition: url("/Assets/UI/Fonts/Font_AktSemiBold.asset");
-    font-size: 13px;
+.brand-kicker-text {
+    -unity-font-definition: url("/Assets/UI/Fonts/Font_AktMedium.asset");
+    font-size: 15px;
     color: #94E2D5;
-    letter-spacing: 2.6px;
+    letter-spacing: 1.8px;
 }
 
 .hero-title {
     -unity-font-definition: url("/Assets/UI/Fonts/Font_AktBold.asset");
-    font-size: 62px;
+    font-size: 66px;
     color: #CDD6F4;
-    letter-spacing: 2.5px;
-    margin-bottom: 4px;
+    letter-spacing: 1.5px;
+    margin-bottom: 12px;
     margin-left: -2px;
     -unity-text-align: middle-left;
-    text-shadow: 0 4px 20px rgba(17, 17, 27, 0.90);
 }
 
 .hero-tagline {
     -unity-font-definition: url("/Assets/UI/Fonts/Font_AktRegular.asset");
-    font-size: 16px;
-    color: #A6ADC8;
-    letter-spacing: 0.6px;
-    -unity-text-align: middle-left;
-    text-shadow: 0 2px 10px rgba(17, 17, 27, 0.90);
+    font-size: 18px;
+    color: #BAC2DE;
+    white-space: normal;
+    -unity-text-align: upper-left;
 }
 
-.title-nav-block {
-    flex-direction: column;
-    align-items: flex-start;
+.rail-divider {
+    width: 100%;
+    height: 1px;
+    background-color: #45475A;
+    margin-top: 30px;
 }
 
 .title-buttons {
-    width: 316px;
+    width: 100%;
     flex-direction: column;
-    margin-bottom: 22px;
+    margin-top: 8px;
+    margin-bottom: 8px;
 }
 
-.menu-action-btn {
-    -unity-font-definition: url("/Assets/UI/Fonts/Font_AktSemiBold.asset");
-    height: 42px;
-    font-size: 15px;
+/* Single solid focal primary CTA (Crust on Sapphire: 9.93:1 WCAG AAA) */
+.primary-cta-btn {
+    -unity-font-definition: url("/Assets/UI/Fonts/Font_AktBold.asset");
+    width: 100%;
+    height: 60px;
+    font-size: 20px;
     letter-spacing: 0.4px;
-    color: #BAC2DE;
-    background-color: rgba(17, 17, 27, 0.56);
-    border-width: 0;
-    border-left-width: 2px;
-    border-left-color: rgba(88, 91, 112, 0.65);
-    border-radius: 0px;
-    padding-left: 18px;
-    padding-right: 16px;
-    margin-bottom: 6px;
+    color: #11111B;
+    background-color: #74C7EC;
+    border-width: 2px;
+    border-color: #74C7EC;
+    border-radius: 3px;
+    padding: 0 22px;
+    margin-bottom: 18px;
     -unity-text-align: middle-left;
-    transition-property: background-color, border-color, color, translate;
-    transition-duration: 0.16s;
+    transition-property: background-color, border-color, scale;
+    transition-duration: 0.14s;
     transition-timing-function: ease-out-cubic;
 }
 
-.menu-action-btn:hover {
-    background-color: rgba(49, 50, 68, 0.78);
-    border-left-color: #89B4FA;
-    border-left-width: 3px;
-    color: #CDD6F4;
-    translate: 6px 0;
-}
-
-.menu-action-btn:focus {
-    background-color: rgba(49, 50, 68, 0.82);
-    border-left-color: #74C7EC;
-    border-left-width: 3px;
-    color: #CDD6F4;
-    translate: 6px 0;
-}
-
-.menu-action-btn:active {
-    translate: 3px 0;
-}
-
-.menu-action-btn--primary {
-    height: 52px;
-    font-size: 16px;
-    margin-bottom: 12px;
-    background-color: rgba(30, 30, 46, 0.88);
-    border-width: 1px;
-    border-color: rgba(116, 199, 236, 0.42);
-    border-left-width: 4px;
-    border-left-color: #74C7EC;
-    color: #CDD6F4;
-}
-
-.menu-action-btn--primary:hover,
-.menu-action-btn--primary:focus {
-    background-color: rgba(116, 199, 236, 0.22);
+.primary-cta-btn:hover {
+    background-color: #89DCEB;
     border-color: #89DCEB;
-    border-left-color: #89DCEB;
+}
+
+.primary-cta-btn:focus {
+    background-color: #89DCEB;
+    border-color: #F9E2AF;
+    border-width: 3px;
+}
+
+.primary-cta-btn:active {
+    scale: 0.99 0.99;
+}
+
+/* Clean flat editorial secondary rows without decorative left stripes */
+.nav-row-btn {
+    -unity-font-definition: url("/Assets/UI/Fonts/Font_AktSemiBold.asset");
+    width: 100%;
+    height: 52px;
+    font-size: 18px;
+    letter-spacing: 0.25px;
+    color: #CDD6F4;
+    background-color: transparent;
+    border-width: 2px;
+    border-color: transparent;
+    border-radius: 3px;
+    padding: 0 18px;
+    margin-bottom: 6px;
+    -unity-text-align: middle-left;
+    transition-property: background-color, border-color, color;
+    transition-duration: 0.14s;
+    transition-timing-function: ease-out-cubic;
+}
+
+.nav-row-btn:hover {
+    background-color: #313244;
+    border-color: #6C7086;
     color: #CDD6F4;
 }
 
-.menu-action-btn--showcase {
-    border-left-color: rgba(148, 226, 213, 0.65);
-    color: #94E2D5;
-}
-
-.menu-action-btn--showcase:hover,
-.menu-action-btn--showcase:focus {
-    background-color: rgba(148, 226, 213, 0.14);
-    border-left-color: #94E2D5;
+.nav-row-btn:focus {
+    background-color: #313244;
+    border-color: #F9E2AF;
     color: #CDD6F4;
 }
 
-.menu-action-btn--danger {
-    border-left-color: rgba(243, 139, 168, 0.45);
+.nav-row-btn:active {
+    background-color: #45475A;
+}
+
+.nav-divider {
+    width: 100%;
+    height: 1px;
+    background-color: #313244;
+    margin-top: 10px;
+    margin-bottom: 12px;
+}
+
+.nav-row-btn--quit {
     color: #A6ADC8;
+    height: 48px;
+    font-size: 17px;
+    margin-bottom: 0;
 }
 
-.menu-action-btn--danger:hover,
-.menu-action-btn--danger:focus {
-    background-color: rgba(243, 139, 168, 0.14);
-    border-left-color: #F38BA8;
+.nav-row-btn--quit:hover {
+    background-color: #313244;
+    border-color: #F38BA8;
     color: #F38BA8;
+}
+
+.nav-row-btn--quit:focus {
+    background-color: #313244;
+    border-color: #F9E2AF;
+    color: #F38BA8;
+}
+
+.rail-footer {
+    flex-direction: column;
+    align-items: flex-start;
+    border-top-width: 1px;
+    border-top-color: #313244;
+    padding-top: 18px;
+}
+
+.footer-progress {
+    -unity-font-definition: url("/Assets/UI/Fonts/Font_AktMedium.asset");
+    font-size: 15px;
+    color: #94E2D5;
+    margin-bottom: 6px;
 }
 
 .footer-hint {
     -unity-font-definition: url("/Assets/UI/Fonts/Font_AktRegular.asset");
-    font-size: 12px;
-    color: #9399B2;
-    letter-spacing: 0.6px;
+    font-size: 14px;
+    color: #A6ADC8;
+    letter-spacing: 0.2px;
     -unity-text-align: middle-left;
-    text-shadow: 0 2px 6px rgba(17, 17, 27, 0.85);
 }
 
-/* Chapter Ribbon View */
+.footer-hint--center {
+    -unity-text-align: middle-center;
+}
+
+/* Chapter & Chamber Index View */
 .ribbon-view {
     position: absolute;
     left: 0;
@@ -196,9 +245,10 @@
     bottom: 0;
     flex-direction: column;
     justify-content: space-between;
-    padding: 28px 36px 26px 36px;
-    transition-property: opacity, scale;
-    transition-duration: 0.30s;
+    background-color: rgba(17, 17, 27, 0.78);
+    padding: 32px 44px 32px 44px;
+    transition-property: opacity;
+    transition-duration: 0.20s;
 }
 
 .ribbon-view--hidden {
@@ -208,7 +258,6 @@
 
 .ribbon-view--fading {
     opacity: 0;
-    scale: 0.96 0.96;
 }
 
 .ribbon-topbar {
@@ -217,19 +266,16 @@
     align-items: center;
 }
 
-.meta-badge {
-    background-color: rgba(24, 24, 37, 0.86);
-    border-color: rgba(69, 71, 90, 0.65);
-    border-width: 1px;
-    border-radius: 2px;
-    padding: 8px 16px;
+.topbar-left {
+    flex-direction: row;
+    align-items: center;
 }
 
-.meta-badge-text {
+.topbar-progress {
     -unity-font-definition: url("/Assets/UI/Fonts/Font_AktMedium.asset");
-    font-size: 14px;
+    font-size: 16px;
     color: #BAC2DE;
-    letter-spacing: 0.4px;
+    margin-left: 18px;
 }
 
 .topbar-actions {
@@ -237,46 +283,39 @@
     align-items: center;
 }
 
-.top-chip-btn {
+.top-action-btn {
     -unity-font-definition: url("/Assets/UI/Fonts/Font_AktMedium.asset");
-    font-size: 14px;
-    color: #BAC2DE;
-    background-color: rgba(24, 24, 37, 0.86);
-    border-color: rgba(69, 71, 90, 0.70);
+    height: 44px;
+    font-size: 15px;
+    color: #CDD6F4;
+    background-color: #181825;
+    border-color: #6C7086;
     border-width: 1px;
-    border-radius: 2px;
-    padding: 8px 15px;
-    margin-left: 8px;
-    transition-property: background-color, border-color, color, scale;
+    border-radius: 3px;
+    padding: 0 18px;
+    margin-left: 10px;
+    transition-property: background-color, border-color, color;
     transition-duration: 0.14s;
-    transition-timing-function: ease-out-cubic;
 }
 
-.top-chip-btn:hover {
+.topbar-left .top-action-btn {
+    margin-left: 0;
+}
+
+.top-action-btn:hover {
     background-color: #313244;
     border-color: #74C7EC;
-    color: #CDD6F4;
-    scale: 1.02 1.02;
 }
 
-.top-chip-btn:active {
-    scale: 0.98 0.98;
+.top-action-btn:focus {
+    background-color: #313244;
+    border-color: #F9E2AF;
+    border-width: 2px;
 }
 
-.top-chip-btn--on {
+.top-action-btn--on {
     border-color: #A6E3A1;
     color: #A6E3A1;
-}
-
-.top-chip-btn--showcase {
-    border-color: rgba(148, 226, 213, 0.65);
-    color: #94E2D5;
-}
-
-.top-chip-btn--showcase:hover {
-    background-color: rgba(148, 226, 213, 0.16);
-    border-color: #94E2D5;
-    color: #CDD6F4;
 }
 
 .ribbon-viewport {
@@ -291,81 +330,74 @@
     align-items: center;
     position: absolute;
     top: 50%;
-    margin-top: -102px;
-    height: 204px;
+    margin-top: -108px;
+    height: 216px;
 }
 
 .chapter-cluster {
     flex-direction: row;
     align-items: center;
-    height: 204px;
+    height: 216px;
 }
 
 .chapter-node-card {
-    width: 146px;
-    height: 164px;
-    background-color: rgba(17, 17, 27, 0.90);
-    border-color: #45475A;
+    width: 166px;
+    height: 178px;
+    background-color: #181825;
+    border-color: #6C7086;
     border-width: 1px;
     border-top-width: 4px;
     border-radius: 3px;
     align-items: center;
     justify-content: center;
-    padding: 12px 10px;
-    margin-right: 12px;
-    transition-property: scale, border-color, background-color, translate;
-    transition-duration: 0.20s;
+    padding: 14px 12px;
+    margin-right: 16px;
 }
 
 .chapter-node-card--reached {
-    background-color: rgba(24, 24, 37, 0.96);
-    border-color: #585B70;
-}
-
-.chapter-node-card:hover {
-    scale: 1.04 1.04;
-    translate: 0 -3px;
+    background-color: #1E1E2E;
+    border-color: #7F849C;
 }
 
 .chapter-sector-pill {
     -unity-font-definition: url("/Assets/UI/Fonts/Font_AktMedium.asset");
-    font-size: 11px;
-    color: #9399B2;
-    letter-spacing: 1.2px;
+    font-size: 12px;
+    color: #BAC2DE;
+    letter-spacing: 1px;
     margin-bottom: 4px;
 }
 
 .chapter-node-num {
-    font-size: 40px;
+    -unity-font-definition: url("/Assets/UI/Fonts/Font_AktBold.asset");
+    font-size: 42px;
     color: #CDD6F4;
     margin-bottom: 2px;
 }
 
 .chapter-node-theme {
     -unity-font-definition: url("/Assets/UI/Fonts/Font_AktMedium.asset");
-    font-size: 13px;
+    font-size: 14px;
     color: #BAC2DE;
-    letter-spacing: 1.3px;
-    margin-bottom: 8px;
+    margin-bottom: 10px;
 }
 
 .chapter-node-bar-bg {
-    width: 94px;
-    height: 5px;
+    width: 106px;
+    height: 6px;
     border-radius: 3px;
     background-color: #313244;
     position: relative;
 }
 
 .chapter-node-bar-fill {
-    height: 5px;
+    height: 6px;
     border-radius: 3px;
     background-color: #74C7EC;
 }
 
 .segment-rail {
-    width: 416px;
-    height: 150px;
+    width: 420px;
+    height: 160px;
     padding-left: 14px;
     padding-right: 14px;
     flex-direction: row;
@@ -378,22 +410,22 @@
     position: absolute;
     left: 0;
     right: 0;
-    height: 6px;
-    border-radius: 3px;
-    background-color: rgba(49, 50, 68, 0.85);
+    height: 4px;
+    border-radius: 2px;
+    background-color: #45475A;
 }
 
 .segment-line-fill {
     position: absolute;
     left: 0;
-    height: 6px;
-    border-radius: 3px;
-    background-color: #89B4FA;
+    height: 4px;
+    border-radius: 2px;
+    background-color: #74C7EC;
 }
 
 .level-dot-wrap {
-    width: 84px;
-    height: 140px;
+    width: 88px;
+    height: 152px;
     align-items: center;
     justify-content: center;
     position: relative;
@@ -401,54 +433,42 @@
 
 .level-dot-badge {
     position: absolute;
-    top: 4px;
-    -unity-font-definition: url("/Assets/UI/Fonts/Font_AktMedium.asset");
-    font-size: 10px;
+    top: 2px;
+    -unity-font-definition: url("/Assets/UI/Fonts/Font_AktBold.asset");
+    font-size: 11px;
     color: #11111B;
-    background-color: #89DCEB;
-    border-radius: 4px;
-    padding: 1px 6px;
-    letter-spacing: 0.8px;
+    background-color: #74C7EC;
+    border-radius: 2px;
+    padding: 2px 7px;
 }
 
 .level-dot-code {
     position: absolute;
-    top: 22px;
+    top: 26px;
     -unity-font-definition: url("/Assets/UI/Fonts/Font_AktMedium.asset");
-    font-size: 15px;
-    color: #BAC2DE;
+    font-size: 16px;
+    color: #CDD6F4;
 }
 
 .level-dot-stars {
     position: absolute;
-    bottom: 14px;
+    bottom: 12px;
     font-size: 16px;
     color: #F9E2AF;
     letter-spacing: 2px;
 }
 
-.level-dot-halo {
-    position: absolute;
-    width: 56px;
-    height: 56px;
-    border-radius: 28px;
-    border-width: 2px;
-    border-color: rgba(137, 220, 235, 0.65);
-    background-color: rgba(137, 220, 235, 0.14);
-}
-
 .level-dot-btn {
-    width: 34px;
-    height: 34px;
-    border-radius: 17px;
+    width: 44px;
+    height: 44px;
+    border-radius: 22px;
     background-color: #313244;
-    border-color: #585B70;
+    border-color: #7F849C;
     border-width: 2px;
     padding: 0;
     margin: 0;
     transition-property: scale, background-color, border-color;
-    transition-duration: 0.16s;
-    transition-timing-function: ease-out-cubic;
+    transition-duration: 0.14s;
 }
 
 .level-dot-btn--unlocked {
@@ -462,9 +482,9 @@
 }
 
 .level-dot-btn--current {
-    width: 40px;
-    height: 40px;
-    border-radius: 20px;
+    width: 48px;
+    height: 48px;
+    border-radius: 24px;
     background-color: #74C7EC;
     border-color: #F9E2AF;
     border-width: 3px;
@@ -473,12 +493,48 @@
 .level-dot-btn--unlocked:hover,
 .level-dot-btn--cleared:hover,
 .level-dot-btn--current:hover {
-    scale: 1.32 1.32;
+    scale: 1.12 1.12;
     border-color: #F9E2AF;
 }
 
+.level-dot-btn:focus {
+    scale: 1.14 1.14;
+    border-color: #F9E2AF;
+    border-width: 3px;
+}
+
 .level-dot-btn:active {
-    scale: 0.92 0.92;
+    scale: 0.96 0.96;
+}
+
+.chapter-node-card--showcase {
+    background-color: #1E1E2E;
+    border-color: #94E2D5;
+    border-top-width: 4px;
+    border-top-color: #94E2D5;
+}
+
+.showcase-launch-btn {
+    -unity-font-definition: url("/Assets/UI/Fonts/Font_AktBold.asset");
+    height: 38px;
+    font-size: 14px;
+    color: #11111B;
+    background-color: #94E2D5;
+    border-width: 2px;
+    border-color: #94E2D5;
+    border-radius: 3px;
+    padding: 0 14px;
+    margin-top: 6px;
+}
+
+.showcase-launch-btn:hover {
+    background-color: #89DCEB;
+    border-color: #89DCEB;
+}
+
+.showcase-launch-btn:focus {
+    background-color: #89DCEB;
+    border-color: #F9E2AF;
 }
 
 .ribbon-footer {
@@ -486,222 +542,68 @@
 }
 
 .chamber-preview-card {
-    min-width: 680px;
+    min-width: 720px;
+    max-width: 880px;
     flex-direction: row;
     align-items: center;
-    background-color: rgba(24, 24, 37, 0.90);
-    border-color: rgba(69, 71, 90, 0.72);
+    background-color: #181825;
+    border-color: #6C7086;
     border-width: 1px;
     border-radius: 3px;
     margin-bottom: 14px;
-    padding-right: 16px;
-}
-
-.preview-accent {
-    width: 3px;
-    align-self: stretch;
-    background-color: #74C7EC;
-    border-top-left-radius: 0px;
-    border-bottom-left-radius: 0px;
+    padding: 16px 22px;
 }
 
 .preview-content {
     flex-grow: 1;
-    padding: 12px 18px;
     flex-direction: column;
+    padding-right: 20px;
 }
 
 .preview-chapter {
     -unity-font-definition: url("/Assets/UI/Fonts/Font_AktMedium.asset");
-    font-size: 12px;
+    font-size: 14px;
     color: #94E2D5;
-    letter-spacing: 0.6px;
-    margin-bottom: 2px;
+    margin-bottom: 4px;
 }
 
 .preview-title {
     -unity-font-definition: url("/Assets/UI/Fonts/Font_AktBold.asset");
-    font-size: 21px;
+    font-size: 24px;
     color: #CDD6F4;
-    margin-bottom: 2px;
+    margin-bottom: 4px;
 }
 
 .preview-status {
     -unity-font-definition: url("/Assets/UI/Fonts/Font_AktRegular.asset");
-    font-size: 14px;
+    font-size: 15px;
     color: #BAC2DE;
 }
 
 .preview-launch-btn {
-    -unity-font-definition: url("/Assets/UI/Fonts/Font_AktSemiBold.asset");
-    height: 42px;
-    padding: 0 20px;
-    font-size: 14px;
-    letter-spacing: 0.5px;
+    -unity-font-definition: url("/Assets/UI/Fonts/Font_AktBold.asset");
+    height: 48px;
+    min-width: 144px;
+    padding: 0 24px;
+    font-size: 17px;
     color: #11111B;
     background-color: #74C7EC;
-    border-width: 0;
-    border-radius: 2px;
-    transition-property: scale, background-color;
+    border-width: 2px;
+    border-color: #74C7EC;
+    border-radius: 3px;
+    transition-property: background-color, border-color;
     transition-duration: 0.14s;
-}
-
-.chapter-node-card--showcase {
-    background-color: rgba(24, 24, 37, 0.92);
-    border-color: rgba(148, 226, 213, 0.60);
-    border-top-width: 3px;
-    border-top-color: #94E2D5;
-}
-
-.showcase-launch-btn {
-    -unity-font-definition: url("/Assets/UI/Fonts/Font_AktSemiBold.asset");
-    font-size: 13px;
-    color: #11111B;
-    background-color: #94E2D5;
-    border-width: 0;
-    border-radius: 2px;
-    padding: 7px 14px;
-    margin-top: 8px;
-    transition-property: scale, background-color;
-    transition-duration: 0.14s;
-}
-
-.showcase-launch-btn:hover {
-    background-color: #89DCEB;
-    scale: 1.03 1.03;
 }
 
 .preview-launch-btn:hover {
     background-color: #89DCEB;
-    scale: 1.04 1.04;
-}
-
-.preview-launch-btn:active {
-    scale: 0.96 0.96;
-}
-
-/* Smash + Sphere Drop + Portal Zoom FX Layer */
-.fx-layer {
-    position: absolute;
-    left: 0;
-    right: 0;
-    top: 0;
-    bottom: 0;
-}
-
-.impact-shockwave {
-    position: absolute;
-    width: 120px;
-    height: 120px;
-    border-radius: 60px;
-    border-width: 4px;
     border-color: #89DCEB;
-    background-color: rgba(116, 199, 236, 0.16);
 }
 
-.impact-shockwave--hidden {
-    display: none;
-}
-
-.falling-node {
-    position: absolute;
-    width: 96px;
-    height: 96px;
-    border-radius: 48px;
-    background-color: #74C7EC;
-    border-color: #CDD6F4;
+.preview-launch-btn:focus {
+    background-color: #89DCEB;
+    border-color: #F9E2AF;
     border-width: 3px;
-    align-items: center;
-    justify-content: center;
-}
-
-.falling-node--hidden {
-    display: none;
-}
-
-.falling-node-ring {
-    position: absolute;
-    width: 118px;
-    height: 118px;
-    border-radius: 59px;
-    border-width: 2px;
-    border-color: rgba(148, 226, 213, 0.72);
-    background-color: rgba(137, 180, 250, 0.14);
-}
-
-.falling-node-highlight {
-    position: absolute;
-    left: 16px;
-    top: 14px;
-    width: 24px;
-    height: 16px;
-    border-radius: 10px;
-    background-color: rgba(205, 214, 244, 0.65);
-}
-
-.falling-node-label {
-    font-size: 28px;
-    color: #11111B;
-}
-
-.orb-trail-mote {
-    position: absolute;
-    border-radius: 999px;
-    background-color: rgba(137, 220, 235, 0.85);
-}
-
-.break-shard {
-    position: absolute;
-    background-color: rgba(49, 50, 68, 0.96);
-    border-color: #89DCEB;
-    border-width: 1px;
-    border-radius: 4px;
-}
-
-.portal-zoom-orb {
-    position: absolute;
-    width: 44px;
-    height: 44px;
-    border-radius: 999px;
-    background-color: #74C7EC;
-    border-color: #CDD6F4;
-    border-width: 4px;
-    align-items: center;
-    justify-content: center;
-}
-
-.portal-zoom-orb--hidden {
-    display: none;
-}
-
-.portal-zoom-ring {
-    position: absolute;
-    left: -14%;
-    right: -14%;
-    top: -14%;
-    bottom: -14%;
-    border-radius: 999px;
-    border-width: 3px;
-    border-color: rgba(148, 226, 213, 0.78);
-    background-color: rgba(116, 199, 236, 0.12);
-}
-
-.portal-zoom-core {
-    position: absolute;
-    left: 14%;
-    right: 14%;
-    top: 14%;
-    bottom: 14%;
-    border-radius: 999px;
-    background-color: #11111B;
-    border-width: 2px;
-    border-color: rgba(180, 190, 254, 0.65);
-}
-
-.portal-zoom-label {
-    -unity-font-definition: url("/Assets/UI/Fonts/Font_AktMedium.asset");
-    font-size: 16px;
-    color: #CDD6F4;
 }
 
 /* Settings Modal */
@@ -711,7 +613,7 @@
     right: 0;
     top: 0;
     bottom: 0;
-    background-color: rgba(17, 17, 27, 0.82);
+    background-color: rgba(17, 17, 27, 0.84);
     align-items: center;
     justify-content: center;
     transition-property: opacity;
@@ -724,66 +626,57 @@
 }
 
 .settings-card {
-    width: 520px;
+    width: 560px;
     background-color: #1E1E2E;
-    border-color: #585B70;
+    border-color: #7F849C;
     border-width: 1px;
+    border-top-width: 4px;
+    border-top-color: #74C7EC;
     border-radius: 3px;
-    padding: 30px 32px 26px 32px;
-}
-
-.settings-topbar {
-    position: absolute;
-    left: 0;
-    right: 0;
-    top: 0;
-    height: 4px;
-    background-color: #74C7EC;
-    border-top-left-radius: 0px;
-    border-top-right-radius: 0px;
+    padding: 32px 34px 28px 34px;
 }
 
 .settings-title {
-    font-size: 26px;
+    -unity-font-definition: url("/Assets/UI/Fonts/Font_AktBold.asset");
+    font-size: 28px;
     color: #CDD6F4;
-    letter-spacing: 1.5px;
-    margin-bottom: 4px;
+    margin-bottom: 6px;
 }
 
 .settings-subtitle {
     -unity-font-definition: url("/Assets/UI/Fonts/Font_AktRegular.asset");
-    font-size: 14px;
+    font-size: 15px;
     color: #BAC2DE;
-    margin-bottom: 22px;
+    margin-bottom: 24px;
 }
 
 .setting-row {
     flex-direction: row;
     align-items: center;
     justify-content: space-between;
-    background-color: rgba(24, 24, 37, 0.88);
-    border-color: #313244;
+    background-color: #181825;
+    border-color: #45475A;
     border-width: 1px;
-    border-radius: 2px;
-    padding: 13px 16px;
+    border-radius: 3px;
+    padding: 14px 18px;
     margin-bottom: 12px;
 }
 
 .setting-label {
     -unity-font-definition: url("/Assets/UI/Fonts/Font_AktMedium.asset");
-    font-size: 14px;
+    font-size: 16px;
     color: #CDD6F4;
-    min-width: 215px;
+    min-width: 210px;
 }
 
 .setting-slider {
     flex-grow: 1;
-    margin-left: 10px;
-    margin-right: 12px;
+    margin-left: 12px;
+    margin-right: 14px;
 }
 
 .setting-slider .unity-base-slider__tracker {
-    background-color: #45475A;
+    background-color: #6C7086;
     height: 6px;
     border-radius: 3px;
 }
@@ -792,17 +685,22 @@
     background-color: #74C7EC;
     border-color: #CDD6F4;
     border-width: 2px;
-    width: 16px;
-    height: 16px;
-    border-radius: 8px;
-    margin-top: -5px;
+    width: 18px;
+    height: 18px;
+    border-radius: 9px;
+    margin-top: -6px;
+}
+
+.setting-slider:focus .unity-base-slider__dragger {
+    background-color: #89DCEB;
+    border-color: #F9E2AF;
 }
 
 .setting-value {
     -unity-font-definition: url("/Assets/UI/Fonts/Font_AktMedium.asset");
-    font-size: 14px;
+    font-size: 15px;
     color: #94E2D5;
-    min-width: 52px;
+    min-width: 56px;
     -unity-text-align: middle-right;
 }
 
@@ -811,13 +709,17 @@
 }
 
 .setting-toggle .unity-toggle__checkmark {
-    width: 22px;
-    height: 22px;
+    width: 24px;
+    height: 24px;
     background-color: #313244;
-    border-color: #585B70;
-    border-width: 1px;
-    border-radius: 2px;
+    border-color: #7F849C;
+    border-width: 2px;
+    border-radius: 3px;
     -unity-background-image-tint-color: #11111B;
+}
+
+.setting-toggle:focus .unity-toggle__checkmark {
+    border-color: #F9E2AF;
 }
 
 .setting-toggle:checked .unity-toggle__checkmark {
@@ -829,25 +731,69 @@
 .settings-actions {
     flex-direction: row;
     justify-content: space-between;
-    margin-top: 14px;
+    margin-top: 18px;
 }
 
-.settings-actions .menu-action-btn {
+.modal-btn {
+    -unity-font-definition: url("/Assets/UI/Fonts/Font_AktSemiBold.asset");
     flex-grow: 1;
-    margin-bottom: 0;
+    height: 48px;
+    font-size: 16px;
+    border-radius: 3px;
+    border-width: 2px;
     margin-left: 6px;
     margin-right: 6px;
-    height: 48px;
-    font-size: 15px;
-    padding-left: 16px;
-    padding-right: 16px;
+    padding: 0 18px;
     -unity-text-align: middle-center;
-    border-width: 1px;
-    border-color: rgba(69, 71, 90, 0.72);
-    border-radius: 2px;
+    transition-property: background-color, border-color, color;
+    transition-duration: 0.14s;
 }
 
-.settings-actions .menu-action-btn:hover,
-.settings-actions .menu-action-btn:focus {
-    translate: 0 0;
+.modal-btn--primary {
+    background-color: #74C7EC;
+    border-color: #74C7EC;
+    color: #11111B;
+}
+
+.modal-btn--primary:hover {
+    background-color: #89DCEB;
+    border-color: #89DCEB;
+}
+
+.modal-btn--primary:focus {
+    background-color: #89DCEB;
+    border-color: #F9E2AF;
+    border-width: 3px;
+}
+
+.modal-btn--danger {
+    background-color: #313244;
+    border-color: #7F849C;
+    color: #CDD6F4;
+}
+
+.modal-btn--danger:hover {
+    background-color: #181825;
+    border-color: #F38BA8;
+    color: #F38BA8;
+}
+
+.modal-btn--danger:focus {
+    background-color: #181825;
+    border-color: #F9E2AF;
+    border-width: 3px;
+    color: #F38BA8;
+}
+
+/* Reduced motion override toggled by SimulationSettings.ReduceMotion */
+.menu-root--reduce-motion .title-view,
+.menu-root--reduce-motion .ribbon-view,
+.menu-root--reduce-motion .settings-overlay,
+.menu-root--reduce-motion .primary-cta-btn,
+.menu-root--reduce-motion .nav-row-btn,
+.menu-root--reduce-motion .top-action-btn,
+.menu-root--reduce-motion .level-dot-btn,
+.menu-root--reduce-motion .preview-launch-btn,
+.menu-root--reduce-motion .modal-btn {
+    transition-duration: 0s;
 }
