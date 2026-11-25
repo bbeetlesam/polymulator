@@ -12,6 +12,12 @@ namespace Polymulator
     {
         public static SimulationVFX Instance { get; private set; }
 
+        [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.SubsystemRegistration)]
+        private static void ResetStaticState()
+        {
+            Instance = null;
+        }
+
         [Header("Particle Budget")]
         public int ambientParticleCount = 95;
         public float hoverEmitInterval = 0.08f;

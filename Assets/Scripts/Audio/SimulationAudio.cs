@@ -15,6 +15,12 @@ namespace Polymulator
 
         public static SimulationAudio Instance { get; private set; }
 
+        [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.SubsystemRegistration)]
+        private static void ResetStaticState()
+        {
+            Instance = null;
+        }
+
         [Header("Master Volumes")]
         [Range(0f, 1f)] public float uiVolume = 0.55f;
         [Range(0f, 1f)] public float sfxVolume = 0.65f;

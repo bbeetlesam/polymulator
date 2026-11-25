@@ -22,6 +22,12 @@ namespace Polymulator
 
         private static SimulationVisualBridge activeBridge;
 
+        [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.SubsystemRegistration)]
+        private static void ResetStaticState()
+        {
+            activeBridge = null;
+        }
+
         public Transform playerTransform;
         public Transform anchorTransform;
         public SimulationModeController modeController;
@@ -113,15 +119,8 @@ namespace Polymulator
             carryCol.a = 1f;
             Shader.SetGlobalVector(CarryClueColorId, carryCol);
 
-            if (!isFlexible && carryController != null && carryController.IsCarrying &&
-                carryController.TryGetPredictedDropPosition(out Vector3 dropPos))
-            {
-                Shader.SetGlobalVector(CarryTargetPosId, new Vector4(dropPos.x, dropPos.y, dropPos.z, 1f));
-            }
-            else
-            {
-                Shader.SetGlobalVector(CarryTargetPosId, Vector4.zero);
-            }
+            // Keep ChamberGrid free of competing tile drop clues so PlacementGhost is the single 2D floor indicator.
+            Shader.SetGlobalVector(CarryTargetPosId, Vector4.zero);
 
             UpdateFloorRipple();
         }

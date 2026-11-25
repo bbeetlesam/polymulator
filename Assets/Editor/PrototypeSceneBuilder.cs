@@ -1,5 +1,7 @@
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.EventSystems;
+using UnityEngine.InputSystem.UI;
 using UnityEngine.Rendering;
 using UnityEngine.Rendering.Universal;
 using UnityEngine.UIElements;
@@ -93,6 +95,34 @@ namespace Polymulator.EditorTools
 
         [MenuItem("Tools/POLYMULATOR/Build All Campaign Scenes")]
         public static void BuildAllCampaignScenes()
+        {
+            EnsureFusionPresetCatalogAsset();
+            BuildAllCampaignScenesInternal();
+        }
+
+        [MenuItem("Tools/POLYMULATOR/Create Fusion Preset Catalog Asset")]
+        public static void EnsureFusionPresetCatalogAsset()
+        {
+            if (!AssetDatabase.IsValidFolder(ResourcesFolder))
+                AssetDatabase.CreateFolder("Assets", "Resources");
+            string assetPath = ResourcesFolder + "/" + FusionPresetCatalog.ResourceName + ".asset";
+            FusionPresetCatalog catalog = AssetDatabase.LoadAssetAtPath<FusionPresetCatalog>(assetPath);
+            if (catalog == null)
+            {
+                catalog = ScriptableObject.CreateInstance<FusionPresetCatalog>();
+                catalog.PopulateDefaultPresets();
+                AssetDatabase.CreateAsset(catalog, assetPath);
+            }
+            else if (catalog.Presets == null || catalog.Presets.Length == 0)
+            {
+                catalog.PopulateDefaultPresets();
+                EditorUtility.SetDirty(catalog);
+            }
+            AssetDatabase.SaveAssets();
+            Selection.activeObject = catalog;
+        }
+
+        private static void BuildAllCampaignScenesInternal()
         {
             if (!EnsureEditMode()) return;
             FbxModelLibrary.ClearCache();
@@ -195,11 +225,11 @@ namespace Polymulator.EditorTools
             if (oldRectCam != null) Object.DestroyImmediate(oldRectCam);
             MainMenuCameraOrbit orbit = camGo.GetComponent<MainMenuCameraOrbit>();
             if (orbit == null) orbit = camGo.AddComponent<MainMenuCameraOrbit>();
-            orbit.focusPoint = new Vector3(-1.45f, 0.85f, 1.95f) * gridUnit;
+            orbit.focusPoint = new Vector3(-2.65f, 0.80f, 1.45f) * gridUnit;
             orbit.rectFocusPoint = showcaseBot.transform.position + Vector3.up * W(0.70f);
-            orbit.baseYaw = 32f;
-            orbit.basePitch = 18f;
-            orbit.orbitDistance = 9.2f;
+            orbit.baseYaw = 30f;
+            orbit.basePitch = 19f;
+            orbit.orbitDistance = 9.8f;
             Quaternion initRot = Quaternion.Euler(orbit.basePitch, orbit.baseYaw, 0f);
             camGo.transform.SetPositionAndRotation(orbit.focusPoint + initRot * (Vector3.back * orbit.orbitDistance), initRot);
 
@@ -209,6 +239,8 @@ namespace Polymulator.EditorTools
             vBridge.playerTransform = showcaseBot.transform;
             vBridge.anchorTransform = showcaseAnchor.transform;
             services.AddComponent<SimulationVFX>();
+
+            EnsureSceneEventSystem(root.transform);
 
             PanelSettings panelSettings = EnsurePanelSettings();
             AssetDatabase.ImportAsset(UIFolder + "/MainMenuHUD.uss");
@@ -1310,6 +1342,17 @@ namespace Polymulator.EditorTools
                 headCowl.layer = 2;
             }
 
+            // Articulated left & right robot arms attached to shoulders (raise overhead when carrying!)
+            Transform leftArmPivot = Group("Left Arm Pivot", visualRoot);
+            leftArmPivot.gameObject.layer = 2;
+            leftArmPivot.localPosition = new Vector3(W(-0.405f), W(0.53f), W(0.02f));
+            GameObject leftArmGlow = BuildRectArmParts(leftArmPivot, m);
+
+            Transform rightArmPivot = Group("Right Arm Pivot", visualRoot);
+            rightArmPivot.gameObject.layer = 2;
+            rightArmPivot.localPosition = new Vector3(W(0.405f), W(0.53f), W(0.02f));
+            GameObject rightArmGlow = BuildRectArmParts(rightArmPivot, m);
+
             GameObject carryAnchor = new GameObject("Carry Anchor");
             carryAnchor.transform.SetParent(player.transform, false);
             carryAnchor.transform.localPosition = new Vector3(0f, W(1.78f), 0f);
@@ -1351,6 +1394,8 @@ namespace Polymulator.EditorTools
             RectVisualRig rig = player.AddComponent<RectVisualRig>();
             rig.visualRoot = visualRoot;
             rig.headPivot = headPivot;
+            rig.leftArmPivot = leftArmPivot;
+            rig.rightArmPivot = rightArmPivot;
             rig.limitedAccentMaterial = m.accentLimited;
             rig.flexibleAccentMaterial = m.accentFlexible;
             rig.modeAccentRenderers = new[]
@@ -1359,10 +1404,29 @@ namespace Polymulator.EditorTools
                 chestCore != null ? chestCore.GetComponent<Renderer>() : null,
                 backFin != null ? backFin.GetComponent<Renderer>() : null,
                 visor != null ? visor.GetComponent<Renderer>() : null,
-                antennaTip != null ? antennaTip.GetComponent<Renderer>() : null
+                antennaTip != null ? antennaTip.GetComponent<Renderer>() : null,
+                leftArmGlow != null ? leftArmGlow.GetComponent<Renderer>() : null,
+                rightArmGlow != null ? rightArmGlow.GetComponent<Renderer>() : null
             };
 
             return player;
+        }
+
+        private static GameObject BuildRectArmParts(Transform armPivot, Mats m)
+        {
+            GameObject chassis = FbxModelLibrary.CreateSubMeshObject("Arm Chassis", "RectCharacter.fbx", "Rect_ArmChassis", m.player, armPivot, gridUnit, false, 2);
+            FbxModelLibrary.CreateSubMeshObject("Arm Trim", "RectCharacter.fbx", "Rect_ArmTrim", m.playerDark, armPivot, gridUnit, false, 2);
+            GameObject glow = FbxModelLibrary.CreateSubMeshObject("Arm Glow", "RectCharacter.fbx", "Rect_ArmGlow", m.accentLimited, armPivot, gridUnit, false, 2);
+            if (chassis == null)
+            {
+                GameObject upper = Primitive("Arm Upper", PrimitiveType.Cube, new Vector3(0f, -0.14f, 0f), new Vector3(0.13f, 0.24f, 0.13f), m.player, armPivot, false, false);
+                upper.layer = 2;
+                GameObject forearm = Primitive("Arm Forearm", PrimitiveType.Cube, new Vector3(0f, -0.34f, 0.02f), new Vector3(0.14f, 0.22f, 0.14f), m.playerDark, armPivot, false, false);
+                forearm.layer = 2;
+                glow = Primitive("Arm Glow", PrimitiveType.Cube, new Vector3(0f, -0.45f, 0.02f), new Vector3(0.12f, 0.05f, 0.12f), m.accentLimited, armPivot, false, false);
+                glow.layer = 2;
+            }
+            return glow;
         }
 
         private static GameObject BuildCamera(Transform target)
@@ -1541,6 +1605,8 @@ namespace Polymulator.EditorTools
             blueprint.telekinesisController = telekinesis;
             blueprint.anchorTransform = anchorTransform;
 
+            EnsureSceneEventSystem(root);
+
             PanelSettings panelSettings = EnsurePanelSettings();
             VisualTreeAsset uxml = AssetDatabase.LoadAssetAtPath<VisualTreeAsset>(HudUxmlPath);
 
@@ -1558,6 +1624,15 @@ namespace Polymulator.EditorTools
             hudCtrl.pressurePlate = plate;
             hudCtrl.anchorObjective = anchorObjective;
             hudCtrl.blueprintVisualizer = blueprint;
+        }
+
+        private static void EnsureSceneEventSystem(Transform parent)
+        {
+            if (Object.FindFirstObjectByType<EventSystem>() != null) return;
+            GameObject esGo = new GameObject("EventSystem");
+            if (parent != null) esGo.transform.SetParent(parent, false);
+            esGo.AddComponent<EventSystem>();
+            esGo.AddComponent<InputSystemUIInputModule>();
         }
 
         private static PanelSettings EnsurePanelSettings()
