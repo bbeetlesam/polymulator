@@ -18933,8 +18933,6 @@ MonoBehaviour:
   followSmoothTime: 0.14
   minOrthoSize: 2.8
   maxOrthoSize: 5.4
-  maxPeekYaw: 24
-  maxPeekPitch: 7
 --- !u!114 &1370813895
 MonoBehaviour:
   m_ObjectHideFlags: 0

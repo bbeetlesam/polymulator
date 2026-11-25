@@ -4961,8 +4961,6 @@ MonoBehaviour:
   followSmoothTime: 0.14
   minOrthoSize: 2.8
   maxOrthoSize: 5.4
-  maxPeekYaw: 24
-  maxPeekPitch: 7
 --- !u!1 &332717699
 GameObject:
   m_ObjectHideFlags: 0

@@ -286,7 +286,7 @@ ui.hud.blueprint.off,Blueprint Mode: Inactive,Mode Cetak Biru: Nonaktif
 ui.hud.blueprint.on,Blueprint Mode: Active,Mode Cetak Biru: Aktif
 ui.hud.controls.abilities,Partition / Axis / Fusion,Partition / Sumbu / Fusion
 ui.hud.controls.axis_hints,3D Axes / Hints,Sumbu 3D / Petunjuk
-ui.hud.controls.camera,Camera Peek / Reset,Intip Kamera / Reset
+ui.hud.controls.camera,Camera Rotate / Reset,Rotasi Kamera / Reset
 ui.hud.controls.distance_height,Distance / Height,Jarak / Ketinggian
 ui.hud.controls.move,Movement,Gerak
 ui.hud.controls.pause,Pause / Menu,Jeda / Menu

@@ -698,7 +698,7 @@ MonoBehaviour:
   - 'Blueprint Mode: Active'
   - Partition / Axis / Fusion
   - 3D Axes / Hints
-  - Camera Peek / Reset
+  - Camera Rotate / Reset
   - Distance / Height
   - Movement
   - Pause / Menu
