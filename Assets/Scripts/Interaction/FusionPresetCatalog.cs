@@ -46,7 +46,9 @@ namespace Polymulator
 
         public string GetDisplayName(bool isVerticalTop)
         {
-            return isVerticalTop ? verticalTopName : horizontalName;
+            string key = "fusion.preset." + LocalizationKeys.Normalize(presetId) +
+                (isVerticalTop ? ".vertical" : ".horizontal");
+            return L.TOr(key, isVerticalTop ? verticalTopName : horizontalName);
         }
 
         public float GetGapGrid(bool isVerticalTop)
@@ -271,16 +273,22 @@ namespace Polymulator
             return FusionShapeKind.Box;
         }
 
-        public static string GetShapeLabelIndonesian(FusionShapeKind kind)
+        public static string GetShapeLabel(FusionShapeKind kind)
         {
-            return kind switch
+            string key = "fusion.shape." + kind.ToString().ToLowerInvariant();
+            string fallback = kind switch
             {
-                FusionShapeKind.Box => "Balok",
                 FusionShapeKind.Cylinder => "Tabung",
                 FusionShapeKind.Sphere => "Bola",
                 FusionShapeKind.Compound => "Rakitan",
                 _ => "Balok"
             };
+            return L.TOr(key, fallback);
+        }
+
+        public static string GetShapeLabelIndonesian(FusionShapeKind kind)
+        {
+            return GetShapeLabel(kind);
         }
     }
 }

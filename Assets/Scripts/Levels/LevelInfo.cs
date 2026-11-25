@@ -36,20 +36,43 @@ namespace Polymulator
         [SerializeField] private StoryLine[] clearDialogue = System.Array.Empty<StoryLine>();
         [SerializeField] private string[] hints = System.Array.Empty<string>();
 
-        public string Title => levelTitle;
-        public string ChapterSubtitle => chapterSubtitle;
-        public string DistrictLabel => districtLabel;
+        private string Key(string suffix) => LocalizationKeys.Level(name, suffix);
+
+        public string Title => L.TOr(Key("title"), levelTitle);
+        public string ChapterSubtitle => L.TOr(Key("chapter_subtitle"), chapterSubtitle);
+        public string DistrictLabel => L.TOr(Key("district_label"), districtLabel);
         public int ParActions => Mathf.Max(1, parActions);
         public bool RequireFacingAngle => requireFacingAngle;
         public float RequiredFacingYaw => requiredFacingYaw;
-        public string FragmentTitle => fragmentTitle;
+        public string FragmentTitle => L.TOr(Key("fragment_title"), fragmentTitle);
         public bool TriggerGlitchOnClear => triggerGlitchOnClear;
         public bool PlayPianoOnClear => playPianoOnClear;
         public bool AllowPartition => allowPartition;
         public bool AllowFusion => allowFusion;
-        public StoryLine[] OpeningDialogue => openingDialogue;
-        public StoryLine[] ClearDialogue => clearDialogue;
-        public string[] Hints => hints;
+        public StoryLine[] OpeningDialogue => LocalizeLines(openingDialogue, "openingDialogue");
+        public StoryLine[] ClearDialogue => LocalizeLines(clearDialogue, "clearDialogue");
+        public string[] Hints => LocalizeHints(hints);
+
+        private StoryLine[] LocalizeLines(StoryLine[] source, string group)
+        {
+            if (source == null || source.Length == 0) return System.Array.Empty<StoryLine>();
+            var result = new StoryLine[source.Length];
+            for (int i = 0; i < source.Length; i++)
+            {
+                result[i] = source[i];
+                result[i].text = L.TOr(Key(group + "." + i + ".text"), source[i].text);
+            }
+            return result;
+        }
+
+        private string[] LocalizeHints(string[] source)
+        {
+            if (source == null || source.Length == 0) return System.Array.Empty<string>();
+            var result = new string[source.Length];
+            for (int i = 0; i < source.Length; i++)
+                result[i] = L.TOr(Key("hints." + i), source[i]);
+            return result;
+        }
 
         public void Configure(string title, string chapterSub, string district, int par,
             bool requireAngle, float targetYaw, string fragment, bool glitchClear, bool pianoClear,

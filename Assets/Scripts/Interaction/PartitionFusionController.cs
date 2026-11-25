@@ -104,7 +104,7 @@ namespace Polymulator
         private InteractableObject cachedPartner;
         private InteractableObject cachedCutTarget;
         private Vector3 cachedCutAxis = Vector3.right;
-        private string cachedCutRuleLabel = "Auto (Ikut Hadap)";
+        private string cachedCutRuleLabel = string.Empty;
         private bool cachedHasValidCut;
         private float cachedHalfMass;
 
@@ -159,8 +159,9 @@ namespace Polymulator
             }
         }
         public string SelectedPairLabel => fusionStaging
-            ? FusionPresetCatalog.GetShapeLabelIndonesian(stagingPartnerShape) + " + " +
-              FusionPresetCatalog.GetShapeLabelIndonesian(stagingSourceShape)
+            ? L.T("fusion.pair_label",
+                FusionPresetCatalog.GetShapeLabel(stagingPartnerShape),
+                FusionPresetCatalog.GetShapeLabel(stagingSourceShape))
             : string.Empty;
         public Color SelectedPresetAccent => activeStagingPreset != null ? activeStagingPreset.accentTint : PaletteSettings.Green;
         public InteractableObject StagingSource => stagingSource;
@@ -171,7 +172,9 @@ namespace Polymulator
         public Vector3 PreviewCutAxis => cachedCutAxis;
         public bool HasCutPreview => !fusionStaging && cachedHasValidCut && cachedCutTarget != null;
         public string CutAxisShortLabel => GetAxisShortLabel(cutAxisMode);
-        public string CutAxisRuleLabel => cachedHasValidCut ? cachedCutRuleLabel : GetAxisRuleFallback(cutAxisMode);
+        public string CutAxisRuleLabel => cachedHasValidCut && !string.IsNullOrEmpty(cachedCutRuleLabel)
+            ? cachedCutRuleLabel
+            : GetAxisRuleFallback(cutAxisMode);
         public float PreviewSplitHalfMass => cachedHalfMass;
 
         public event Action<InteractableObject, InteractableObject> OnPartitionPerformed;
@@ -392,12 +395,12 @@ namespace Polymulator
 
             string desc = cutAxisMode switch
             {
-                PartitionAxisMode.LeftRight => "KIRI | KANAN (Belah sumbu X)",
-                PartitionAxisMode.FrontBack => "DEPAN | BELAKANG (Belah sumbu Z)",
-                PartitionAxisMode.Horizontal => "ATAS | BAWAH (Belah horizontal Y)",
-                _ => "OTOMATIS (Mengikuti hadap Rect & panjang objek)"
+                PartitionAxisMode.LeftRight => L.T("partition.axis.left_right"),
+                PartitionAxisMode.FrontBack => L.T("partition.axis.front_back"),
+                PartitionAxisMode.Horizontal => L.T("partition.axis.horizontal"),
+                _ => L.T("partition.axis.auto")
             };
-            modeController?.NotifyBanner("Arah Partition [3]: " + desc, PaletteSettings.Peach);
+            modeController?.NotifyBanner(L.T("partition.axis_notice", desc), PaletteSettings.Peach);
             return cutAxisMode;
         }
 
@@ -611,14 +614,14 @@ namespace Polymulator
             InteractableObject target = ResolveActiveTarget();
             if (target == null)
             {
-                modeController?.NotifyBanner("Dekati atau pegang sebuah objek untuk dibelah [1]", PaletteSettings.Peach);
+                modeController?.NotifyBanner(L.T("partition.no_target"), PaletteSettings.Peach);
                 return false;
             }
 
             if (!CanPartitionTarget(target, out float sourceMass))
             {
                 SimulationVFX.Ring(target.transform.position, PaletteSettings.Peach, 1.3f, 0.35f);
-                modeController?.NotifyBanner(target.displayName + " tidak dapat dibelah lagi", PaletteSettings.Peach);
+                modeController?.NotifyBanner(L.T("partition.cannot_split", target.displayName), PaletteSettings.Peach);
                 return false;
             }
 
@@ -726,7 +729,7 @@ namespace Polymulator
 
             activeTransitionCount = Mathf.Max(0, activeTransitionCount - 1);
             modeController?.NotifyBanner(
-                $"Partition Sambungan: {spawnedRemainder?.displayName} & {spawnedDetached?.displayName} dipisah",
+                L.T("partition.unfused", spawnedRemainder?.displayName, spawnedDetached?.displayName),
                 PaletteSettings.Peach);
             OnPartitionPerformed?.Invoke(spawnedRemainder, spawnedDetached);
         }
@@ -856,7 +859,7 @@ namespace Polymulator
             activeTransitionCount = Mathf.Max(0, activeTransitionCount - 1);
 
             modeController?.NotifyBanner(
-                $"Partition ({axisDesc}): {baseLabel} -> {partA.displayName} & {partB.displayName} ({halfMass:0.0}t x 2)",
+                L.T("partition.completed", axisDesc, baseLabel, partA.displayName, partB.displayName, halfMass),
                 PaletteSettings.Peach);
             OnPartitionPerformed?.Invoke(partA, partB);
         }
@@ -894,14 +897,14 @@ namespace Polymulator
             InteractableObject held = ResolveHeldObject();
             if (held == null)
             {
-                modeController?.NotifyBanner("Angkat objek dulu [E] lalu dekatkan ke objek lain untuk Fusion [2]", PaletteSettings.Yellow);
+                modeController?.NotifyBanner(L.T("fusion.no_target"), PaletteSettings.Yellow);
                 return false;
             }
 
             if (!held.CanBePickedUp || !held.canFuse)
             {
                 SimulationVFX.Ring(held.transform.position, PaletteSettings.Peach, 1.4f, 0.35f);
-                modeController?.NotifyBanner(held.displayName + " tidak dapat digabungkan", PaletteSettings.Peach);
+                modeController?.NotifyBanner(L.T("fusion.cannot_merge", held.displayName), PaletteSettings.Peach);
                 return false;
             }
 
@@ -909,8 +912,8 @@ namespace Polymulator
             if (partner == null)
             {
                 string hint = IsCoreObject(held)
-                    ? held.displayName + " hanya bisa disatukan dengan pecahan CORE-01 lain di dekatnya"
-                    : "Dekatkan " + held.displayName + " yang sedang diangkat ke objek lain untuk mulai Fusing [2]";
+                    ? L.T("fusion.core_needs_core_piece", held.displayName)
+                    : L.T("fusion.bring_closer", held.displayName);
                 SimulationVFX.Ring(held.transform.position, PaletteSettings.Yellow, 1.7f, 0.38f);
                 modeController?.NotifyBanner(hint, PaletteSettings.Yellow);
                 return false;
@@ -919,7 +922,7 @@ namespace Polymulator
             if (!HasCompoundCapacity(held, partner))
             {
                 SimulationVFX.Ring(held.transform.position, PaletteSettings.Peach, 1.6f, 0.38f);
-                modeController?.NotifyBanner("Batas maksimum gabungan (" + MaxCompoundSubParts + " bagian) tercapai", PaletteSettings.Peach);
+                modeController?.NotifyBanner(L.T("fusion.max_parts", MaxCompoundSubParts), PaletteSettings.Peach);
                 return false;
             }
 
@@ -1030,7 +1033,7 @@ namespace Polymulator
             if (!selectedSideValid)
             {
                 SimulationAudio.PlayAnchorReject(stagingPartner.transform.position);
-                modeController?.NotifyBanner("Sisi " + GetFusionSideLabel(selectedFusionSide) + " terhalang. Pilih sisi lain [WASD / Q / 3]", PaletteSettings.Red);
+                modeController?.NotifyBanner(L.T("fusion.side_blocked", GetFusionSideLabel(selectedFusionSide)), PaletteSettings.Red);
                 return false;
             }
 
@@ -1117,7 +1120,7 @@ namespace Polymulator
             if (!silent)
             {
                 SimulationAudio.PlayMenuClick();
-                modeController?.NotifyBanner("Tahap Fusing dibatalkan", PaletteSettings.Subtext0);
+                modeController?.NotifyBanner(L.T("fusion.stage_cancelled"), PaletteSettings.Subtext0);
             }
 
             OnFusionStagingChanged?.Invoke(false);
@@ -1556,8 +1559,8 @@ namespace Polymulator
             activeTransitionCount = Mathf.Max(0, activeTransitionCount - 1);
 
             string banner = restoringCore
-                ? "CORE-01 dipulihkan utuh melalui Fusion!"
-                : $"{merged.displayName} ({GetFusionSideLabel(chosenSide)}): {partnerLabel} + {srcLabel}";
+                ? L.T("fusion.core_restored")
+                : L.T("fusion.completed", merged.displayName, GetFusionSideLabel(chosenSide), partnerLabel, srcLabel);
             modeController?.NotifyBanner(banner, vfxAccent);
             OnFusionPerformed?.Invoke(merged);
         }
@@ -2008,29 +2011,29 @@ namespace Polymulator
 
             if (cutAxisMode == PartitionAxisMode.Horizontal)
             {
-                reasonLabel = "Atas | Bawah (Y)";
+                reasonLabel = L.T("partition.reason.horizontal");
                 return Vector3.up;
             }
             if (cutAxisMode == PartitionAxisMode.LeftRight)
             {
-                reasonLabel = "Kiri | Kanan (X)";
+                reasonLabel = L.T("partition.reason.left_right");
                 return Mathf.Abs(Vector3.Dot(Vector3.right, localX)) >= Mathf.Abs(Vector3.Dot(Vector3.right, localZ)) ? localX : localZ;
             }
             if (cutAxisMode == PartitionAxisMode.FrontBack)
             {
-                reasonLabel = "Depan | Belakang (Z)";
+                reasonLabel = L.T("partition.reason.front_back");
                 return Mathf.Abs(Vector3.Dot(Vector3.forward, localX)) >= Mathf.Abs(Vector3.Dot(Vector3.forward, localZ)) ? localX : localZ;
             }
 
             Vector3 size = GetTrueWorldSize(target);
             if (size.z > size.x * 1.15f)
             {
-                reasonLabel = "Auto (Panjang Objek)";
+                reasonLabel = L.T("partition.reason.auto_long");
                 return localZ;
             }
             if (size.x > size.z * 1.15f)
             {
-                reasonLabel = "Auto (Lebar Objek)";
+                reasonLabel = L.T("partition.reason.auto_wide");
                 return localX;
             }
 
@@ -2039,7 +2042,7 @@ namespace Polymulator
             right.Normalize();
 
             bool pickX = Mathf.Abs(Vector3.Dot(right, localX)) >= Mathf.Abs(Vector3.Dot(right, localZ));
-            reasonLabel = "Auto (Hadap Rect)";
+            reasonLabel = L.T("partition.reason.auto_facing");
             return pickX ? localX : localZ;
         }
 
@@ -2240,37 +2243,42 @@ namespace Polymulator
 
         private static string GetAxisShortLabel(PartitionAxisMode mode)
         {
-            return mode switch
+            string key = "fusion.axis_short." + mode.ToString().ToLowerInvariant();
+            string fallback = mode switch
             {
                 PartitionAxisMode.LeftRight => "KIRI | KANAN",
                 PartitionAxisMode.FrontBack => "DEPAN | BELAKANG",
                 PartitionAxisMode.Horizontal => "ATAS | BAWAH",
                 _ => "OTOMATIS"
             };
+            return L.TOr(key, fallback);
         }
 
         private static string GetAxisRuleFallback(PartitionAxisMode mode)
         {
-            return mode switch
+            string key = "fusion.axis_rule." + mode.ToString().ToLowerInvariant();
+            string fallback = mode switch
             {
                 PartitionAxisMode.LeftRight => "Sumbu Kiri | Kanan (X)",
                 PartitionAxisMode.FrontBack => "Sumbu Depan | Belakang (Z)",
                 PartitionAxisMode.Horizontal => "Sumbu Atas | Bawah (Y)",
                 _ => "Auto (Hadap Rect)"
             };
+            return L.TOr(key, fallback);
         }
 
         public static string GetFusionSideLabel(FusionAttachmentSide side)
         {
-            return side switch
+            string key = "fusion.side." + side.ToString().ToLowerInvariant();
+            string fallback = side switch
             {
-                FusionAttachmentSide.Right => "KANAN",
                 FusionAttachmentSide.Front => "DEPAN",
                 FusionAttachmentSide.Left => "KIRI",
                 FusionAttachmentSide.Back => "BELAKANG",
                 FusionAttachmentSide.Top => "ATAS",
                 _ => "KANAN"
             };
+            return L.TOr(key, fallback);
         }
 
         private void TriggerHitStop(float seconds)

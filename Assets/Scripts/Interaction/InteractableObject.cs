@@ -188,7 +188,7 @@ namespace Polymulator
             Body.angularVelocity = Vector3.zero;
             Body.WakeUp();
             SimulationVFX.Ring(restore, PaletteSettings.Yellow, 1.5f, 0.35f);
-            SimulationModeController.Instance?.NotifyBanner(displayName + " dikembalikan ke ruang uji", PaletteSettings.Yellow);
+            SimulationModeController.Instance?.NotifyBanner(L.T("ui.object.returned", displayName), PaletteSettings.Yellow);
         }
 
         public void CacheComponents()

@@ -704,6 +704,26 @@
     -unity-text-align: middle-right;
 }
 
+.setting-language-btn {
+    -unity-font-definition: url("/Assets/UI/Fonts/Font_AktMedium.asset");
+    font-size: 15px;
+    color: #94E2D5;
+    background-color: #313244;
+    border-color: #45475A;
+    border-width: 1px;
+    border-radius: 3px;
+    padding: 6px 14px;
+    min-width: 120px;
+}
+
+.setting-language-btn:hover {
+    border-color: #89DCEB;
+}
+
+.setting-language-btn:focus {
+    border-color: #F9E2AF;
+}
+
 .setting-toggle {
     margin: 0;
 }

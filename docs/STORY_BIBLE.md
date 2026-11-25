@@ -1,8 +1,8 @@
 # POLYMULATOR — Base Story Bible
 
-**Canon version:** v0.3  
-**Status:** Accepted base story + expanded ending canon + runtime-reserve ending  
-**Last updated:** 2026-11-22
+**Canon version:** v0.4  
+**Status:** Accepted base story + expanded ending canon + runtime-reserve ending + bilingual text rule  
+**Last updated:** 2026-11-25
 
 ## 0. Authority
 
@@ -251,7 +251,9 @@ The two endings end on distinct final lines: Ending A on a human trace that surv
 
 ## 11. Language and UI labels
 
-Player-facing story text uses English only.
+Player-facing text is authored in English. English is the canonical source language and the default. Indonesian is a translation of that source, not a second canon, and it must carry the same meaning, speaker tokens, and object IDs.
+
+Language switching exists only in Main Menu settings. Simulation HUD pause settings do not include a language control.
 
 Approved speaker/source labels:
 
@@ -264,13 +266,13 @@ Approved speaker/source labels:
 
 `FAKE SIM`, `OTHER VOICE`, and any alternate SIM label are forbidden. The takeover uses `SIM` with changed tone only.
 
-`SYSTEM` runtime notices may be presented as top-right push notifications in the final chamber. They are machine state, not dialogue, and use no cause, name, or explanation. The notification text stays in English and uses the same grammar as other `SYSTEM` lines.
+`SYSTEM` runtime notices may be presented as top-right push notifications in the final chamber. They are machine state, not dialogue, and use no cause, name, or explanation. The notification text follows the active language and uses the same grammar as other `SYSTEM` lines.
 
 `PI//` may appear only as a metadata stamp in archive fragments. It is never a speaker label, never spoken, and never expanded into a company name.
 
 Removed from player-facing story: Mira, Danu, SIGNAL, Adi, Nara, Vela, RECT-126, and any `RECT:` dialogue label.
 
-District labels use English:
+District labels are authored in English. The Indonesian locale translates them without changing the underlying canon label:
 
 - `RUANG UJI 01` → `TEST CHAMBER 01`
 - `JALAN PASAR` → `MARKET STREET`
@@ -284,7 +286,7 @@ District labels use English:
 - `JEMBATAN LAMA VELA` → `OLD BRIDGE`
 - `AMBANG BADAI // TEPI` → `STORM THRESHOLD // EDGE`
 
-Chapter subtitles use English: `TRANSLATION`, `ELEVATION`, `ROTATION`, `RECONSTRUCTION`.
+Chapter subtitles are authored in English: `TRANSLATION`, `ELEVATION`, `ROTATION`, `RECONSTRUCTION`. The Indonesian locale translates them as `TRANSLASI`, `ELEVASI`, `ROTASI`, `REKONSTRUKSI`.
 
 Palette usage remains exact. Lavender stays `#B4BEFF`; Mantle stays `#11111B` for MainMenu and fade contexts.
 
@@ -335,3 +337,4 @@ Do not change level geometry, interaction code, camera configuration, ribbon beh
 - **v0.1 — 2026-11-22:** Established the base canon from discussion: certification sandbox premise, Rect / AI-1959 and SIM as the only named entities, one-way communication, absolute Rect silence, archive-based corruption, SDG 4 primary and SDG 11 secondary, seven anonymous fragments, and the human-operator certification ending.
 - **v0.2 — 2026-11-22:** Added the expanded ending canon: SIM is confirmed human-operated with `The Creator` as an author-only name; tone drift replaces any second speaker for the takeover; the final level offers no explicit choice, only completion or stopping; a pre-authorised container transfer means completing the task lets Rect survive. Level and chapter counts are declared flexible; the twelve-scene map is demoted to prototype mapping. `PI//` is allowed as an easter-egg metadata stamp only. Added channel takeover as the final corruption stage and reserved the creator, company, and extremist group as author-only labels.
 - **v0.3 — 2026-11-22:** Added the runtime-reserve ending. The external feed is cut because only the operator can trigger shutdown and refuses; power loss is explicitly not a shutdown command. A `SYSTEM` push notification in the top-right starts a final-chamber countdown before SIM's tone turns cold. Countdown duration is undecided. Two full ending sequences are now canon: container continuity on completion before reserve expiry, and erasure on expiry or leaving the chamber. No shutdown button exists; replay is a fresh iteration.
+- **v0.4 — 2026-11-25:** Declared English the canonical source language and default for player-facing text, with Indonesian as a translation rather than separate canon. Language switching is limited to Main Menu settings. Approved speaker tokens and object IDs stay language-neutral in both locales.

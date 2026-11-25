@@ -1,4 +1,4 @@
-<ui:UXML xmlns:ui="UnityEngine.UIElements" editor-extension-mode="False">
+<ui:UXML xmlns:ui="UnityEngine.UIElements" xmlns:poly="Polymulator" editor-extension-mode="False">
     <Style src="MainMenuHUD.uss" />
     <ui:VisualElement name="menu-root" class="menu-root">
 
@@ -9,26 +9,26 @@
                     <ui:VisualElement class="brand-kicker" picking-mode="Ignore">
                         <ui:VisualElement class="brand-mark-a" picking-mode="Ignore" />
                         <ui:VisualElement class="brand-mark-b" picking-mode="Ignore" />
-                        <ui:Label name="title-iter-label" text="KOTA TEPI  /  ARSIP SPASIAL" class="brand-kicker-text" picking-mode="Ignore" />
+                        <poly:LocalizedText name="title-iter-label" loc-key="ui.menu.kicker" class="loc-text brand-kicker-text" picking-mode="Ignore" />
                     </ui:VisualElement>
 
                     <ui:Label text="POLYMULATOR" class="hero-title" picking-mode="Ignore" />
-                    <ui:Label text="Rekonstruksi ruang melalui translasi, rotasi, partisi, dan fusi." class="hero-tagline" picking-mode="Ignore" />
+                    <poly:LocalizedText loc-key="ui.menu.tagline" class="loc-text hero-tagline" picking-mode="Ignore" />
                     <ui:VisualElement class="rail-divider" picking-mode="Ignore" />
                 </ui:VisualElement>
 
                 <ui:VisualElement name="title-buttons" class="title-buttons">
-                    <ui:Button name="btn-enter" text="Mulai Simulasi" class="primary-cta-btn" />
-                    <ui:Button name="btn-chapters" text="Pilih Ruangan" class="nav-row-btn" />
-                    <ui:Button name="btn-title-showcase" text="Ruang Showcase" class="nav-row-btn" />
-                    <ui:Button name="btn-title-settings" text="Pengaturan" class="nav-row-btn" />
+                    <ui:Button name="btn-enter" text="" class="primary-cta-btn" />
+                    <poly:LocalizedButton loc-key="ui.menu.buttons.chapters" name="btn-chapters" class="loc-text nav-row-btn" />
+                    <poly:LocalizedButton loc-key="ui.menu.buttons.showcase" name="btn-title-showcase" class="loc-text nav-row-btn" />
+                    <poly:LocalizedButton loc-key="ui.menu.settings.title" name="btn-title-settings" class="loc-text nav-row-btn" />
                     <ui:VisualElement class="nav-divider" picking-mode="Ignore" />
-                    <ui:Button name="btn-shutdown" text="Keluar" class="nav-row-btn nav-row-btn--quit" />
+                    <poly:LocalizedButton loc-key="ui.menu.buttons.quit" name="btn-shutdown" class="loc-text nav-row-btn nav-row-btn--quit" />
                 </ui:VisualElement>
 
                 <ui:VisualElement class="rail-footer" picking-mode="Ignore">
-                    <ui:Label name="title-progress-label" text="0/14 Ruangan Selesai  •  0 Memori" class="footer-progress" picking-mode="Ignore" />
-                    <ui:Label text="Panah / W-S: Pilih   •   Enter: Buka" class="footer-hint" picking-mode="Ignore" />
+                    <ui:Label name="title-progress-label" text="" class="footer-progress" picking-mode="Ignore" />
+                    <poly:LocalizedText loc-key="ui.menu.hints.title_nav" class="loc-text footer-hint" picking-mode="Ignore" />
                 </ui:VisualElement>
             </ui:VisualElement>
 
@@ -39,13 +39,13 @@
         <ui:VisualElement name="ribbon-view" class="ribbon-view ribbon-view--hidden">
             <ui:VisualElement class="ribbon-topbar">
                 <ui:VisualElement class="topbar-left">
-                    <ui:Button name="btn-ribbon-back" text="[Esc] Beranda" class="top-action-btn" />
-                    <ui:Label name="ribbon-meta-label" text="0/14 Ruangan  •  0 Memori" class="topbar-progress" picking-mode="Ignore" />
+                    <poly:LocalizedButton loc-key="ui.menu.buttons.home" name="btn-ribbon-back" class="loc-text top-action-btn" />
+                    <ui:Label name="ribbon-meta-label" text="" class="topbar-progress" picking-mode="Ignore" />
                 </ui:VisualElement>
                 <ui:VisualElement class="topbar-actions">
-                    <ui:Button name="btn-ribbon-showcase" text="Ruang Showcase" class="top-action-btn" />
-                    <ui:Button name="btn-demo-toggle" text="[F2] Buka Semua: Mati" class="top-action-btn" />
-                    <ui:Button name="btn-ribbon-settings" text="Pengaturan" class="top-action-btn" />
+                    <poly:LocalizedButton loc-key="ui.menu.buttons.showcase" name="btn-ribbon-showcase" class="loc-text top-action-btn" />
+                    <ui:Button name="btn-demo-toggle" text="" class="top-action-btn" />
+                    <poly:LocalizedButton loc-key="ui.menu.settings.title" name="btn-ribbon-settings" class="loc-text top-action-btn" />
                 </ui:VisualElement>
             </ui:VisualElement>
 
@@ -56,42 +56,47 @@
             <ui:VisualElement class="ribbon-footer">
                 <ui:VisualElement name="chamber-preview-card" class="chamber-preview-card">
                     <ui:VisualElement class="preview-content" picking-mode="Ignore">
-                        <ui:Label name="preview-chapter-label" text="Chapter 1  •  Translasi" class="preview-chapter" picking-mode="Ignore" />
-                        <ui:Label name="preview-title-label" text="1.1  •  Bangun di Ruangan Kosong" class="preview-title" picking-mode="Ignore" />
-                        <ui:Label name="preview-status-label" text="Siap dimulai  •  Klik titik level atau tekan Enter" class="preview-status" picking-mode="Ignore" />
+                        <ui:Label name="preview-chapter-label" text="" class="preview-chapter" picking-mode="Ignore" />
+                        <ui:Label name="preview-title-label" text="" class="preview-title" picking-mode="Ignore" />
+                        <ui:Label name="preview-status-label" text="" class="preview-status" picking-mode="Ignore" />
                     </ui:VisualElement>
-                    <ui:Button name="btn-preview-launch" text="Mulai" class="preview-launch-btn" />
+                    <ui:Button name="btn-preview-launch" text="" class="preview-launch-btn" />
                 </ui:VisualElement>
-                <ui:Label text="Geser / Scroll / A-D: Telusuri Chapter   •   Klik titik ruangan atau tekan Enter untuk masuk" class="footer-hint footer-hint--center" picking-mode="Ignore" />
+                <poly:LocalizedText loc-key="ui.menu.hints.ribbon_nav" class="loc-text footer-hint footer-hint--center" picking-mode="Ignore" />
             </ui:VisualElement>
         </ui:VisualElement>
 
         <!-- Settings Modal -->
         <ui:VisualElement name="settings-overlay" class="settings-overlay settings-overlay--hidden">
             <ui:VisualElement name="settings-card" class="settings-card">
-                <ui:Label text="Pengaturan" class="settings-title" picking-mode="Ignore" />
-                <ui:Label text="Audio, sensitivitas kamera, dan kenyamanan gerak" class="settings-subtitle" picking-mode="Ignore" />
+                <poly:LocalizedText loc-key="ui.menu.settings.title" class="loc-text settings-title" picking-mode="Ignore" />
+                <poly:LocalizedText loc-key="ui.menu.settings.subtitle" class="loc-text settings-subtitle" picking-mode="Ignore" />
 
                 <ui:VisualElement class="setting-row">
-                    <ui:Label text="Volume Utama" class="setting-label" picking-mode="Ignore" />
+                    <poly:LocalizedText loc-key="ui.menu.settings.volume" class="loc-text setting-label" picking-mode="Ignore" />
                     <ui:Slider name="slider-volume" low-value="0" high-value="100" value="85" class="setting-slider" />
-                    <ui:Label name="val-volume" text="85%" class="setting-value" picking-mode="Ignore" />
+                    <ui:Label name="val-volume" text="" class="setting-value" picking-mode="Ignore" />
                 </ui:VisualElement>
 
                 <ui:VisualElement class="setting-row">
-                    <ui:Label text="Sensitivitas Kamera" class="setting-label" picking-mode="Ignore" />
+                    <poly:LocalizedText loc-key="ui.menu.settings.sensitivity" class="loc-text setting-label" picking-mode="Ignore" />
                     <ui:Slider name="slider-sensitivity" low-value="40" high-value="220" value="100" class="setting-slider" />
-                    <ui:Label name="val-sensitivity" text="1.0x" class="setting-value" picking-mode="Ignore" />
+                    <ui:Label name="val-sensitivity" text="" class="setting-value" picking-mode="Ignore" />
                 </ui:VisualElement>
 
                 <ui:VisualElement class="setting-row">
-                    <ui:Label text="Kurangi Gerak" class="setting-label" picking-mode="Ignore" />
+                    <poly:LocalizedText loc-key="ui.menu.settings.reduce_motion" class="loc-text setting-label" picking-mode="Ignore" />
                     <ui:Toggle name="toggle-reduce-motion" class="setting-toggle" />
                 </ui:VisualElement>
 
+                <ui:VisualElement class="setting-row">
+                    <poly:LocalizedText loc-key="ui.menu.settings.language" class="loc-text setting-label" picking-mode="Ignore" />
+                    <ui:Button name="btn-language" text="" class="setting-language-btn" />
+                </ui:VisualElement>
+
                 <ui:VisualElement class="settings-actions">
-                    <ui:Button name="btn-reset-save" text="Reset Progres" class="modal-btn modal-btn--danger" />
-                    <ui:Button name="btn-settings-close" text="Selesai  [Esc]" class="modal-btn modal-btn--primary" />
+                    <ui:Button name="btn-reset-save" text="" class="modal-btn modal-btn--danger" />
+                    <poly:LocalizedButton loc-key="ui.menu.settings.done" name="btn-settings-close" class="loc-text modal-btn modal-btn--primary" />
                 </ui:VisualElement>
             </ui:VisualElement>
         </ui:VisualElement>
