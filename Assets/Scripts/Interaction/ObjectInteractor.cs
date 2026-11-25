@@ -125,7 +125,7 @@ namespace Polymulator
                 else
                 {
                     SimulationVFX.Ring(target.transform.position, PaletteSettings.Peach, 1.5f, 0.35f);
-                    modeController?.NotifyBanner(target.displayName + " IS STATIC ANCHOR", PaletteSettings.Peach);
+                    modeController?.NotifyBanner(L.T("ui.object.static_anchor", target.displayName), PaletteSettings.Peach);
                 }
             }
         }
@@ -151,7 +151,7 @@ namespace Polymulator
                 else
                 {
                     SimulationVFX.Ring(target.transform.position, PaletteSettings.Peach, 1.5f, 0.35f);
-                    modeController?.NotifyBanner(target.displayName + " CANNOT BE TETHERED", PaletteSettings.Peach);
+                    modeController?.NotifyBanner(L.T("ui.object.cannot_tether", target.displayName), PaletteSettings.Peach);
                 }
             }
         }

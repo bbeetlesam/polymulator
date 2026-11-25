@@ -24,6 +24,11 @@ namespace Polymulator
 
         public static event System.Action<string, string, string, string, string> OnCollected;
 
+        private static string Key(string suffix)
+        {
+            return LocalizationKeys.Fragment(SceneManager.GetActiveScene().name, suffix);
+        }
+
         private void Start()
         {
             if (visualCrystal == null) visualCrystal = transform;
@@ -63,7 +68,12 @@ namespace Polymulator
             SimulationVFX.Ring(transform.position, PaletteSettings.Yellow, 2.2f, 0.45f);
             SimulationVisualBridge.TriggerFloorRipple(transform.position, PaletteSettings.Rosewater, 6.2f, 1.15f, 0.72f);
 
-            OnCollected?.Invoke(fragmentTitle, speaker, storyLine, replySpeaker, replyLine);
+            OnCollected?.Invoke(
+                L.TOr(Key("title"), fragmentTitle),
+                speaker,
+                L.TOr(Key("line"), storyLine),
+                replySpeaker,
+                L.TOr(Key("reply_line"), replyLine));
             gameObject.SetActive(false);
         }
     }

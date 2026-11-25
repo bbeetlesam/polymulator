@@ -107,8 +107,9 @@ namespace Polymulator
                 core.Body.linearVelocity = kick.normalized * GridSettings.ToWorld(2.2f) + Vector3.up * GridSettings.ToWorld(1.8f);
             }
             OnObjectiveFeedback?.Invoke(
-                "Arah rotasi belum pas (" + Mathf.RoundToInt(core.transform.eulerAngles.y) +
-                " deg): putar ke " + Mathf.RoundToInt(Mathf.Repeat(requiredFacingYaw, 360f)) + " deg [R]",
+                L.T("ui.anchor.rotation_mismatch",
+                    Mathf.RoundToInt(core.transform.eulerAngles.y),
+                    Mathf.RoundToInt(Mathf.Repeat(requiredFacingYaw, 360f))),
                 PaletteSettings.Peach);
         }
 
@@ -136,7 +137,7 @@ namespace Polymulator
                 rejectCooldownUntil = Time.time + 2.0f;
                 SimulationAudio.PlayAnchorReject(transform.position);
                 SimulationVFX.Ring(transform.position, PaletteSettings.Peach, 1.55f, 0.35f);
-                OnObjectiveFeedback?.Invoke("ANCHOR REQUIRES CORE-01 (PLATFORM HIGH)", PaletteSettings.Peach);
+                OnObjectiveFeedback?.Invoke(L.T("ui.anchor.requires_core"), PaletteSettings.Peach);
             }
         }
 
@@ -161,8 +162,8 @@ namespace Polymulator
             {
                 awaitingReleaseCore = obj;
                 string orientHint = requireFacingAngle && !IsOrientationMatched(obj)
-                    ? "Putar CORE [R] ke " + Mathf.RoundToInt(Mathf.Repeat(requiredFacingYaw, 360f)) + " deg dulu"
-                    : "Posisi sejajar Anchor: lepas untuk mengunci CORE-01";
+                    ? L.T("ui.anchor.rotate_core", Mathf.RoundToInt(Mathf.Repeat(requiredFacingYaw, 360f)))
+                    : L.T("ui.anchor.release_to_lock");
                 Color hintCol = requireFacingAngle && !IsOrientationMatched(obj)
                     ? PaletteSettings.Yellow
                     : PaletteSettings.Green;
@@ -231,7 +232,7 @@ namespace Polymulator
                 body.angularVelocity = Vector3.zero;
             }
             SimulationVFX.Ring(safePos, PaletteSettings.Yellow, 1.6f, 0.35f);
-            OnObjectiveFeedback?.Invoke("CORE-01 RE-MATERIALIZED AT PLATFORM HIGH", PaletteSettings.Yellow);
+            OnObjectiveFeedback?.Invoke(L.T("ui.anchor.core_rematerialized"), PaletteSettings.Yellow);
         }
     }
 }

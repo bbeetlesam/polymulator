@@ -1,5 +1,4 @@
 using System.Collections.Generic;
-using System.Globalization;
 using UnityEngine;
 using UnityEngine.EventSystems;
 using UnityEngine.InputSystem;
@@ -113,7 +112,7 @@ namespace Polymulator
         private bool pauseSettingsOpen;
         private bool chamberCompleted;
         private float clearOverlayDelay = -1f;
-        private string levelDisplayName = "Ruangan Uji 01";
+        private string levelDisplayName = string.Empty;
         private string levelNumberLabel = "1.1";
         private string nextSceneName = string.Empty;
         private LevelInfo activeLevelInfo;
@@ -172,8 +171,8 @@ namespace Polymulator
             RefreshTargetAndPrompt(true);
 
             string prefix = SimulationProgress.IsSpecialShowcase(SceneManager.GetActiveScene().name)
-                ? "Ruang Showcase: "
-                : "Ruangan " + levelNumberLabel + ": ";
+                ? L.T("ui.hud.start.showcase")
+                : L.T("ui.hud.start.room", levelNumberLabel);
             HandleStatusBanner(prefix + levelDisplayName, PaletteSettings.Sapphire);
             if (activeLevelInfo != null && activeLevelInfo.OpeningDialogue != null && activeLevelInfo.OpeningDialogue.Length > 0)
                 EnqueueStoryLines(activeLevelInfo.OpeningDialogue);
@@ -189,6 +188,8 @@ namespace Polymulator
             activeLevelInfo = Resources.Load<LevelInfo>("Levels/" + sceneName);
             if (activeLevelInfo != null && !string.IsNullOrEmpty(activeLevelInfo.Title))
                 levelDisplayName = activeLevelInfo.Title;
+            else
+                levelDisplayName = L.T("ui.hud.default_level");
         }
 
         private void OnEnable()
@@ -344,7 +345,7 @@ namespace Polymulator
             });
 
             if (btnNext != null && !string.IsNullOrEmpty(nextSceneName))
-                btnNext.text = "Ruangan " + nextSceneName.Replace("Level", "") + "  [Enter]";
+                btnNext.text = L.T("ui.hud.overlay.next_room", nextSceneName.Replace("Level", ""));
 
             slotRotasi = root.Q<VisualElement>("slot-rotasi");
             slotSpecial = root.Q<VisualElement>("slot-special");
@@ -500,11 +501,11 @@ namespace Polymulator
             if (!hasShownBlueprintConcept)
             {
                 hasShownBlueprintConcept = true;
-                HandleStatusBanner("Mode Cetak Biru [V]: Arah Sumbu & Garis Target Aktif", PaletteSettings.Teal);
+                HandleStatusBanner(L.T("ui.hud.blueprint.intro"), PaletteSettings.Teal);
             }
             else
             {
-                HandleStatusBanner(active ? "Mode Cetak Biru: Aktif" : "Mode Cetak Biru: Nonaktif", PaletteSettings.Teal);
+                HandleStatusBanner(active ? L.T("ui.hud.blueprint.on") : L.T("ui.hud.blueprint.off"), PaletteSettings.Teal);
             }
         }
 
@@ -515,7 +516,7 @@ namespace Polymulator
             if (mode == SimulationMode.Flexible && !hasShownFlexNarrative)
             {
                 hasShownFlexNarrative = true;
-                HandleStatusBanner("Mode Fleksibel aktif: Gerak Bebas & Telekinesis [F]", PaletteSettings.Mauve);
+                HandleStatusBanner(L.T("ui.hud.mode.flexible_active"), PaletteSettings.Mauve);
             }
         }
 
@@ -524,14 +525,14 @@ namespace Polymulator
             RefreshObjectiveText();
             if (chamberCompleted) return;
             HandleStatusBanner(
-                active ? "Pelat beban aktif: jembatan energi menyala" : "Pelat beban lepas: jembatan energi padam",
+                active ? L.T("ui.hud.plate.active") : L.T("ui.hud.plate.released"),
                 active ? PaletteSettings.Green : PaletteSettings.Peach);
         }
 
         private void HandleFragmentCollected(string fragTitle, string speaker, string line, string replySpeaker, string replyLine)
         {
             fragmentCollectedThisRun = true;
-            HandleStatusBanner("Memori Tersimpan: " + fragTitle, PaletteSettings.Rosewater);
+            HandleStatusBanner(L.T("ui.hud.fragment.saved", fragTitle), PaletteSettings.Rosewater);
             storyQueue.Clear();
             var lines = new List<LevelInfo.StoryLine>(2);
             if (!string.IsNullOrEmpty(line)) lines.Add(new LevelInfo.StoryLine { speaker = speaker, text = line });
@@ -669,7 +670,7 @@ namespace Polymulator
         private void UpdateStoryProgressLabel()
         {
             if (storyProgressLabel == null) return;
-            storyProgressLabel.text = "[SPACE] Lanjut";
+            storyProgressLabel.text = L.T("ui.hud.story.next");
         }
 
         private static Color SpeakerColor(string speaker)
@@ -718,13 +719,13 @@ namespace Polymulator
                     ? presetName + " (" + pairLabel + ")"
                     : presetName;
                 fusionStageTitle.text = valid
-                    ? "Tahap Fusing  •  " + presetTag + "  •  Sisi: " + sideLabel
-                    : "Tahap Fusing  •  " + presetName + "  •  Sisi: " + sideLabel + " (Terhalang)";
+                    ? L.T("ui.hud.fusion.stage.valid", presetTag, sideLabel)
+                    : L.T("ui.hud.fusion.stage.blocked", presetName, sideLabel);
                 fusionStageTitle.style.color = accent;
             }
             if (fusionStageHint != null)
             {
-                fusionStageHint.text = "[WASD / Q / 3] Pilih Sisi   •   [2 / Enter] Gabung   •   [Esc] Batal";
+                fusionStageHint.text = L.T("ui.hud.fusion.stage.hint");
             }
         }
         private void HandleChoiceFeedback(string msg) => HandleStatusBanner(msg, PaletteSettings.Peach);
@@ -747,7 +748,7 @@ namespace Polymulator
             int par = activeLevelInfo != null ? activeLevelInfo.ParActions : 8;
             lastClearStars = SimulationProgress.RecordClear(SceneManager.GetActiveScene().name, totalActions, par);
 
-            HandleStatusBanner("Ruangan " + levelNumberLabel + " selesai: Anchor terkunci", PaletteSettings.Green);
+            HandleStatusBanner(L.T("ui.hud.objective.completed", levelNumberLabel), PaletteSettings.Green);
 
             if (activeLevelInfo != null)
             {
@@ -816,19 +817,19 @@ namespace Polymulator
             if (chamberCompleted)
             {
                 objectiveLabel.text = endingController != null
-                    ? "Keputusan Kota Tepi Ditetapkan"
-                    : "Chapter Selesai";
+                    ? L.T("ui.hud.objective.decision_set")
+                    : L.T("ui.hud.objective.chapter_complete");
                 objectiveLabel.style.color = PaletteSettings.Green;
-                SetDetail(endingController != null ? string.Empty : "CORE-01 Terkunci di Anchor", PaletteSettings.Green);
+                SetDetail(endingController != null ? string.Empty : L.T("ui.hud.objective.core_locked"), PaletteSettings.Green);
                 if (modeAccentBar != null) modeAccentBar.style.backgroundColor = PaletteSettings.Green;
                 return;
             }
 
             if (endingController != null)
             {
-                objectiveLabel.text = "Pilih Jalur Akhir  •  0/1 Selesai";
+                objectiveLabel.text = L.T("ui.hud.objective.final_choice");
                 objectiveLabel.style.color = PaletteSettings.Text;
-                SetDetail("Timur (Tanggul)  •  Utara (Pemancar)  •  Barat (Brankas)", PaletteSettings.Teal);
+                SetDetail(L.T("ui.hud.objective.final_paths"), PaletteSettings.Teal);
                 if (modeAccentBar != null) modeAccentBar.style.backgroundColor = PaletteSettings.Teal;
                 return;
             }
@@ -858,43 +859,41 @@ namespace Polymulator
 
                 if (allActive)
                 {
-                    objectiveLabel.text = string.Format("Pelat Beban {0}/{1} Aktif  •  {2}/{3} Selesai",
+                    objectiveLabel.text = L.T("ui.hud.objective.plates",
                         activeCount, totalPlates, activeCount, totalSteps);
                     objectiveLabel.style.color = PaletteSettings.Green;
-                    SetDetail("Bawa CORE-01 ke Soket Anchor", PaletteSettings.Green);
+                    SetDetail(L.T("ui.hud.objective.bring_core"), PaletteSettings.Green);
                     if (modeAccentBar != null) modeAccentBar.style.backgroundColor = PaletteSettings.Green;
                 }
                 else
                 {
-                    objectiveLabel.text = string.Format("Pelat Beban {0}/{1} Aktif  •  {2}/{3} Selesai",
+                    objectiveLabel.text = L.T("ui.hud.objective.plates",
                         activeCount, totalPlates, activeCount, totalSteps);
                     objectiveLabel.style.color = PaletteSettings.Text;
 
                     if (totalPlates == 1)
                     {
                         WeightedPressurePlate single = plates[0];
-                        SetDetail(string.Format(CultureInfo.InvariantCulture,
-                            "Beban Pelat: {0:0.0} / {1:0.0} t", single.CurrentMass, single.requiredMass),
+                        SetDetail(L.T("ui.hud.objective.plate_weight", single.CurrentMass, single.requiredMass),
                             PaletteSettings.Teal);
                     }
                     else if (totalPlates <= 3)
                     {
-                        System.Text.StringBuilder sb = new System.Text.StringBuilder("Beban: ");
+                        System.Text.StringBuilder sb = new System.Text.StringBuilder(L.T("ui.hud.objective.weights"));
                         bool first = true;
                         for (int i = 0; i < plates.Length; i++)
                         {
                             if (plates[i] == null) continue;
                             if (!first) sb.Append("  •  ");
                             first = false;
-                            sb.AppendFormat(CultureInfo.InvariantCulture, "{0:0.0}/{1:0.0} t",
-                                plates[i].CurrentMass, plates[i].requiredMass);
+                            sb.Append(L.T("ui.hud.objective.weight_item",
+                                plates[i].CurrentMass, plates[i].requiredMass));
                         }
                         SetDetail(sb.ToString(), PaletteSettings.Teal);
                     }
                     else
                     {
-                        SetDetail(string.Format(CultureInfo.InvariantCulture,
-                            "Total Beban Pelat: {0:0.0} / {1:0.0} t", sumCurrent, sumRequired),
+                        SetDetail(L.T("ui.hud.objective.total_weight", sumCurrent, sumRequired),
                             PaletteSettings.Teal);
                     }
 
@@ -903,7 +902,7 @@ namespace Polymulator
                 return;
             }
 
-            objectiveLabel.text = "Kunci CORE-01 ke Anchor  •  0/1 Selesai";
+            objectiveLabel.text = L.T("ui.hud.objective.lock_core");
             objectiveLabel.style.color = PaletteSettings.Text;
             SetDetail(string.Empty, PaletteSettings.Teal);
             if (modeAccentBar != null) modeAccentBar.style.backgroundColor = PaletteSettings.Teal;
@@ -943,7 +942,9 @@ namespace Polymulator
                 iconSpecial.IconKind = isFlexible ? HudIconKind.Telekinesis : HudIconKind.Throw;
                 iconSpecial.SetTint(accent);
             }
-            if (titleSpecial != null) titleSpecial.text = isFlexible ? "Telekinesis" : "Lempar";
+            if (titleSpecial != null) titleSpecial.text = isFlexible
+                ? L.T("ui.hud.ability.telekinesis")
+                : L.T("ui.hud.ability.throw");
 
             RefreshPartitionFusionDock();
         }
@@ -1092,7 +1093,9 @@ namespace Polymulator
             pauseSettingsOpen = !pauseSettingsOpen;
             if (pauseSettingsOpen) SyncPauseSettingsToUI();
             pauseSettingsPanel.EnableInClassList("pause-settings-panel--hidden", !pauseSettingsOpen);
-            if (btnPauseSettings != null) btnPauseSettings.text = pauseSettingsOpen ? "Tutup Pengaturan" : "Pengaturan";
+            if (btnPauseSettings != null) btnPauseSettings.text = pauseSettingsOpen
+                ? L.T("ui.menu.settings.close")
+                : L.T("ui.menu.settings.title");
             SimulationAudio.PlayMenuClick();
             if (pauseSettingsOpen && pauseSliderVolume != null) pauseSliderVolume.Focus();
             else if (!pauseSettingsOpen && btnPauseSettings != null) btnPauseSettings.Focus();
@@ -1109,7 +1112,9 @@ namespace Polymulator
             if (pauseValSensitivity != null) pauseValSensitivity.text = SimulationSettings.CameraSensitivity.ToString("0.0") + "x";
 
             if (pauseToggleReduce != null) pauseToggleReduce.SetValueWithoutNotify(SimulationSettings.ReduceMotion);
-            if (btnPauseSettings != null) btnPauseSettings.text = pauseSettingsOpen ? "Tutup Pengaturan" : "Pengaturan";
+            if (btnPauseSettings != null) btnPauseSettings.text = pauseSettingsOpen
+                ? L.T("ui.menu.settings.close")
+                : L.T("ui.menu.settings.title");
         }
 
         private void ShowContextualSimHint()
@@ -1117,7 +1122,7 @@ namespace Polymulator
             SimulationAudio.PlayMenuHover();
             if (chamberCompleted)
             {
-                HandleStatusBanner("Ruangan selesai: lanjut ke ruangan berikutnya", PaletteSettings.Green);
+                HandleStatusBanner(L.T("ui.hud.hint.completed"), PaletteSettings.Green);
                 return;
             }
 
@@ -1125,7 +1130,7 @@ namespace Polymulator
             {
                 string customHint = activeLevelInfo.Hints[hintStep % activeLevelInfo.Hints.Length];
                 hintStep++;
-                HandleStatusBanner("Petunjuk: " + customHint, PaletteSettings.Sky);
+                HandleStatusBanner(L.T("ui.hud.hint.custom", customHint), PaletteSettings.Sky);
                 return;
             }
 
@@ -1133,16 +1138,16 @@ namespace Polymulator
             {
                 hintStep = (hintStep + 1) % 2;
                 string msg = hintStep == 0
-                    ? "Petunjuk: Letakkan balok pemberat di atas pelat lantai hingga berubah hijau"
-                    : "Petunjuk: Gunakan [E] untuk mengangkat, [TAB] untuk Mode Fleksibel, atau [1]/[3]/[2] bila aktif";
+                    ? L.T("ui.hud.hint.plate_place")
+                    : L.T("ui.hud.hint.modes");
                 HandleStatusBanner(msg, PaletteSettings.Peach);
                 return;
             }
 
             hintStep = (hintStep + 1) % 2;
             string bridgeMsg = hintStep == 0
-                ? "Petunjuk: Bawa kubus kuning CORE-01 ke arah soket Anchor"
-                : "Petunjuk: Jika soket memiliki tanda panah, tekan [R] untuk memutar CORE-01";
+                ? L.T("ui.hud.hint.core_to_anchor")
+                : L.T("ui.hud.hint.rotate_core");
             HandleStatusBanner(bridgeMsg, PaletteSettings.Teal);
         }
 
@@ -1155,11 +1160,13 @@ namespace Polymulator
             if (modalAccentBar != null)
                 modalAccentBar.style.backgroundColor = completed ? PaletteSettings.Green : PaletteSettings.Sapphire;
             if (modalTitle != null)
-                modalTitle.text = completed ? "Ruangan " + levelNumberLabel + " Selesai" : "Simulasi Dijeda";
+                modalTitle.text = completed
+                    ? L.T("ui.hud.overlay.cleared_title", levelNumberLabel)
+                    : L.T("ui.hud.overlay.paused_title");
             if (modalSubtitle != null)
                 modalSubtitle.text = completed
-                    ? levelDisplayName + "  •  Anchor Terkunci"
-                    : "Ruangan " + levelNumberLabel + "  •  " + levelDisplayName;
+                    ? L.T("ui.hud.overlay.cleared_subtitle", levelDisplayName)
+                    : L.T("ui.hud.overlay.paused_subtitle", levelNumberLabel, levelDisplayName);
             if (modalRankLabel != null)
             {
                 modalRankLabel.EnableInClassList("modal-rank--hidden", !completed);
@@ -1167,7 +1174,7 @@ namespace Polymulator
                 {
                     string stars = new string('★', lastClearStars) + new string('☆', 3 - lastClearStars);
                     string fragTag = fragmentCollectedThisRun || SimulationProgress.HasFragment(SceneManager.GetActiveScene().name)
-                        ? "   •   Memori Tersimpan"
+                        ? L.T("ui.hud.overlay.memory_saved")
                         : string.Empty;
                     modalRankLabel.text = stars + fragTag;
                 }
@@ -1184,30 +1191,30 @@ namespace Polymulator
             if (btnNext != null)
             {
                 btnNext.text = !string.IsNullOrEmpty(nextSceneName)
-                    ? "Ruangan " + nextSceneName.Replace("Level", "") + "  [Enter]"
-                    : "Ruangan Berikutnya  [Enter]";
+                    ? L.T("ui.hud.overlay.next_room", nextSceneName.Replace("Level", ""))
+                    : L.T("ui.hud.overlay.next_generic");
                 btnNext.EnableInClassList("modal-btn--hidden", !hasNext);
                 btnNext.EnableInClassList("modal-btn--primary", hasNext);
             }
             if (btnResume != null)
             {
-                btnResume.text = "Lanjutkan  [Esc]";
+                btnResume.text = L.T("ui.hud.overlay.resume");
                 btnResume.EnableInClassList("modal-btn--hidden", completed);
                 btnResume.EnableInClassList("modal-btn--primary", !completed);
             }
             if (btnPauseSettings != null)
             {
-                btnPauseSettings.text = "Pengaturan";
+                btnPauseSettings.text = L.T("ui.menu.settings.title");
                 btnPauseSettings.EnableInClassList("modal-btn--hidden", completed);
             }
             if (btnReplay != null)
             {
-                btnReplay.text = "Ulangi Ruangan  [R]";
+                btnReplay.text = L.T("ui.hud.overlay.replay");
                 btnReplay.EnableInClassList("modal-btn--primary", completed && !hasNext);
             }
             if (btnMainMenu != null)
             {
-                btnMainMenu.text = "Menu Utama  [M]";
+                btnMainMenu.text = L.T("ui.hud.overlay.main_menu");
                 btnMainMenu.RemoveFromClassList("modal-btn--primary");
                 btnMainMenu.AddToClassList("modal-btn--subtle");
             }
@@ -1250,7 +1257,7 @@ namespace Polymulator
             if (endingPara3 != null)
                 endingPara3.text = outcome.epilogueLines != null && outcome.epilogueLines.Length > 2 ? outcome.epilogueLines[2] : "";
             if (endingMemoriesLabel != null)
-                endingMemoriesLabel.text = string.Format("Total Memori Terkumpul: {0} Fragmen Kota Tepi", outcome.fragmentCount);
+                endingMemoriesLabel.text = L.T("ui.hud.overlay.total_memories", outcome.fragmentCount);
 
             if (btnNext != null)
             {
@@ -1265,12 +1272,12 @@ namespace Polymulator
             if (btnPauseSettings != null) SetPauseSettingsButtonVisible(false);
             if (btnReplay != null)
             {
-                btnReplay.text = "Ulangi Pilihan Akhir  [R]";
+                btnReplay.text = L.T("ui.hud.overlay.replay_ending");
                 btnReplay.RemoveFromClassList("modal-btn--primary");
             }
             if (btnMainMenu != null)
             {
-                btnMainMenu.text = "Kembali ke Menu Utama  [M]";
+                btnMainMenu.text = L.T("ui.hud.overlay.back_to_menu");
                 btnMainMenu.RemoveFromClassList("modal-btn--subtle");
                 btnMainMenu.AddToClassList("modal-btn--primary");
             }
@@ -1381,7 +1388,7 @@ namespace Polymulator
             string weightText = string.Empty;
             if (showTargetCard && activeObj.CanBePickedUp && activeObj.Body != null)
             {
-                weightText = "Bobot " + activeObj.Body.mass.ToString("0.0", CultureInfo.InvariantCulture) + " t";
+                weightText = L.T("ui.hud.target.weight", activeObj.Body.mass);
             }
 
             bool isFlexible = modeController != null && modeController.IsFlexible;

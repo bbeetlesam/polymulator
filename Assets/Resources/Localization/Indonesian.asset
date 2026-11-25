@@ -1,0 +1,810 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: a0d02a4cf07250320999e9672b344f2a, type: 3}
+  m_Name: Indonesian
+  m_EditorClassIdentifier: Assembly-CSharp::Polymulator.LocalizationCatalog
+  keys:
+  - chapter.1
+  - chapter.2
+  - chapter.3
+  - chapter.4
+  - chapter.5
+  - ending.archivist.badge
+  - ending.archivist.epilogue.0
+  - ending.archivist.epilogue.1
+  - ending.archivist.epilogue.2
+  - ending.archivist.summary
+  - ending.archivist.title
+  - ending.feedback.archivist_requires_partition
+  - ending.feedback.requires_core
+  - ending.preservation.badge
+  - ending.preservation.epilogue.0
+  - ending.preservation.epilogue.1
+  - ending.preservation.epilogue.2
+  - ending.preservation.summary
+  - ending.preservation.title
+  - ending.prompt_hint
+  - ending.restoration.badge
+  - ending.restoration.epilogue.0
+  - ending.restoration.epilogue.1
+  - ending.restoration.epilogue.2
+  - ending.restoration.summary
+  - ending.restoration.title
+  - fragment.level_1_1.line
+  - fragment.level_1_1.reply_line
+  - fragment.level_1_1.title
+  - fragment.level_1_2.line
+  - fragment.level_1_2.reply_line
+  - fragment.level_1_2.title
+  - fragment.level_1_3.line
+  - fragment.level_1_3.reply_line
+  - fragment.level_1_3.title
+  - fragment.level_2_1.line
+  - fragment.level_2_1.reply_line
+  - fragment.level_2_1.title
+  - fragment.level_2_3.line
+  - fragment.level_2_3.reply_line
+  - fragment.level_2_3.title
+  - fragment.level_3_1.line
+  - fragment.level_3_1.reply_line
+  - fragment.level_3_1.title
+  - fragment.level_3_3.line
+  - fragment.level_3_3.reply_line
+  - fragment.level_3_3.title
+  - fragment.level_4_1.line
+  - fragment.level_4_1.reply_line
+  - fragment.level_4_1.title
+  - fragment.level_4_2.line
+  - fragment.level_4_2.reply_line
+  - fragment.level_4_2.title
+  - fragment.level_4_3.line
+  - fragment.level_4_3.reply_line
+  - fragment.level_4_3.title
+  - fragment.level_5_1.line
+  - fragment.level_5_1.reply_line
+  - fragment.level_5_1.title
+  - fragment.level_5_2.line
+  - fragment.level_5_2.reply_line
+  - fragment.level_5_2.title
+  - fragment.levelshowcase.line
+  - fragment.levelshowcase.reply_line
+  - fragment.levelshowcase.title
+  - fusion.axis_rule.auto
+  - fusion.axis_rule.front_back
+  - fusion.axis_rule.horizontal
+  - fusion.axis_rule.left_right
+  - fusion.axis_short.auto
+  - fusion.axis_short.front_back
+  - fusion.axis_short.horizontal
+  - fusion.axis_short.left_right
+  - fusion.bring_closer
+  - fusion.cannot_merge
+  - fusion.completed
+  - fusion.core_needs_core_piece
+  - fusion.core_restored
+  - fusion.max_parts
+  - fusion.no_target
+  - fusion.pair_label
+  - fusion.preset.box_box.horizontal
+  - fusion.preset.box_box.vertical
+  - fusion.preset.box_sphere.horizontal
+  - fusion.preset.box_sphere.vertical
+  - fusion.preset.compound_any.horizontal
+  - fusion.preset.compound_any.vertical
+  - fusion.preset.cylinder_box.horizontal
+  - fusion.preset.cylinder_box.vertical
+  - fusion.preset.cylinder_cylinder.horizontal
+  - fusion.preset.cylinder_cylinder.vertical
+  - fusion.preset.cylinder_sphere.horizontal
+  - fusion.preset.cylinder_sphere.vertical
+  - fusion.preset.sphere_sphere.horizontal
+  - fusion.preset.sphere_sphere.vertical
+  - fusion.shape.box
+  - fusion.shape.compound
+  - fusion.shape.cylinder
+  - fusion.shape.sphere
+  - fusion.side.back
+  - fusion.side.front
+  - fusion.side.left
+  - fusion.side.right
+  - fusion.side.top
+  - fusion.side_blocked
+  - fusion.stage_cancelled
+  - level.level_1_1.chapter_subtitle
+  - level.level_1_1.clearDialogue.0.text
+  - level.level_1_1.clearDialogue.1.text
+  - level.level_1_1.district_label
+  - level.level_1_1.fragment_title
+  - level.level_1_1.hints.0
+  - level.level_1_1.hints.1
+  - level.level_1_1.hints.2
+  - level.level_1_1.openingDialogue.0.text
+  - level.level_1_1.openingDialogue.1.text
+  - level.level_1_1.title
+  - level.level_1_2.chapter_subtitle
+  - level.level_1_2.clearDialogue.0.text
+  - level.level_1_2.district_label
+  - level.level_1_2.fragment_title
+  - level.level_1_2.hints.0
+  - level.level_1_2.hints.1
+  - level.level_1_2.hints.2
+  - level.level_1_2.openingDialogue.0.text
+  - level.level_1_2.openingDialogue.1.text
+  - level.level_1_2.title
+  - level.level_1_3.chapter_subtitle
+  - level.level_1_3.clearDialogue.0.text
+  - level.level_1_3.district_label
+  - level.level_1_3.fragment_title
+  - level.level_1_3.hints.0
+  - level.level_1_3.hints.1
+  - level.level_1_3.hints.2
+  - level.level_1_3.openingDialogue.0.text
+  - level.level_1_3.openingDialogue.1.text
+  - level.level_1_3.title
+  - level.level_2_1.chapter_subtitle
+  - level.level_2_1.clearDialogue.0.text
+  - level.level_2_1.district_label
+  - level.level_2_1.fragment_title
+  - level.level_2_1.hints.0
+  - level.level_2_1.hints.1
+  - level.level_2_1.hints.2
+  - level.level_2_1.openingDialogue.0.text
+  - level.level_2_1.openingDialogue.1.text
+  - level.level_2_1.title
+  - level.level_2_2.chapter_subtitle
+  - level.level_2_2.clearDialogue.0.text
+  - level.level_2_2.district_label
+  - level.level_2_2.hints.0
+  - level.level_2_2.hints.1
+  - level.level_2_2.hints.2
+  - level.level_2_2.openingDialogue.0.text
+  - level.level_2_2.openingDialogue.1.text
+  - level.level_2_2.title
+  - level.level_2_3.chapter_subtitle
+  - level.level_2_3.clearDialogue.0.text
+  - level.level_2_3.district_label
+  - level.level_2_3.fragment_title
+  - level.level_2_3.hints.0
+  - level.level_2_3.hints.1
+  - level.level_2_3.hints.2
+  - level.level_2_3.openingDialogue.0.text
+  - level.level_2_3.openingDialogue.1.text
+  - level.level_2_3.title
+  - level.level_3_1.chapter_subtitle
+  - level.level_3_1.clearDialogue.0.text
+  - level.level_3_1.district_label
+  - level.level_3_1.fragment_title
+  - level.level_3_1.hints.0
+  - level.level_3_1.hints.1
+  - level.level_3_1.hints.2
+  - level.level_3_1.openingDialogue.0.text
+  - level.level_3_1.openingDialogue.1.text
+  - level.level_3_1.title
+  - level.level_3_2.chapter_subtitle
+  - level.level_3_2.clearDialogue.0.text
+  - level.level_3_2.district_label
+  - level.level_3_2.hints.0
+  - level.level_3_2.hints.1
+  - level.level_3_2.hints.2
+  - level.level_3_2.openingDialogue.0.text
+  - level.level_3_2.openingDialogue.1.text
+  - level.level_3_2.title
+  - level.level_3_3.chapter_subtitle
+  - level.level_3_3.clearDialogue.0.text
+  - level.level_3_3.district_label
+  - level.level_3_3.fragment_title
+  - level.level_3_3.hints.0
+  - level.level_3_3.hints.1
+  - level.level_3_3.hints.2
+  - level.level_3_3.openingDialogue.0.text
+  - level.level_3_3.openingDialogue.1.text
+  - level.level_3_3.title
+  - level.level_4_1.chapter_subtitle
+  - level.level_4_1.clearDialogue.0.text
+  - level.level_4_1.district_label
+  - level.level_4_1.fragment_title
+  - level.level_4_1.hints.0
+  - level.level_4_1.hints.1
+  - level.level_4_1.hints.2
+  - level.level_4_1.openingDialogue.0.text
+  - level.level_4_1.openingDialogue.1.text
+  - level.level_4_1.title
+  - level.level_4_2.chapter_subtitle
+  - level.level_4_2.clearDialogue.0.text
+  - level.level_4_2.district_label
+  - level.level_4_2.fragment_title
+  - level.level_4_2.hints.0
+  - level.level_4_2.hints.1
+  - level.level_4_2.hints.2
+  - level.level_4_2.openingDialogue.0.text
+  - level.level_4_2.openingDialogue.1.text
+  - level.level_4_2.title
+  - level.level_4_3.chapter_subtitle
+  - level.level_4_3.clearDialogue.0.text
+  - level.level_4_3.district_label
+  - level.level_4_3.fragment_title
+  - level.level_4_3.hints.0
+  - level.level_4_3.hints.1
+  - level.level_4_3.hints.2
+  - level.level_4_3.openingDialogue.0.text
+  - level.level_4_3.openingDialogue.1.text
+  - level.level_4_3.title
+  - level.level_5_1.chapter_subtitle
+  - level.level_5_1.clearDialogue.0.text
+  - level.level_5_1.district_label
+  - level.level_5_1.fragment_title
+  - level.level_5_1.hints.0
+  - level.level_5_1.hints.1
+  - level.level_5_1.hints.2
+  - level.level_5_1.openingDialogue.0.text
+  - level.level_5_1.openingDialogue.1.text
+  - level.level_5_1.title
+  - level.level_5_2.chapter_subtitle
+  - level.level_5_2.clearDialogue.0.text
+  - level.level_5_2.district_label
+  - level.level_5_2.fragment_title
+  - level.level_5_2.hints.0
+  - level.level_5_2.hints.1
+  - level.level_5_2.hints.2
+  - level.level_5_2.openingDialogue.0.text
+  - level.level_5_2.openingDialogue.1.text
+  - level.level_5_2.title
+  - level.levelshowcase.chapter_subtitle
+  - level.levelshowcase.clearDialogue.0.text
+  - level.levelshowcase.district_label
+  - level.levelshowcase.fragment_title
+  - level.levelshowcase.hints.0
+  - level.levelshowcase.hints.1
+  - level.levelshowcase.hints.2
+  - level.levelshowcase.openingDialogue.0.text
+  - level.levelshowcase.openingDialogue.1.text
+  - level.levelshowcase.title
+  - partition.axis.auto
+  - partition.axis.front_back
+  - partition.axis.horizontal
+  - partition.axis.left_right
+  - partition.axis_notice
+  - partition.cannot_split
+  - partition.completed
+  - partition.no_target
+  - partition.reason.auto_facing
+  - partition.reason.auto_long
+  - partition.reason.auto_wide
+  - partition.reason.front_back
+  - partition.reason.horizontal
+  - partition.reason.left_right
+  - partition.unfused
+  - ui.anchor.core_rematerialized
+  - ui.anchor.release_to_lock
+  - ui.anchor.requires_core
+  - ui.anchor.rotate_core
+  - ui.anchor.rotation_mismatch
+  - ui.hud.ability.elevation
+  - ui.hud.ability.fusion
+  - ui.hud.ability.partition
+  - ui.hud.ability.rotation
+  - ui.hud.ability.telekinesis
+  - ui.hud.ability.throw
+  - ui.hud.ability.translation
+  - ui.hud.blueprint.intro
+  - ui.hud.blueprint.off
+  - ui.hud.blueprint.on
+  - ui.hud.controls.abilities
+  - ui.hud.controls.axis_hints
+  - ui.hud.controls.camera
+  - ui.hud.controls.distance_height
+  - ui.hud.controls.move
+  - ui.hud.controls.pause
+  - ui.hud.controls.pickup
+  - ui.hud.controls.rotate_throw
+  - ui.hud.controls.switch_mode
+  - ui.hud.controls.title
+  - ui.hud.default_level
+  - ui.hud.fragment.saved
+  - ui.hud.fusion.stage.blocked
+  - ui.hud.fusion.stage.hint
+  - ui.hud.fusion.stage.valid
+  - ui.hud.hint.completed
+  - ui.hud.hint.core_to_anchor
+  - ui.hud.hint.custom
+  - ui.hud.hint.modes
+  - ui.hud.hint.plate_place
+  - ui.hud.hint.rotate_core
+  - ui.hud.metrics.concept_note
+  - ui.hud.metrics.throw_tether
+  - ui.hud.mode.flexible_active
+  - ui.hud.objective.bring_core
+  - ui.hud.objective.chapter_complete
+  - ui.hud.objective.completed
+  - ui.hud.objective.core_locked
+  - ui.hud.objective.decision_set
+  - ui.hud.objective.final_choice
+  - ui.hud.objective.final_paths
+  - ui.hud.objective.lock_core
+  - ui.hud.objective.plate_weight
+  - ui.hud.objective.plates
+  - ui.hud.objective.total_weight
+  - ui.hud.objective.weight_item
+  - ui.hud.objective.weights
+  - ui.hud.overlay.back_to_menu
+  - ui.hud.overlay.cleared_subtitle
+  - ui.hud.overlay.cleared_title
+  - ui.hud.overlay.main_menu
+  - ui.hud.overlay.memory_saved
+  - ui.hud.overlay.next_generic
+  - ui.hud.overlay.next_room
+  - ui.hud.overlay.paused_subtitle
+  - ui.hud.overlay.paused_title
+  - ui.hud.overlay.replay
+  - ui.hud.overlay.replay_ending
+  - ui.hud.overlay.resume
+  - ui.hud.overlay.total_memories
+  - ui.hud.plate.active
+  - ui.hud.plate.released
+  - ui.hud.start.room
+  - ui.hud.start.showcase
+  - ui.hud.story.next
+  - ui.hud.target.weight
+  - ui.language.english
+  - ui.language.indonesian
+  - ui.menu.active_badge
+  - ui.menu.archive_short
+  - ui.menu.buttons.chapters
+  - ui.menu.buttons.home
+  - ui.menu.buttons.open_demo
+  - ui.menu.buttons.quit
+  - ui.menu.buttons.showcase
+  - ui.menu.chapter_pill
+  - ui.menu.continue
+  - ui.menu.demo.off
+  - ui.menu.demo.on
+  - ui.menu.hints.ribbon_nav
+  - ui.menu.hints.title_nav
+  - ui.menu.kicker
+  - ui.menu.preview.chapter
+  - ui.menu.preview.launch.locked
+  - ui.menu.preview.launch.replay
+  - ui.menu.preview.launch.start
+  - ui.menu.preview.memory_saved
+  - ui.menu.preview.showcase.chapter
+  - ui.menu.preview.showcase.launch
+  - ui.menu.preview.showcase.status
+  - ui.menu.preview.showcase.title
+  - ui.menu.preview.status.cleared
+  - ui.menu.preview.status.locked
+  - ui.menu.preview.status.ready
+  - ui.menu.preview.title
+  - ui.menu.progress.ribbon
+  - ui.menu.progress.title
+  - ui.menu.room_fallback
+  - ui.menu.sandbox
+  - ui.menu.settings.close
+  - ui.menu.settings.done
+  - ui.menu.settings.language
+  - ui.menu.settings.reduce_motion
+  - ui.menu.settings.reset
+  - ui.menu.settings.reset_confirm
+  - ui.menu.settings.sensitivity
+  - ui.menu.settings.subtitle
+  - ui.menu.settings.title
+  - ui.menu.settings.volume
+  - ui.menu.showcase
+  - ui.menu.start
+  - ui.menu.tagline
+  - ui.mode.active
+  - ui.mode.flexible
+  - ui.mode.flexible_summary
+  - ui.mode.fusion_locked
+  - ui.mode.limited
+  - ui.mode.limited_summary
+  - ui.mode.partition_locked
+  - ui.object.cannot_tether
+  - ui.object.returned
+  - ui.object.static_anchor
+  texts:
+  - TRANSLASI
+  - ELEVASI
+  - ROTASI
+  - FUSION & PARTITION
+  - BADAI & PILIHAN AKHIR
+  - "Akhir Cerita C  \u2022  Arsip Terbuka"
+  - Vela memanjat pagar observasi saat sinyal radio lama menyala lagi. Bukan suara sistem SIM, melainkan rekaman suara warga yang dulu menanam pesan di ruang sunyi.
+  - Danu tidak pernah kembali ke menara kendali, namun partitur pianonya berbunyi di seluruh pengeras suara Kota Tepi sebelum badai reda.
+  - 'Kamu berdiri sebagai Rect di tepi dermaga: sistem simulasi perlahan terbuka, memberi ruang bagi kota untuk mengingat siapa dirinya.'
+  - 'Dengan Partition [1], inti energi terbagi: setengah menutup pintu air darurat, setengah lagi menyalakan Menara Pemancar warga.'
+  - Suara Kota Tepi Mengudara
+  - 'Pemancar Warga: belah CORE-01 dengan [1] Partition atau aktifkan pelat pemancar di tengah.'
+  - Soket pilihan akhir memerlukan CORE-01.
+  - "Akhir Cerita B  \u2022  Brankas Abadi"
+  - Di luar dinding arsip, ombak masih menghantam pondasi lama. Beberapa dermaga harus ditinggalkan sementara warga berpindah ke dataran tinggi.
+  - Namun di dalam brankas, lampu kuning-hangat tetap menyala. Setiap fragmen yang kamu kumpulkan tersusun rapi agar generasi berikutnya masih tahu lagu kota ini.
+  - Sistem berhenti menghitung skor; yang tersisa hanya penjaga sunyi bernama Rect.
+  - Inti energi dimasukkan ke Brankas Arsip Barat. Seluruh foto, surat, dan rekaman Kota Tepi terlindungi sempurna dari korosi badai.
+  - Ingatan Dijaga di Balik Kaca
+  - 'Pilihan Akhir: Bawa CORE-01 ke Timur (Tanggul), Utara (Pemancar + Partition [1]), atau Barat (Brankas)'
+  - "Akhir Cerita A  \u2022  Tanggul Tertutup"
+  - Air laut surut meninggalkan dermaga yang kering dan jalan pasar yang utuh. Mira membantu warga kembali menyalakan lampu rumah susun.
+  - Di gedung arsip yang membeku sepi, layar SIM menampilkan status hijau. Tidak ada nama yang tersisa di daftar sejarah, hanya koordinat bangunan yang rapi.
+  - Rect menatap laut dari balik tanggul, menyimpan satu nada piano yang entah milik siapa.
+  - Seluruh daya inti dialirkan penuh ke Tanggul Utara. Gelombang badai tertahan di luar dinding, tetapi seluruh bank memori bawah tanah ikut terendam.
+  - Kota Selamat, Ingatan Terkubur
+  - Kalau kau masih bisa mendengar rekaman ini, Rect... Kota Tepi belum benar-benar habis.
+  - Kita tinggal di ruangan sunyi ini bersama suara yang sempat tertinggal.
+  - Suara di Balik Kaca
+  - Dulu bau roti selalu sampai ke tikungan sebelum matahari naik.
+  - Sekarang yang tersisa hanya kotak penahan dan pagar cahaya.
+  - Gerai Roti Pagi
+  - Kalau jembatan arsip naik lagi suatu hari nanti, artinya ada yang menolak melupakan kota ini.
+  - Jembatannya butuh dua pemberat sekaligus. Jangan tinggalkan salah satunya.
+  - Surat Penutup Shift
+  - Waktu listrik naik turun, cuma anak tangga ini yang jadi jalan keluar warga.
+  - Di mode Fleksibel kamu bisa melompat dan menarik beban dari jauh.
+  - Jemuran Lantai Dua
+  - Dari atap ini kita bisa melihat seluruh tanggul utara sebelum air naik.
+  - Jaga jalur elevasinya tetap utuh, Nara. Arsip berada di seberang.
+  - Antena Pemancar Nara
+  - Semua pintu arsip lama hanya mau terkunci kalau simbol sisinya menghadap ke arah yang benar.
+  - Sudut yang keliru cuma akan memantulkan inti keluar.
+  - Kunci Putar Ruang Arsip
+  - Danu selalu bilang kalau musik tidak bisa diukur grid. Ia menaruhnya di sudut ruang yang tak terindeks.
+  - Kalau sistem mulai membekukan memori warga, nada ini akan membukanya lagi.
+  - Partitur Tanpa Judul
+  - "Dua benda yang disatukan dengan Fusion tidak harus sejenis \u2014 kubus dan prisma tetap menyatu membentuk komposit baru."
+  - 'FUSION [2] aktif: gabungkan dua benda berbeda bentuk maupun massa menjadi satu inti komposit.'
+  - Hukum Kekekalan Ruang
+  - Menyimpan seluruh data dalam satu gumpalan besar justru berbahaya. Belah ia agar bisa mengisi dua penjaga sekaligus.
+  - 'PARTITION [1] aktif: belah satu benda berat menjadi dua bagian seimbang.'
+  - Pecahan yang Terkendali
+  - Saat Partition dan Fusion dipakai bergantian, tidak ada massa yang terbuang percuma.
+  - Badai di tanggul luar mulai terdengar. Bersiaplah menuju kota utama.
+  - Catatan Terakhir Laboratorium
+  - Air badai sudah menyentuh sisi luar ruang kendali. Sebentar lagi semua jalur mengarah ke ruang keputusan akhir.
+  - Ingat, kamu masih punya kendali penuh untuk membelah atau menyatukan apa yang tersisa.
+  - Gelombang Tanggul Utara
+  - Kami tidak akan memaksamu memilih, Rect.
+  - Selamatkan tanggulnya, kunci arsipnya, atau pecah energinya agar suara kami ikut bertahan.
+  - Suara Warga Kota Tepi
+  - 'Seluruh mekanik utama aktif di ruang ini: Translasi, Elevasi, Rotasi, Partition [1]/[3], dan Fusion Hibrid [2].'
+  - Gunakan [TAB] untuk Mode Fleksibel, [F] Telekinesis, [R] Rotasi, [1] Partition, [3] Arah Potong, dan [2] Fusion.
+  - Arsip Demo POLYMULATOR
+  - Auto (Hadap Rect)
+  - Sumbu Depan | Belakang (Z)
+  - Sumbu Atas | Bawah (Y)
+  - Sumbu Kiri | Kanan (X)
+  - OTOMATIS
+  - DEPAN | BELAKANG
+  - ATAS | BAWAH
+  - KIRI | KANAN
+  - 'Dekatkan {0} yang sedang diangkat ke objek lain untuk mulai Fusing [2]'
+  - '{0} tidak dapat digabungkan'
+  - '{0} ({1}): {2} + {3}'
+  - '{0} hanya bisa disatukan dengan pecahan CORE-01 lain di dekatnya'
+  - CORE-01 dipulihkan utuh melalui Fusion!
+  - Batas maksimum gabungan ({0} bagian) tercapai
+  - 'Angkat objek dulu [E] lalu dekatkan ke objek lain untuk Fusion [2]'
+  - '{0} + {1}'
+  - BALOK-GANDA
+  - PILAR-GANDA
+  - SOKET-ORB
+  - PEDESTAL-ORB
+  - RAKITAN-MODULAR
+  - MENARA-MODULAR
+  - MODUL-POROS
+  - TURRET-SILINDER
+  - TURBIN-GANDA
+  - PISTON-MENARA
+  - PISTON-ORB
+  - MERCU-ORB
+  - BARBEL-ORB
+  - INTI-KEMBAR
+  - Balok
+  - Rakitan
+  - Tabung
+  - Bola
+  - BELAKANG
+  - DEPAN
+  - KIRI
+  - KANAN
+  - ATAS
+  - 'Sisi {0} terhalang. Pilih sisi lain [WASD / Q / 3]'
+  - Tahap Fusing dibatalkan
+  - "CHAPTER 1  \u2022  TRANSLASI"
+  - Kunci utama terpasang. Pintu menuju Distrik Pasar terbuka.
+  - Di balik cahaya dinding ruangan ini, bayangan jalanan lama mulai terlihat.
+  - RUANG UJI 01
+  - Suara di Balik Kaca
+  - Gerakkan Rect dengan WASD atau tombol panah mendekati kubus kuning CORE-01.
+  - Tekan [E] untuk mengangkat CORE-01, bawa ke soket bulat ANCHOR-01 di utara, lalu tekan [E] atau [Q] untuk meletakkan.
+  - "Kristal merah muda di sisi kiri bersifat opsional \u2014 sentuh untuk mendengar fragmen cerita."
+  - Sesi simulasi dimulai. Unit Rect aktif kembali di Ruang Uji 01.
+  - Sebuah inti kuning menyala di tengah lantai. Seseorang meninggalkannya tepat di jalurmu.
+  - Bangun di Ruangan Kosong
+  - "CHAPTER 1  \u2022  TRANSLASI"
+  - Bagus, jalannya terbuka lagi. Ayo terus ke arah gedung arsip.
+  - JALAN PASAR LAMA
+  - Gerai Roti Pagi
+  - Angkat balok BEBAN-PASAR dengan [E] lalu letakkan di atas pelat lantai PAD-PASAR di kiri.
+  - Saat pelat berubah hijau dan pagar merah menghilang, bawa CORE-01 ke ANCHOR-01 di utara.
+  - 'Tips: tekan [Klik Kiri] saat memegang balok jika ingin mendorongnya ke depan.'
+  - Gerbang merah di depan dikunci pelat beban di lantai kiri.
+  - Cari balok pemberat di sekitar lorong agar pagarnya padam.
+  - Jalan Pasar
+  - "CHAPTER 1  \u2022  TRANSLASI"
+  - Sektor Translasi selesai. Akses ke tingkat elevasi rusun dibuka.
+  - GERBANG ARSIP
+  - Surat Penutup Shift
+  - Letakkan BEBAN-BARAT di PAD-BARAT dan BEBAN-TIMUR di PAD-TIMUR.
+  - Jika kedua pelat sudah hijau, tangga jembatan di tengah akan memanjang hingga menyentuh dek atas.
+  - Bawa CORE-01 naik menyusuri tangga jembatan ke ANCHOR-01.
+  - Tangga menuju dek arsip terputus di tengah.
+  - Aktifkan kedua pelat lantai agar jembatan energinya tersambung penuh.
+  - Gerbang Arsip Timur
+  - "CHAPTER 2  \u2022  ELEVASI"
+  - Pelan-pelan, bangunan lama ini mulai merespons langkah kita lagi.
+  - RUSUN MATAHARI // L1
+  - Jemuran Lantai Dua
+  - Tekan [TAB] untuk mengganti mode gerak ke Mode Fleksibel (warna ungu).
+  - Angkat BEBAN-UNGU lewat tangga balkon kiri, atau arahkan ke BEBAN-UNGU dan tekan [F] untuk mengangkatnya dengan telekinesis ke PAD-BALKON.
+  - Setelah jembatan kanan aktif, bawa CORE-01 naik ke Dek Anchor.
+  - Pelat pemicu jembatan berada di atas balkon kiri!
+  - Tekan [TAB] untuk beralih ke Mode Fleksibel agar Rect bisa melompat dan memakai telekinesis [F].
+  - Tangga Rusun Matahari
+  - "CHAPTER 2  \u2022  ELEVASI"
+  - Sinar telekinesismu makin stabil. Puncak menara tinggal selangkah lagi.
+  - RUSUN MATAHARI // L2
+  - Tekan [TAB] ke Mode Fleksibel agar Telekinesis aktif.
+  - Arahkan ke BEBAN-RAK di platform kanan atas, tekan [F] untuk menariknya turun ke PAD-UTARA.
+  - Arahkan ke CORE-01 di menara kiri atas, tekan [F] untuk menurunkannya, lalu bawa masuk melewati pagar yang sudah terbuka.
+  - CORE-01 terjebak di puncak tiang barat tanpa tangga!
+  - Di Mode Fleksibel [TAB], gunakan sinar [F] Telekinesis untuk menurunkan benda dari tempat tinggi.
+  - Teras Atas Rusun
+  - "CHAPTER 2  \u2022  ELEVASI"
+  - Sektor Elevasi terhubung. Pintu Gedung Arsip mulai terbaca.
+  - MENARA RUSUN
+  - Antena Pemancar Nara
+  - Taruh PEMBERAT-A ke PAD-PINTU di kiri bawah agar pagar tengah terbuka.
+  - Gunakan Mode Fleksibel [TAB] dan angkat PEMBERAT-B (dengan tangga atau [F]) ke PAD-PUNCAK di balkon kanan.
+  - Setelah jembatan ke puncak aktif, bawa CORE-01 naik ke ANCHOR-01.
+  - Puncak menara dijaga pagar tengah sekaligus tangga putus.
+  - Buka pagar dengan pelat kiri dulu, lalu bawa pemberat kedua ke balkon kanan.
+  - Puncak Menara Rusun
+  - "CHAPTER 3  \u2022  ROTASI"
+  - Pas sekali. Pintu menuju ruang dalam arsip langsung berbunyi klik.
+  - LOBI ARSIP
+  - Kunci Putar Ruang Arsip
+  - "Soket Anchor meminta inti menghadap UTARA (0\xB0), sesuai arah panah di dudukan."
+  - Saat memegang CORE-01 [E] atau mengarahkannya dengan [F], tekan [R] untuk memutarnya hingga panah kubus cocok dengan soket.
+  - Letakkan CORE-01 yang sudah sejajar tepat ke tengah ANCHOR-01.
+  - Soket Anchor ini memiliki pengunci arah. Perhatikan panah pada dudukan Anchor.
+  - Tekan [R] saat memegang atau menarik kubus untuk memutarnya 90 derajat.
+  - Kunci Arah Arsip
+  - "CHAPTER 3  \u2022  ROTASI"
+  - Rekaman arsip kota tersembunyi di unit yang tidak pernah dicatat peta resmi...
+  - RUANG CERMIN ARSIP
+  - Bawa PRISMA-BERAT ke PAD-CERMIN di kiri untuk menyalakan tangga naik.
+  - "Ambil CORE-01 dan tekan [R] DUA KALI sampai arah hadapnya menjadi 180\xB0 (Selatan)."
+  - Bawa CORE-01 naik jembatan ke ANCHOR-01.
+  - "Soket kali ini membalik ke arah SELATAN \u2014 berlawanan dari arah kedatanganmu."
+  - Putar CORE-01 dua kali sebelum memasangnya.
+  - Ruang Cermin Arsip
+  - "CHAPTER 3  \u2022  ROTASI"
+  - "Nada terakhir berbunyi. Kunci sistem Rekonstruksi \u2014 Fusion dan Partition \u2014 kini terbuka untukmu."
+  - UNIT PIANO DANU
+  - Partitur Tanpa Judul
+  - Taruh PEMBERAT-KIRI di PAD-KUNCI dan PEMBERAT-KANAN di PAD-NADA.
+  - "Ambil CORE-01, tekan [R] dua kali (dari 90\xB0 ke 270\xB0 / menghadap BARAT, ke arah piano)."
+  - Naiki tangga jembatan di tengah dan pasang CORE-01 ke ANCHOR-01.
+  - Ruangan di sudut kiri itu apartemen lama Danu... bahkan di dalam simulasi, pianonya masih ada.
+  - "Aktifkan kedua pelat agar jembatan naik, lalu kunci inti menghadap BARAT (270\xB0)."
+  - Apartemen Tak Terindeks
+  - "CHAPTER 4  \u2022  FUSION & PARTITION"
+  - Berhasil! Sekarang kamu menguasai FUSION [2] untuk menggabungkan beban berat.
+  - BENGKEL FUSION // 01
+  - Hukum Kekekalan Ruang
+  - Dekati RINGAN-A atau RINGAN-B (atau pegang satu dan dekatkan ke pasangannya hingga muncul garis tautan hijau).
+  - "Tekan tombol [2] untuk menjalankan FUSION \u2014 keduanya akan menyatu menjadi satu blok 2.4 ton."
+  - Bawa blok gabungan 2.4 t ke PAD-BERAT agar pagar merah padam, lalu taruh CORE-01 ke ANCHOR-01.
+  - Pelat PAD-BERAT butuh minimal 2.2 ton. Di depanmu ada Kubus RINGAN-A (1.2 t) dan Prisma RINGAN-B (1.2 t).
+  - Bawa salah satu mendekati pasangannya hingga garis lengkung hijau menyala, lalu tekan [2] FUSION untuk menyatukan bentuk yang berbeda.
+  - Dua Beban Jadi Satu
+  - "CHAPTER 4  \u2022  FUSION & PARTITION"
+  - Satu benda jadi dua kunci. Pembagian yang adil menyelamatkan jalur ini.
+  - RUANG PARTITION // 02
+  - Pecahan yang Terkendali
+  - 'Dekati atau pegang blok besar MONOLIT (2.4 t): garis bidang laser menunjukkan arah potongan secara real-time.'
+  - Gunakan [3] bila ingin mengubah sumbu potong (Auto / X / Z / Y), lalu tekan [1] untuk membelah MONOLIT menjadi MONOLIT-A & -B (1.2 t x 2).
+  - Taruh masing-masing pecahan di PAD-KIRI dan PAD-KANAN, lalu bawa CORE-01 naik jembatan.
+  - Hanya ada satu blok MONOLIT seberat 2.4 ton. Bidang laser oranye menunjukkan ke mana belahan akan jatuh.
+  - Secara otomatis arah potong mengikuti hadap Rect; tekan [3] untuk memutar bidang potong (Kiri|Kanan, Depan|Belakang, Atas|Bawah), lalu [1] PARTITION.
+  - Satu Dibelah Dua
+  - "CHAPTER 4  \u2022  FUSION & PARTITION"
+  - Semua mekanik dasar telah dikuasai. Badai utama di Kota Tepi sudah di depan mata.
+  - SIMPUL REKONSTRUKSI
+  - Catatan Terakhir Laboratorium
+  - 'Langkah 1: Belah BLOK-UTAMA (2.4 t) dengan [1] Partition -> menjadi dua potongan 1.2 t.'
+  - 'Langkah 2: Letakkan satu potongan 1.2 t di PAD-RINGAN (kiri). Bawa potongan kedua mendekati BLOK-TAMBAH (1.2 t), tekan [2] Fusion menjadi 2.4 t, lalu taruh di PAD-GABUNG (kanan).'
+  - "Langkah 3: Putar CORE-01 dengan [R] dua kali hingga menghadap 180\xB0 (Selatan) dan pasang di ANCHOR-01."
+  - 'Uji gabungan: pelat kiri butuh >= 1.0 t, pelat kanan butuh >= 2.2 t.'
+  - "Gunakan Partition [1] lalu Fusion [2] secara berurutan, lalu putar CORE-01 [R] ke arah 180\xB0."
+  - Harmoni Dua Arah
+  - "CHAPTER 5  \u2022  BADAI & PILIHAN AKHIR"
+  - 'Peringatan: Ruang Pilihan Akhir telah dicapai. Bersiaplah mengambil keputusan untuk Kota Tepi.'
+  - AMBANG TANGGUL UTARA
+  - Gelombang Tanggul Utara
+  - Belah PENAHAN-BESAR (2.4 t) dengan [1] Partition (putar bidang potong dengan [3] jika perlu) -> naikkan satu bagian 1.2 t ke PAD-GARDU di balkon kiri ([TAB] + [F] atau tangga).
+  - Gabungkan bagian 1.2 t kedua dengan PENAHAN-TAMBAH (1.2 t) memakai [2] Fusion -> letakkan blok 2.4 t di PAD-TANGGUL (kanan).
+  - "Putar CORE-01 dengan [R] ke 90\xB0 (Timur), lalu bawa melewati pagar dan jembatan ke ANCHOR-01."
+  - Satu pagar energi dan jembatan rusak menghalangi pintu menuju inti pengendali tanggul.
+  - 'Gunakan seluruh kemampuanmu: Partition [1], Fusion [2], Telekinesis [F], dan Rotasi [R].'
+  - Ambang Badai
+  - "CHAPTER 5  \u2022  PILIHAN AKHIR"
+  - Keputusan telah tercatat di sejarah Kota Tepi.
+  - SIMPUL PUSAT KOTA TEPI
+  - Suara Warga Kota Tepi
+  - "Pilihan A (Restoration \u2014 Timur): Bawa CORE-01 langsung ke Soket Timur untuk menutup penuh tanggul kota."
+  - "Pilihan B (Preservation \u2014 Barat): Bawa CORE-01 ke Soket Barat untuk mengabadikan seluruh rekaman arsip."
+  - "Pilihan C (Archivist \u2014 Utara): Tekan [1] Partition pada CORE-01 (atau belah BALOK-ARSIP di PAD-PEMANCAR) lalu pasang ke Soket Utara!"
+  - 'Tiga jalur terakhir menyala di hadapanmu. Tentukan ke mana CORE-01 akan disalurkan:'
+  - "Timur: TANGGUL UTARA (selamatkan kota fisik)  \u2022  Utara: PEMANCAR (pecah dengan Partition [1])  \u2022  Barat: BRANKAS ARSIP."
+  - Pilihan Akhir Kota Tepi
+  - "SPECIAL SHOWCASE  \u2022  SEMUA FITUR"
+  - Demo Showcase selesai! Semua sistem mekanik dan audio-visual terverifikasi berfungsi.
+  - SANDBOX & DEMO
+  - Arsip Demo POLYMULATOR
+  - 'KIRI (Partition [1] + [3]): Dekati DEMO-PARTITION (2.4 t) untuk melihat bidang potong laser oranye. Tekan [3] untuk mengganti sumbu potong, lalu [1] untuk membelah jadi 2 x 1.2 t.'
+  - 'KANAN (Fusion Hibrid [2] + [TAB]/[F]): Dekatkan Kubus DEMO-FUSE-A & Prisma DEMO-FUSE-B, tekan [2] untuk menggabung dua bentuk berbeda jadi 2.4 t, lalu naikkan ke PAD-FUSE-ATAS.'
+  - "TENGAH (Rotasi [R]): Ambil CORE-01, tekan [R] tiga kali sampai 0\xB0 (Utara), lalu pasang ke ANCHOR-01 di puncak."
+  - Selamat datang di Ruang Showcase! Semua mekanik siap diuji dengan pratinjau laser Partition & tautan Fusion.
+  - "Kiri: uji Partition [1] & sumbu potong [3]  \u2022  Kanan: uji Fusion [2] objek Kubus+Prisma  \u2022  Tengah: Rotasi [R] CORE-01."
+  - 'Ruang Showcase: Semua Mekanik'
+  - OTOMATIS (Mengikuti hadap Rect & panjang objek)
+  - DEPAN | BELAKANG (Belah sumbu Z)
+  - ATAS | BAWAH (Belah horizontal Y)
+  - KIRI | KANAN (Belah sumbu X)
+  - 'Arah Partition [3]: {0}'
+  - '{0} tidak dapat dibelah lagi'
+  - 'Partition ({0}): {1} -> {2} & {3} ({4:0.0}t x 2)'
+  - 'Dekati atau pegang sebuah objek untuk dibelah [1]'
+  - Auto (Hadap Rect)
+  - Auto (Panjang Objek)
+  - Auto (Lebar Objek)
+  - Depan | Belakang (Z)
+  - Atas | Bawah (Y)
+  - Kiri | Kanan (X)
+  - 'Partition Sambungan: {0} & {1} dipisah'
+  - CORE-01 RE-MATERIALIZED AT PLATFORM HIGH
+  - 'Posisi sejajar Anchor: lepas untuk mengunci CORE-01'
+  - ANCHOR REQUIRES CORE-01 (PLATFORM HIGH)
+  - Putar CORE [R] ke {0} deg dulu
+  - 'Arah rotasi belum pas ({0} deg): putar ke {1} deg [R]'
+  - Elevasi
+  - Fusion
+  - Partition
+  - Rotasi
+  - Telekinesis
+  - Lempar
+  - Translasi
+  - 'Mode Cetak Biru [V]: Arah Sumbu & Garis Target Aktif'
+  - 'Mode Cetak Biru: Nonaktif'
+  - 'Mode Cetak Biru: Aktif'
+  - Partition / Sumbu / Fusion
+  - Sumbu 3D / Petunjuk
+  - Intip Kamera / Reset
+  - Jarak / Ketinggian
+  - Gerak
+  - Jeda / Menu
+  - Angkat / Lepas / Tarik
+  - Putar / Lempar
+  - Ganti Mode
+  - Kontrol
+  - RUANG SIMULASI
+  - 'Memori Tersimpan: {0}'
+  - "Tahap Fusing  \u2022  {0}  \u2022  Sisi: {1} (Terhalang)"
+  - "[WASD / Q / 3] Pilih Sisi   \u2022   [2 / Enter] Gabung   \u2022   [Esc] Batal"
+  - "Tahap Fusing  \u2022  {0}  \u2022  Sisi: {1}"
+  - 'Ruangan selesai: lanjut ke ruangan berikutnya'
+  - 'Petunjuk: Bawa kubus kuning CORE-01 ke arah soket Anchor'
+  - 'Petunjuk: {0}'
+  - 'Petunjuk: Gunakan [E] untuk mengangkat, [TAB] untuk Mode Fleksibel, atau [1]/[3]/[2] bila aktif'
+  - 'Petunjuk: Letakkan balok pemberat di atas pelat lantai hingga berubah hijau'
+  - 'Petunjuk: Jika soket memiliki tanda panah, tekan [R] untuk memutar CORE-01'
+  - 'Konsep ruang: Translasi (X, Y, Z), Rotasi sumbu Y, dan keseimbangan beban.'
+  - Lempar / Tarik
+  - 'Mode Fleksibel aktif: Gerak Bebas & Telekinesis [F]'
+  - Bawa CORE-01 ke Soket Anchor
+  - Chapter Selesai
+  - 'Ruangan {0} selesai: Anchor terkunci'
+  - CORE-01 Terkunci di Anchor
+  - Keputusan Kota Tepi Ditetapkan
+  - "Pilih Jalur Akhir  \u2022  0/1 Selesai"
+  - "Timur (Tanggul)  \u2022  Utara (Pemancar)  \u2022  Barat (Brankas)"
+  - "Kunci CORE-01 ke Anchor  \u2022  0/1 Selesai"
+  - 'Beban Pelat: {0:0.0} / {1:0.0} t'
+  - "Pelat Beban {0}/{1} Aktif  \u2022  {2}/{3} Selesai"
+  - 'Total Beban Pelat: {0:0.0} / {1:0.0} t'
+  - '{0:0.0}/{1:0.0} t'
+  - 'Beban: '
+  - 'Kembali ke Menu Utama  [M]'
+  - "{0}  \u2022  Anchor Terkunci"
+  - Ruangan {0} Selesai
+  - 'Menu Utama  [M]'
+  - "   \u2022   Memori Tersimpan"
+  - 'Ruangan Berikutnya  [Enter]'
+  - 'Ruangan {0}  [Enter]'
+  - "Ruangan {0}  \u2022  {1}"
+  - Simulasi Dijeda
+  - 'Ulangi Ruangan  [R]'
+  - 'Ulangi Pilihan Akhir  [R]'
+  - 'Lanjutkan  [Esc]'
+  - 'Total Memori Terkumpul: {0} Fragmen Kota Tepi'
+  - 'Pelat beban aktif: jembatan energi menyala'
+  - 'Pelat beban lepas: jembatan energi padam'
+  - 'Ruangan {0}: '
+  - 'Ruang Showcase: '
+  - '[SPACE] Lanjut'
+  - Bobot {0:0.0} t
+  - INGGRIS
+  - INDONESIA
+  - AKTIF
+  - ARSIP
+  - Pilih Ruangan
+  - '[Esc] Beranda'
+  - Buka Demo
+  - Keluar
+  - Ruang Showcase
+  - CHAPTER 0{0}
+  - Lanjutkan Ruangan {0}.{1}
+  - '[F2] Buka Semua: Mati'
+  - '[F2] Buka Semua: Nyala'
+  - "Geser / Scroll / A-D: Telusuri Chapter   \u2022   Klik titik ruangan atau tekan Enter untuk masuk"
+  - "Panah / W-S: Pilih   \u2022   Enter: Buka"
+  - KOTA TEPI  /  ARSIP SPASIAL
+  - "Chapter {0}  \u2022  {1}"
+  - Terkunci
+  - Main Ulang
+  - Mulai
+  - "  \u2022  Memori tersimpan"
+  - "Ruang Showcase  \u2022  Semua Mekanik Terbuka"
+  - Buka Showcase
+  - Partition [1], Fusion [2], Telekinesis [F], Rotasi [R], dan Mode Fleksibel langsung aktif
+  - Demo Lengkap POLYMULATOR
+  - Selesai  [{0}]{1}
+  - 'Ruangan terkunci: selesaikan ruangan sebelumnya lebih dulu'
+  - "Siap dimulai  \u2022  Klik titik ruangan atau tekan Enter"
+  - "{0}.{1}  \u2022  {2}"
+  - "{0}/{1} Ruangan  \u2022  {2} Memori"
+  - "{0}/{1} Ruangan Selesai  \u2022  {2} Memori"
+  - Ruangan {0}.{1}
+  - SANDBOX
+  - Tutup Pengaturan
+  - 'Selesai  [Esc]'
+  - Bahasa
+  - Kurangi Gerak
+  - Reset Progres
+  - Klik Lagi untuk Hapus
+  - Sensitivitas Kamera
+  - Audio, sensitivitas kamera, dan kenyamanan gerak
+  - Pengaturan
+  - Volume Utama
+  - SHOWCASE
+  - Mulai Simulasi  1.1
+  - Rekonstruksi ruang melalui translasi, rotasi, partisi, dan fusi.
+  - '{0} MODE ACTIVE'
+  - FLEXIBLE
+  - Gerak Bebas  /  Telekinesis
+  - FUSION [2] belum aktif di chapter ini
+  - LIMITED
+  - "Angkat  /  Putar 90\xB0  /  Lempar"
+  - PARTITION [1] belum aktif di chapter ini
+  - '{0} CANNOT BE TETHERED'
+  - '{0} dikembalikan ke ruang uji'
+  - '{0} IS STATIC ANCHOR'

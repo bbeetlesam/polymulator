@@ -44,10 +44,8 @@ namespace Polymulator
 
         public Color ModeColor => IsLimited ? PaletteSettings.ModeLimited : PaletteSettings.ModeFlexible;
 
-        public string ModeLabel => IsLimited ? "LIMITED" : "FLEXIBLE";
-        public string ModeSummary => IsLimited
-            ? "Angkat  /  Putar 90°  /  Lempar"
-            : "Gerak Bebas  /  Telekinesis";
+        public string ModeLabel => L.T(IsLimited ? "ui.mode.limited" : "ui.mode.flexible");
+        public string ModeSummary => L.T(IsLimited ? "ui.mode.limited_summary" : "ui.mode.flexible_summary");
 
         public event Action<SimulationMode> OnModeChanged;
         public event Action<string, Color> OnStatusBanner;
@@ -140,7 +138,7 @@ namespace Polymulator
             RectVisualRig.NotifyActionStretch(transform, 0.14f);
 
             OnModeChanged?.Invoke(currentMode);
-            OnStatusBanner?.Invoke(ModeLabel + " MODE ACTIVE", tint);
+            OnStatusBanner?.Invoke(L.T("ui.mode.active", ModeLabel), tint);
         }
 
         public void NotifyBanner(string message, Color color)
@@ -155,7 +153,7 @@ namespace Polymulator
                 return;
             if (!CanUsePartition)
             {
-                OnStatusBanner?.Invoke("PARTITION [1] belum aktif di chapter ini", PaletteSettings.Peach);
+                OnStatusBanner?.Invoke(L.T("ui.mode.partition_locked"), PaletteSettings.Peach);
                 return;
             }
             partitionFusionController?.TryPartition();
@@ -168,7 +166,7 @@ namespace Polymulator
                 return;
             if (!CanUseFusion)
             {
-                OnStatusBanner?.Invoke("FUSION [2] belum aktif di chapter ini", PaletteSettings.Green);
+                OnStatusBanner?.Invoke(L.T("ui.mode.fusion_locked"), PaletteSettings.Green);
                 return;
             }
             partitionFusionController?.TryFusion();
@@ -184,7 +182,7 @@ namespace Polymulator
             }
             if (!CanUsePartition)
             {
-                OnStatusBanner?.Invoke("PARTITION [1] belum aktif di chapter ini", PaletteSettings.Peach);
+                OnStatusBanner?.Invoke(L.T("ui.mode.partition_locked"), PaletteSettings.Peach);
                 return;
             }
             partitionFusionController?.CycleCutAxis();

@@ -1,0 +1,398 @@
+key,en,id
+chapter.1,TRANSLATION,TRANSLASI
+chapter.2,ELEVATION,ELEVASI
+chapter.3,ROTATION,ROTASI
+chapter.4,FUSION & PARTITION,FUSION & PARTITION
+chapter.5,STORM & FINAL CHOICE,BADAI & PILIHAN AKHIR
+ending.archivist.badge,Ending C  •  Open Archive,Akhir Cerita C  •  Arsip Terbuka
+ending.archivist.epilogue.0,Vela climbs the observation fence as an old radio signal comes back. It is not the SIM system voice but a recording of residents who once planted a message in the silent room.,"Vela memanjat pagar observasi saat sinyal radio lama menyala lagi. Bukan suara sistem SIM, melainkan rekaman suara warga yang dulu menanam pesan di ruang sunyi."
+ending.archivist.epilogue.1,"Danu never returned to the control tower, but his piano score played across every district speaker before the storm subsided.","Danu tidak pernah kembali ke menara kendali, namun partitur pianonya berbunyi di seluruh pengeras suara Kota Tepi sebelum badai reda."
+ending.archivist.epilogue.2,"You stand as Rect at the edge of the pier: the simulation system slowly opens, giving the city room to remember who it is.","Kamu berdiri sebagai Rect di tepi dermaga: sistem simulasi perlahan terbuka, memberi ruang bagi kota untuk mengingat siapa dirinya."
+ending.archivist.summary,"With Partition [1], the energy core is split: half closes the emergency floodgate, half powers the community transmitter tower.","Dengan Partition [1], inti energi terbagi: setengah menutup pintu air darurat, setengah lagi menyalakan Menara Pemancar warga."
+ending.archivist.title,The District Goes on Air,Suara Kota Tepi Mengudara
+ending.feedback.archivist_requires_partition,Community Transmitter: partition CORE-01 with [1] or activate the transmitter plate in the center.,Pemancar Warga: belah CORE-01 dengan [1] Partition atau aktifkan pelat pemancar di tengah.
+ending.feedback.requires_core,The final-choice socket requires CORE-01.,Soket pilihan akhir memerlukan CORE-01.
+ending.preservation.badge,Ending B  •  Eternal Vault,Akhir Cerita B  •  Brankas Abadi
+ending.preservation.epilogue.0,"Outside the archive walls, waves still strike the old foundation. Several piers must be abandoned while residents move to higher ground.","Di luar dinding arsip, ombak masih menghantam pondasi lama. Beberapa dermaga harus ditinggalkan sementara warga berpindah ke dataran tinggi."
+ending.preservation.epilogue.1,"Inside the vault, though, the warm yellow light stays on. Every fragment you collected is laid out neatly so the next generation still knows this city's song.","Namun di dalam brankas, lampu kuning-hangat tetap menyala. Setiap fragmen yang kamu kumpulkan tersusun rapi agar generasi berikutnya masih tahu lagu kota ini."
+ending.preservation.epilogue.2,The system stops counting score; all that remains is a silent keeper named Rect.,Sistem berhenti menghitung skor; yang tersisa hanya penjaga sunyi bernama Rect.
+ending.preservation.summary,"The energy core is placed in the West Archive Vault. Every photo, letter, and recording from the district is perfectly protected from storm corrosion.","Inti energi dimasukkan ke Brankas Arsip Barat. Seluruh foto, surat, dan rekaman Kota Tepi terlindungi sempurna dari korosi badai."
+ending.preservation.title,Memories Kept Behind Glass,Ingatan Dijaga di Balik Kaca
+ending.prompt_hint,"Final Choice: Carry CORE-01 East (Levee), North (Transmitter + Partition [1]), or West (Vault)","Pilihan Akhir: Bawa CORE-01 ke Timur (Tanggul), Utara (Pemancar + Partition [1]), atau Barat (Brankas)"
+ending.restoration.badge,Ending A  •  Levee Closed,Akhir Cerita A  •  Tanggul Tertutup
+ending.restoration.epilogue.0,"The seawater recedes, leaving a dry pier and an intact market street. Mira helps residents relight the apartment block.",Air laut surut meninggalkan dermaga yang kering dan jalan pasar yang utuh. Mira membantu warga kembali menyalakan lampu rumah susun.
+ending.restoration.epilogue.1,"In the archive building, frozen silent, the SIM display shows a green status. No names remain in the history list, only tidy building coordinates.","Di gedung arsip yang membeku sepi, layar SIM menampilkan status hijau. Tidak ada nama yang tersisa di daftar sejarah, hanya koordinat bangunan yang rapi."
+ending.restoration.epilogue.2,"Rect gazes at the sea from behind the levee, holding a single piano note whose owner is unknown.","Rect menatap laut dari balik tanggul, menyimpan satu nada piano yang entah milik siapa."
+ending.restoration.summary,"All core power is routed to the North Levee. The storm surge is held outside the wall, but the entire underground memory bank floods with it.","Seluruh daya inti dialirkan penuh ke Tanggul Utara. Gelombang badai tertahan di luar dinding, tetapi seluruh bank memori bawah tanah ikut terendam."
+ending.restoration.title,"City Saved, Memory Buried","Kota Selamat, Ingatan Terkubur"
+fragment.level_1_1.line,"If you can still hear this recording, Rect... Tepi City isn't truly gone yet.","Kalau kau masih bisa mendengar rekaman ini, Rect... Kota Tepi belum benar-benar habis."
+fragment.level_1_1.reply_line,We live in this quiet room with the voices that were left behind.,Kita tinggal di ruangan sunyi ini bersama suara yang sempat tertinggal.
+fragment.level_1_1.title,Voices Behind the Glass,Suara di Balik Kaca
+fragment.level_1_2.line,"Back then, the smell of bread always reached the corner before the sun came up.",Dulu bau roti selalu sampai ke tikungan sebelum matahari naik.
+fragment.level_1_2.reply_line,Now all that's left are containment boxes and light barriers.,Sekarang yang tersisa hanya kotak penahan dan pagar cahaya.
+fragment.level_1_2.title,Morning Bread Stall,Gerai Roti Pagi
+fragment.level_1_3.line,"If the archive bridge rises again someday, it means someone refuses to forget this city.","Kalau jembatan arsip naik lagi suatu hari nanti, artinya ada yang menolak melupakan kota ini."
+fragment.level_1_3.reply_line,The bridge needs two weights at once. Don't leave either one behind.,Jembatannya butuh dua pemberat sekaligus. Jangan tinggalkan salah satunya.
+fragment.level_1_3.title,Shift Closing Letter,Surat Penutup Shift
+fragment.level_2_1.line,"When the power flickered, these stairs were the only way out for the residents.","Waktu listrik naik turun, cuma anak tangga ini yang jadi jalan keluar warga."
+fragment.level_2_1.reply_line,In Flexible Mode you can jump and pull weights from a distance.,Di mode Fleksibel kamu bisa melompat dan menarik beban dari jauh.
+fragment.level_2_1.title,Second-Floor Clothesline,Jemuran Lantai Dua
+fragment.level_2_3.line,From this roof we can see the entire north dyke before the water rises.,Dari atap ini kita bisa melihat seluruh tanggul utara sebelum air naik.
+fragment.level_2_3.reply_line,"Keep the elevation path intact, Nara. The archive is on the other side.","Jaga jalur elevasinya tetap utuh, Nara. Arsip berada di seberang."
+fragment.level_2_3.title,Nara's Transmitter Antenna,Antena Pemancar Nara
+fragment.level_3_1.line,All the old archive doors only lock when the symbol on their side faces the right direction.,Semua pintu arsip lama hanya mau terkunci kalau simbol sisinya menghadap ke arah yang benar.
+fragment.level_3_1.reply_line,The wrong angle will only bounce the core out.,Sudut yang keliru cuma akan memantulkan inti keluar.
+fragment.level_3_1.title,Archive Chamber Twist Lock,Kunci Putar Ruang Arsip
+fragment.level_3_3.line,Danu always said music can't be measured by a grid. He put it in an unindexed corner of the room.,Danu selalu bilang kalau musik tidak bisa diukur grid. Ia menaruhnya di sudut ruang yang tak terindeks.
+fragment.level_3_3.reply_line,"If the system starts freezing the residents' memories, this tone will unlock them again.","Kalau sistem mulai membekukan memori warga, nada ini akan membukanya lagi."
+fragment.level_3_3.title,Untitled Score,Partitur Tanpa Judul
+fragment.level_4_1.line,Two objects combined with Fusion don't have to be the same kind — a cube and a prism still merge into a new composite.,Dua benda yang disatukan dengan Fusion tidak harus sejenis — kubus dan prisma tetap menyatu membentuk komposit baru.
+fragment.level_4_1.reply_line,FUSION [2] active: combine two objects of different shape and mass into one composite core.,FUSION [2] aktif: gabungkan dua benda berbeda bentuk maupun massa menjadi satu inti komposit.
+fragment.level_4_1.title,Law of Conservation of Space,Hukum Kekekalan Ruang
+fragment.level_4_2.line,Storing all the data in one big lump is dangerous. Split it so it can fill both guardians at once.,Menyimpan seluruh data dalam satu gumpalan besar justru berbahaya. Belah ia agar bisa mengisi dua penjaga sekaligus.
+fragment.level_4_2.reply_line,PARTITION [1] active: split one heavy object into two balanced parts.,PARTITION [1] aktif: belah satu benda berat menjadi dua bagian seimbang.
+fragment.level_4_2.title,Controlled Fragments,Pecahan yang Terkendali
+fragment.level_4_3.line,"When Partition and Fusion are used alternately, no mass is wasted.","Saat Partition dan Fusion dipakai bergantian, tidak ada massa yang terbuang percuma."
+fragment.level_4_3.reply_line,The storm at the outer levee is starting to be heard. Get ready to head to the main city.,Badai di tanggul luar mulai terdengar. Bersiaplah menuju kota utama.
+fragment.level_4_3.title,Final Laboratory Notes,Catatan Terakhir Laboratorium
+fragment.level_5_1.line,Stormwater has reached the outer side of the control room. Soon all paths lead to the final decision chamber.,Air badai sudah menyentuh sisi luar ruang kendali. Sebentar lagi semua jalur mengarah ke ruang keputusan akhir.
+fragment.level_5_1.reply_line,"Remember, you still have full control to split or join whatever remains.","Ingat, kamu masih punya kendali penuh untuk membelah atau menyatukan apa yang tersisa."
+fragment.level_5_1.title,North Levee Wave,Gelombang Tanggul Utara
+fragment.level_5_2.line,"We won't force you to choose, Rect.","Kami tidak akan memaksamu memilih, Rect."
+fragment.level_5_2.reply_line,"Save the levee, lock the archive, or split its energy so our voices survive too.","Selamatkan tanggulnya, kunci arsipnya, atau pecah energinya agar suara kami ikut bertahan."
+fragment.level_5_2.title,Voices of Tepi City Residents,Suara Warga Kota Tepi
+fragment.levelshowcase.line,"All main mechanics active in this room: Translation, Elevation, Rotation, Partition [1]/[3], and Hybrid Fusion [2].","Seluruh mekanik utama aktif di ruang ini: Translasi, Elevasi, Rotasi, Partition [1]/[3], dan Fusion Hibrid [2]."
+fragment.levelshowcase.reply_line,"Use [TAB] for Flexible Mode, [F] Telekinesis, [R] Rotation, [1] Partition, [3] Cut Direction, and [2] Fusion.","Gunakan [TAB] untuk Mode Fleksibel, [F] Telekinesis, [R] Rotasi, [1] Partition, [3] Arah Potong, dan [2] Fusion."
+fragment.levelshowcase.title,POLYMULATOR Demo Archive,Arsip Demo POLYMULATOR
+fusion.axis_rule.auto,Auto (Rect Facing),Auto (Hadap Rect)
+fusion.axis_rule.front_back,Front | Back Axis (Z),Sumbu Depan | Belakang (Z)
+fusion.axis_rule.horizontal,Top | Bottom Axis (Y),Sumbu Atas | Bawah (Y)
+fusion.axis_rule.left_right,Left | Right Axis (X),Sumbu Kiri | Kanan (X)
+fusion.axis_short.auto,AUTOMATIC,OTOMATIS
+fusion.axis_short.front_back,FRONT | BACK,DEPAN | BELAKANG
+fusion.axis_short.horizontal,TOP | BOTTOM,ATAS | BAWAH
+fusion.axis_short.left_right,LEFT | RIGHT,KIRI | KANAN
+fusion.bring_closer,Bring held {0} near another object to begin Fusion [2],Dekatkan {0} yang sedang diangkat ke objek lain untuk mulai Fusing [2]
+fusion.cannot_merge,{0} cannot be fused,{0} tidak dapat digabungkan
+fusion.completed,{0} ({1}): {2} + {3},{0} ({1}): {2} + {3}
+fusion.core_needs_core_piece,{0} can only be fused with another CORE-01 piece nearby,{0} hanya bisa disatukan dengan pecahan CORE-01 lain di dekatnya
+fusion.core_restored,CORE-01 restored intact through Fusion!,CORE-01 dipulihkan utuh melalui Fusion!
+fusion.max_parts,Maximum fusion limit ({0} parts) reached,Batas maksimum gabungan ({0} bagian) tercapai
+fusion.no_target,"Lift an object first [E], then move it near another object to Fuse [2]",Angkat objek dulu [E] lalu dekatkan ke objek lain untuk Fusion [2]
+fusion.pair_label,{0} + {1},{0} + {1}
+fusion.preset.box_box.horizontal,TWIN-BLOCK,BALOK-GANDA
+fusion.preset.box_box.vertical,TWIN-PILLAR,PILAR-GANDA
+fusion.preset.box_sphere.horizontal,ORB-SOCKET,SOKET-ORB
+fusion.preset.box_sphere.vertical,ORB-PEDESTAL,PEDESTAL-ORB
+fusion.preset.compound_any.horizontal,MODULAR-ASSEMBLY,RAKITAN-MODULAR
+fusion.preset.compound_any.vertical,MODULAR-TOWER,MENARA-MODULAR
+fusion.preset.cylinder_box.horizontal,AXLE-MODULE,MODUL-POROS
+fusion.preset.cylinder_box.vertical,CYLINDER-TURRET,TURRET-SILINDER
+fusion.preset.cylinder_cylinder.horizontal,TWIN-TURBINE,TURBIN-GANDA
+fusion.preset.cylinder_cylinder.vertical,TOWER-PISTON,PISTON-MENARA
+fusion.preset.cylinder_sphere.horizontal,ORB-PISTON,PISTON-ORB
+fusion.preset.cylinder_sphere.vertical,ORB-BEACON,MERCU-ORB
+fusion.preset.sphere_sphere.horizontal,ORB-BARBELL,BARBEL-ORB
+fusion.preset.sphere_sphere.vertical,TWIN-CORE,INTI-KEMBAR
+fusion.shape.box,Block,Balok
+fusion.shape.compound,Assembly,Rakitan
+fusion.shape.cylinder,Cylinder,Tabung
+fusion.shape.sphere,Sphere,Bola
+fusion.side.back,BACK,BELAKANG
+fusion.side.front,FRONT,DEPAN
+fusion.side.left,LEFT,KIRI
+fusion.side.right,RIGHT,KANAN
+fusion.side.top,TOP,ATAS
+fusion.side_blocked,Side {0} is blocked. Choose another side [WASD / Q / 3],Sisi {0} terhalang. Pilih sisi lain [WASD / Q / 3]
+fusion.stage_cancelled,Fusion stage cancelled,Tahap Fusing dibatalkan
+level.level_1_1.chapter_subtitle,CHAPTER 1  •  TRANSLATION,CHAPTER 1  •  TRANSLASI
+level.level_1_1.clearDialogue.0.text,Main key installed. The door to the Market District is open.,Kunci utama terpasang. Pintu menuju Distrik Pasar terbuka.
+level.level_1_1.clearDialogue.1.text,"Behind the light on this chamber's walls, shadows of the old streets begin to appear.","Di balik cahaya dinding ruangan ini, bayangan jalanan lama mulai terlihat."
+level.level_1_1.district_label,TEST CHAMBER 01,RUANG UJI 01
+level.level_1_1.fragment_title,Voices Behind the Glass,Suara di Balik Kaca
+level.level_1_1.hints.0,Move Rect with WASD or the arrow keys toward the yellow cube CORE-01.,Gerakkan Rect dengan WASD atau tombol panah mendekati kubus kuning CORE-01.
+level.level_1_1.hints.1,"Press [E] to lift CORE-01, carry it to the round socket ANCHOR-01 to the north, then press [E] or [Q] to put it down.","Tekan [E] untuk mengangkat CORE-01, bawa ke soket bulat ANCHOR-01 di utara, lalu tekan [E] atau [Q] untuk meletakkan."
+level.level_1_1.hints.2,The pink crystal on the left side is optional — touch it to hear a story fragment.,Kristal merah muda di sisi kiri bersifat opsional — sentuh untuk mendengar fragmen cerita.
+level.level_1_1.openingDialogue.0.text,Simulation session starting. Unit Rect is back online in Test Chamber 01.,Sesi simulasi dimulai. Unit Rect aktif kembali di Ruang Uji 01.
+level.level_1_1.openingDialogue.1.text,A yellow core glows in the middle of the floor. Someone left it right on your path.,Sebuah inti kuning menyala di tengah lantai. Seseorang meninggalkannya tepat di jalurmu.
+level.level_1_1.title,Build in an Empty Chamber,Bangun di Ruangan Kosong
+level.level_1_2.chapter_subtitle,CHAPTER 1  •  TRANSLATION,CHAPTER 1  •  TRANSLASI
+level.level_1_2.clearDialogue.0.text,"Good, the path is open again. Let's keep going toward the archive building.","Bagus, jalannya terbuka lagi. Ayo terus ke arah gedung arsip."
+level.level_1_2.district_label,OLD MARKET STREET,JALAN PASAR LAMA
+level.level_1_2.fragment_title,Morning Bread Stall,Gerai Roti Pagi
+level.level_1_2.hints.0,"Lift the BEBAN-PASAR block with [E], then place it on the PAD-PASAR floor plate on the left.",Angkat balok BEBAN-PASAR dengan [E] lalu letakkan di atas pelat lantai PAD-PASAR di kiri.
+level.level_1_2.hints.1,"When the plate turns green and the red barrier disappears, bring CORE-01 to ANCHOR-01 to the north.","Saat pelat berubah hijau dan pagar merah menghilang, bawa CORE-01 ke ANCHOR-01 di utara."
+level.level_1_2.hints.2,Tip: press [Left Click] while holding a block if you want to push it forward.,Tips: tekan [Klik Kiri] saat memegang balok jika ingin mendorongnya ke depan.
+level.level_1_2.openingDialogue.0.text,The red gate ahead is locked by the weight plate on the left floor.,Gerbang merah di depan dikunci pelat beban di lantai kiri.
+level.level_1_2.openingDialogue.1.text,Find a weight block around the hallway to turn off the barrier.,Cari balok pemberat di sekitar lorong agar pagarnya padam.
+level.level_1_2.title,Market Street,Jalan Pasar
+level.level_1_3.chapter_subtitle,CHAPTER 1  •  TRANSLATION,CHAPTER 1  •  TRANSLASI
+level.level_1_3.clearDialogue.0.text,Translation Sector complete. Access to the apartment building's elevation level is open.,Sektor Translasi selesai. Akses ke tingkat elevasi rusun dibuka.
+level.level_1_3.district_label,ARCHIVE GATE,GERBANG ARSIP
+level.level_1_3.fragment_title,Shift Closing Letter,Surat Penutup Shift
+level.level_1_3.hints.0,Place BEBAN-BARAT on PAD-BARAT and BEBAN-TIMUR on PAD-TIMUR.,Letakkan BEBAN-BARAT di PAD-BARAT dan BEBAN-TIMUR di PAD-TIMUR.
+level.level_1_3.hints.1,"If both plates are green, the bridge stairs in the middle will extend until they reach the upper deck.","Jika kedua pelat sudah hijau, tangga jembatan di tengah akan memanjang hingga menyentuh dek atas."
+level.level_1_3.hints.2,Carry CORE-01 up along the bridge stairs to ANCHOR-01.,Bawa CORE-01 naik menyusuri tangga jembatan ke ANCHOR-01.
+level.level_1_3.openingDialogue.0.text,The stairs to the archive deck are broken in the middle.,Tangga menuju dek arsip terputus di tengah.
+level.level_1_3.openingDialogue.1.text,Activate both floor plates so the energy bridge connects fully.,Aktifkan kedua pelat lantai agar jembatan energinya tersambung penuh.
+level.level_1_3.title,East Archive Gate,Gerbang Arsip Timur
+level.level_2_1.chapter_subtitle,CHAPTER 2  •  ELEVATION,CHAPTER 2  •  ELEVASI
+level.level_2_1.clearDialogue.0.text,"Slowly, this old building is starting to respond to our steps again.","Pelan-pelan, bangunan lama ini mulai merespons langkah kita lagi."
+level.level_2_1.district_label,MATAHARI APARTMENTS // L1,RUSUN MATAHARI // L1
+level.level_2_1.fragment_title,Second-Floor Clothesline,Jemuran Lantai Dua
+level.level_2_1.hints.0,Press [TAB] to switch movement mode to Flexible Mode (purple).,Tekan [TAB] untuk mengganti mode gerak ke Mode Fleksibel (warna ungu).
+level.level_2_1.hints.1,"Lift BEBAN-UNGU via the left balcony stairs, or aim at BEBAN-UNGU and press [F] to lift it with telekinesis onto PAD-BALKON.","Angkat BEBAN-UNGU lewat tangga balkon kiri, atau arahkan ke BEBAN-UNGU dan tekan [F] untuk mengangkatnya dengan telekinesis ke PAD-BALKON."
+level.level_2_1.hints.2,"Once the right bridge is active, bring CORE-01 up to the Anchor Deck.","Setelah jembatan kanan aktif, bawa CORE-01 naik ke Dek Anchor."
+level.level_2_1.openingDialogue.0.text,The bridge trigger plate is on the left balcony!,Pelat pemicu jembatan berada di atas balkon kiri!
+level.level_2_1.openingDialogue.1.text,Press [TAB] to switch to Flexible Mode so Rect can jump and use [F] telekinesis.,Tekan [TAB] untuk beralih ke Mode Fleksibel agar Rect bisa melompat dan memakai telekinesis [F].
+level.level_2_1.title,Matahari Apartments Stairs,Tangga Rusun Matahari
+level.level_2_2.chapter_subtitle,CHAPTER 2  •  ELEVATION,CHAPTER 2  •  ELEVASI
+level.level_2_2.clearDialogue.0.text,Your telekinesis beam is getting steadier. The tower top is one step away.,Sinar telekinesismu makin stabil. Puncak menara tinggal selangkah lagi.
+level.level_2_2.district_label,MATAHARI APARTMENTS // L2,RUSUN MATAHARI // L2
+level.level_2_2.hints.0,Press [TAB] to switch to Flexible Mode so Telekinesis is active.,Tekan [TAB] ke Mode Fleksibel agar Telekinesis aktif.
+level.level_2_2.hints.1,"Aim at BEBAN-RAK on the upper-right platform, press [F] to pull it down to PAD-UTARA.","Arahkan ke BEBAN-RAK di platform kanan atas, tekan [F] untuk menariknya turun ke PAD-UTARA."
+level.level_2_2.hints.2,"Aim at CORE-01 on the upper-left tower, press [F] to lower it, then bring it in through the open barrier.","Arahkan ke CORE-01 di menara kiri atas, tekan [F] untuk menurunkannya, lalu bawa masuk melewati pagar yang sudah terbuka."
+level.level_2_2.openingDialogue.0.text,CORE-01 is stuck on top of the west pole with no stairs!,CORE-01 terjebak di puncak tiang barat tanpa tangga!
+level.level_2_2.openingDialogue.1.text,"In Flexible Mode [TAB], use the [F] Telekinesis beam to lower objects from high places.","Di Mode Fleksibel [TAB], gunakan sinar [F] Telekinesis untuk menurunkan benda dari tempat tinggi."
+level.level_2_2.title,Apartment Upper Terrace,Teras Atas Rusun
+level.level_2_3.chapter_subtitle,CHAPTER 2  •  ELEVATION,CHAPTER 2  •  ELEVASI
+level.level_2_3.clearDialogue.0.text,Elevation Sector connected. The Archive Building door is starting to register.,Sektor Elevasi terhubung. Pintu Gedung Arsip mulai terbaca.
+level.level_2_3.district_label,APARTMENT TOWER,MENARA RUSUN
+level.level_2_3.fragment_title,Nara's Transmitter Antenna,Antena Pemancar Nara
+level.level_2_3.hints.0,Put PEMBERAT-A on PAD-PINTU at the lower left to open the middle barrier.,Taruh PEMBERAT-A ke PAD-PINTU di kiri bawah agar pagar tengah terbuka.
+level.level_2_3.hints.1,Use Flexible Mode [TAB] and lift PEMBERAT-B (with the stairs or [F]) to PAD-PUNCAK on the right balcony.,Gunakan Mode Fleksibel [TAB] dan angkat PEMBERAT-B (dengan tangga atau [F]) ke PAD-PUNCAK di balkon kanan.
+level.level_2_3.hints.2,"Once the bridge to the top is active, bring CORE-01 up to ANCHOR-01.","Setelah jembatan ke puncak aktif, bawa CORE-01 naik ke ANCHOR-01."
+level.level_2_3.openingDialogue.0.text,The tower top is guarded by a middle barrier and broken stairs.,Puncak menara dijaga pagar tengah sekaligus tangga putus.
+level.level_2_3.openingDialogue.1.text,"Open the barrier with the left plate first, then bring the second weight to the right balcony.","Buka pagar dengan pelat kiri dulu, lalu bawa pemberat kedua ke balkon kanan."
+level.level_2_3.title,Top of the Apartment Tower,Puncak Menara Rusun
+level.level_3_1.chapter_subtitle,CHAPTER 3  •  ROTATION,CHAPTER 3  •  ROTASI
+level.level_3_1.clearDialogue.0.text,Exactly right. The door to the inner archive chamber clicks immediately.,Pas sekali. Pintu menuju ruang dalam arsip langsung berbunyi klik.
+level.level_3_1.district_label,ARCHIVE LOBBY,LOBI ARSIP
+level.level_3_1.fragment_title,Archive Chamber Twist Lock,Kunci Putar Ruang Arsip
+level.level_3_1.hints.0,"The Anchor socket requires the core facing NORTH (0°), matching the arrow on the mount.","Soket Anchor meminta inti menghadap UTARA (0°), sesuai arah panah di dudukan."
+level.level_3_1.hints.1,"While holding CORE-01 [E] or aiming at it with [F], press [R] to rotate it until the cube's arrow matches the socket.","Saat memegang CORE-01 [E] atau mengarahkannya dengan [F], tekan [R] untuk memutarnya hingga panah kubus cocok dengan soket."
+level.level_3_1.hints.2,Place the aligned CORE-01 right into the center of ANCHOR-01.,Letakkan CORE-01 yang sudah sejajar tepat ke tengah ANCHOR-01.
+level.level_3_1.openingDialogue.0.text,This Anchor socket has a direction lock. Pay attention to the arrow on the Anchor mount.,Soket Anchor ini memiliki pengunci arah. Perhatikan panah pada dudukan Anchor.
+level.level_3_1.openingDialogue.1.text,Press [R] while holding or pulling the cube to rotate it 90 degrees.,Tekan [R] saat memegang atau menarik kubus untuk memutarnya 90 derajat.
+level.level_3_1.title,Archive Direction Lock,Kunci Arah Arsip
+level.level_3_2.chapter_subtitle,CHAPTER 3  •  ROTATION,CHAPTER 3  •  ROTASI
+level.level_3_2.clearDialogue.0.text,The city's archive recordings are hidden in a unit never recorded on any official map...,Rekaman arsip kota tersembunyi di unit yang tidak pernah dicatat peta resmi...
+level.level_3_2.district_label,ARCHIVE MIRROR CHAMBER,RUANG CERMIN ARSIP
+level.level_3_2.hints.0,Bring PRISMA-BERAT to PAD-CERMIN on the left to turn on the upward stairs.,Bawa PRISMA-BERAT ke PAD-CERMIN di kiri untuk menyalakan tangga naik.
+level.level_3_2.hints.1,Pick up CORE-01 and press [R] TWO TIMES until its facing direction becomes 180° (South).,Ambil CORE-01 dan tekan [R] DUA KALI sampai arah hadapnya menjadi 180° (Selatan).
+level.level_3_2.hints.2,Bring CORE-01 up the bridge to ANCHOR-01.,Bawa CORE-01 naik jembatan ke ANCHOR-01.
+level.level_3_2.openingDialogue.0.text,This socket flips to SOUTH — opposite the direction you came from.,Soket kali ini membalik ke arah SELATAN — berlawanan dari arah kedatanganmu.
+level.level_3_2.openingDialogue.1.text,Rotate CORE-01 twice before installing it.,Putar CORE-01 dua kali sebelum memasangnya.
+level.level_3_2.title,Archive Mirror Chamber,Ruang Cermin Arsip
+level.level_3_3.chapter_subtitle,CHAPTER 3  •  ROTATION,CHAPTER 3  •  ROTASI
+level.level_3_3.clearDialogue.0.text,The final tone sounds. The keys to the Reconstruction system — Fusion and Partition — are now open to you.,Nada terakhir berbunyi. Kunci sistem Rekonstruksi — Fusion dan Partition — kini terbuka untukmu.
+level.level_3_3.district_label,DANU PIANO UNIT,UNIT PIANO DANU
+level.level_3_3.fragment_title,Untitled Score,Partitur Tanpa Judul
+level.level_3_3.hints.0,Place PEMBERAT-KIRI on PAD-KUNCI and PEMBERAT-KANAN on PAD-NADA.,Taruh PEMBERAT-KIRI di PAD-KUNCI dan PEMBERAT-KANAN di PAD-NADA.
+level.level_3_3.hints.1,"Pick up CORE-01, press [R] twice (from 90° to 270° / facing WEST, toward the piano).","Ambil CORE-01, tekan [R] dua kali (dari 90° ke 270° / menghadap BARAT, ke arah piano)."
+level.level_3_3.hints.2,Climb the bridge stairs in the middle and install CORE-01 into ANCHOR-01.,Naiki tangga jembatan di tengah dan pasang CORE-01 ke ANCHOR-01.
+level.level_3_3.openingDialogue.0.text,"That room in the left corner is Danu's old apartment... even in the simulation, his piano is still there.","Ruangan di sudut kiri itu apartemen lama Danu... bahkan di dalam simulasi, pianonya masih ada."
+level.level_3_3.openingDialogue.1.text,"Activate both plates to raise the bridge, then lock the core facing WEST (270°).","Aktifkan kedua pelat agar jembatan naik, lalu kunci inti menghadap BARAT (270°)."
+level.level_3_3.title,Unindexed Apartment,Apartemen Tak Terindeks
+level.level_4_1.chapter_subtitle,CHAPTER 4  •  FUSION & PARTITION,CHAPTER 4  •  FUSION & PARTITION
+level.level_4_1.clearDialogue.0.text,Success! Now you've mastered FUSION [2] to combine heavy loads.,Berhasil! Sekarang kamu menguasai FUSION [2] untuk menggabungkan beban berat.
+level.level_4_1.district_label,FUSION WORKSHOP // 01,BENGKEL FUSION // 01
+level.level_4_1.fragment_title,Law of Conservation of Space,Hukum Kekekalan Ruang
+level.level_4_1.hints.0,Approach RINGAN-A or RINGAN-B (or hold one and bring it close to its pair until a green link line appears).,Dekati RINGAN-A atau RINGAN-B (atau pegang satu dan dekatkan ke pasangannya hingga muncul garis tautan hijau).
+level.level_4_1.hints.1,Press [2] to run FUSION — both will merge into one 2.4 t block.,Tekan tombol [2] untuk menjalankan FUSION — keduanya akan menyatu menjadi satu blok 2.4 ton.
+level.level_4_1.hints.2,"Bring the combined 2.4 t block to PAD-BERAT so the red barrier goes out, then place CORE-01 at ANCHOR-01.","Bawa blok gabungan 2.4 t ke PAD-BERAT agar pagar merah padam, lalu taruh CORE-01 ke ANCHOR-01."
+level.level_4_1.openingDialogue.0.text,The PAD-BERAT plate needs at least 2.2 t. In front of you are the RINGAN-A cube (1.2 t) and the RINGAN-B prism (1.2 t).,Pelat PAD-BERAT butuh minimal 2.2 ton. Di depanmu ada Kubus RINGAN-A (1.2 t) dan Prisma RINGAN-B (1.2 t).
+level.level_4_1.openingDialogue.1.text,"Bring one near its pair until the green curved line lights up, then press [2] FUSION to merge the different shapes.","Bawa salah satu mendekati pasangannya hingga garis lengkung hijau menyala, lalu tekan [2] FUSION untuk menyatukan bentuk yang berbeda."
+level.level_4_1.title,Two Weights Become One,Dua Beban Jadi Satu
+level.level_4_2.chapter_subtitle,CHAPTER 4  •  FUSION & PARTITION,CHAPTER 4  •  FUSION & PARTITION
+level.level_4_2.clearDialogue.0.text,One object becomes two keys. A fair split saves this path.,Satu benda jadi dua kunci. Pembagian yang adil menyelamatkan jalur ini.
+level.level_4_2.district_label,PARTITION CHAMBER // 02,RUANG PARTITION // 02
+level.level_4_2.fragment_title,Controlled Fragments,Pecahan yang Terkendali
+level.level_4_2.hints.0,Approach or hold the large MONOLIT block (2.4 t): the laser plane line shows the cut direction in real-time.,Dekati atau pegang blok besar MONOLIT (2.4 t): garis bidang laser menunjukkan arah potongan secara real-time.
+level.level_4_2.hints.1,"Use [3] to change the cut axis (Auto / X / Z / Y), then press [1] to split MONOLIT into MONOLIT-A & -B (1.2 t x 2).","Gunakan [3] bila ingin mengubah sumbu potong (Auto / X / Z / Y), lalu tekan [1] untuk membelah MONOLIT menjadi MONOLIT-A & -B (1.2 t x 2)."
+level.level_4_2.hints.2,"Place each fragment on PAD-KIRI and PAD-KANAN, then bring CORE-01 up the bridge.","Taruh masing-masing pecahan di PAD-KIRI dan PAD-KANAN, lalu bawa CORE-01 naik jembatan."
+level.level_4_2.openingDialogue.0.text,There is only one MONOLIT block weighing 2.4 t. The orange laser plane shows where the pieces will fall.,Hanya ada satu blok MONOLIT seberat 2.4 ton. Bidang laser oranye menunjukkan ke mana belahan akan jatuh.
+level.level_4_2.openingDialogue.1.text,"By default the cut direction follows Rect's facing; press [3] to rotate the cutting plane (Left|Right, Front|Back, Top|Bottom), then [1] PARTITION.","Secara otomatis arah potong mengikuti hadap Rect; tekan [3] untuk memutar bidang potong (Kiri|Kanan, Depan|Belakang, Atas|Bawah), lalu [1] PARTITION."
+level.level_4_2.title,One Split into Two,Satu Dibelah Dua
+level.level_4_3.chapter_subtitle,CHAPTER 4  •  FUSION & PARTITION,CHAPTER 4  •  FUSION & PARTITION
+level.level_4_3.clearDialogue.0.text,All basic mechanics have been mastered. The main storm in Tepi City is right in front of us.,Semua mekanik dasar telah dikuasai. Badai utama di Kota Tepi sudah di depan mata.
+level.level_4_3.district_label,RECONSTRUCTION JUNCTION,SIMPUL REKONSTRUKSI
+level.level_4_3.fragment_title,Final Laboratory Notes,Catatan Terakhir Laboratorium
+level.level_4_3.hints.0,Step 1: Split BLOK-UTAMA (2.4 t) with [1] Partition -> into two 1.2 t pieces.,Langkah 1: Belah BLOK-UTAMA (2.4 t) dengan [1] Partition -> menjadi dua potongan 1.2 t.
+level.level_4_3.hints.1,"Step 2: Place one 1.2 t piece on PAD-RINGAN (left). Bring the second piece near BLOK-TAMBAH (1.2 t), press [2] Fusion to make 2.4 t, then place it on PAD-GABUNG (right).","Langkah 2: Letakkan satu potongan 1.2 t di PAD-RINGAN (kiri). Bawa potongan kedua mendekati BLOK-TAMBAH (1.2 t), tekan [2] Fusion menjadi 2.4 t, lalu taruh di PAD-GABUNG (kanan)."
+level.level_4_3.hints.2,Step 3: Rotate CORE-01 with [R] twice until it faces 180° (South) and attach it to ANCHOR-01.,Langkah 3: Putar CORE-01 dengan [R] dua kali hingga menghadap 180° (Selatan) dan pasang di ANCHOR-01.
+level.level_4_3.openingDialogue.0.text,"Combined test: left plate needs >= 1.0 t, right plate needs >= 2.2 t.","Uji gabungan: pelat kiri butuh >= 1.0 t, pelat kanan butuh >= 2.2 t."
+level.level_4_3.openingDialogue.1.text,"Use Partition [1] then Fusion [2] in sequence, then rotate CORE-01 [R] to 180°.","Gunakan Partition [1] lalu Fusion [2] secara berurutan, lalu putar CORE-01 [R] ke arah 180°."
+level.level_4_3.title,Harmony of Two Directions,Harmoni Dua Arah
+level.level_5_1.chapter_subtitle,CHAPTER 5  •  STORM & FINAL CHOICE,CHAPTER 5  •  BADAI & PILIHAN AKHIR
+level.level_5_1.clearDialogue.0.text,Warning: Final Choice Chamber reached. Prepare to make a decision for Tepi City.,Peringatan: Ruang Pilihan Akhir telah dicapai. Bersiaplah mengambil keputusan untuk Kota Tepi.
+level.level_5_1.district_label,NORTH LEVEE THRESHOLD,AMBANG TANGGUL UTARA
+level.level_5_1.fragment_title,North Levee Wave,Gelombang Tanggul Utara
+level.level_5_1.hints.0,Split PENAHAN-BESAR (2.4 t) with [1] Partition (rotate the cutting plane with [3] if needed) -> lift one 1.2 t part to PAD-GARDU on the left balcony ([TAB] + [F] or stairs).,Belah PENAHAN-BESAR (2.4 t) dengan [1] Partition (putar bidang potong dengan [3] jika perlu) -> naikkan satu bagian 1.2 t ke PAD-GARDU di balkon kiri ([TAB] + [F] atau tangga).
+level.level_5_1.hints.1,Combine the second 1.2 t part with PENAHAN-TAMBAH (1.2 t) using [2] Fusion -> place the 2.4 t block on PAD-TANGGUL (right).,Gabungkan bagian 1.2 t kedua dengan PENAHAN-TAMBAH (1.2 t) memakai [2] Fusion -> letakkan blok 2.4 t di PAD-TANGGUL (kanan).
+level.level_5_1.hints.2,"Rotate CORE-01 with [R] to 90° (East), then bring it past the barrier and bridge to ANCHOR-01.","Putar CORE-01 dengan [R] ke 90° (Timur), lalu bawa melewati pagar dan jembatan ke ANCHOR-01."
+level.level_5_1.openingDialogue.0.text,An energy barrier and a broken bridge block the door to the levee control core.,Satu pagar energi dan jembatan rusak menghalangi pintu menuju inti pengendali tanggul.
+level.level_5_1.openingDialogue.1.text,"Use all your abilities: Partition [1], Fusion [2], Telekinesis [F], and Rotation [R].","Gunakan seluruh kemampuanmu: Partition [1], Fusion [2], Telekinesis [F], dan Rotasi [R]."
+level.level_5_1.title,Storm Threshold,Ambang Badai
+level.level_5_2.chapter_subtitle,CHAPTER 5  •  FINAL CHOICE,CHAPTER 5  •  PILIHAN AKHIR
+level.level_5_2.clearDialogue.0.text,The decision has been recorded in the history of Tepi City.,Keputusan telah tercatat di sejarah Kota Tepi.
+level.level_5_2.district_label,TEPI CITY CENTER JUNCTION,SIMPUL PUSAT KOTA TEPI
+level.level_5_2.fragment_title,Voices of Tepi City Residents,Suara Warga Kota Tepi
+level.level_5_2.hints.0,Choice A (Restoration — East): Take CORE-01 directly to the East Socket to fully close the city levee.,Pilihan A (Restoration — Timur): Bawa CORE-01 langsung ke Soket Timur untuk menutup penuh tanggul kota.
+level.level_5_2.hints.1,Choice B (Preservation — West): Take CORE-01 to the West Socket to preserve all archive recordings.,Pilihan B (Preservation — Barat): Bawa CORE-01 ke Soket Barat untuk mengabadikan seluruh rekaman arsip.
+level.level_5_2.hints.2,Choice C (Archivist — North): Press [1] Partition on CORE-01 (or split BALOK-ARSIP on PAD-PEMANCAR) then attach it to the North Socket!,Pilihan C (Archivist — Utara): Tekan [1] Partition pada CORE-01 (atau belah BALOK-ARSIP di PAD-PEMANCAR) lalu pasang ke Soket Utara!
+level.level_5_2.openingDialogue.0.text,Three final paths light up before you. Decide where CORE-01 will be channeled:,Tiga jalur terakhir menyala di hadapanmu. Tentukan ke mana CORE-01 akan disalurkan:
+level.level_5_2.openingDialogue.1.text,East: NORTH LEVEE (save the physical city)  •  North: TRANSMITTER (split with Partition [1])  •  West: ARCHIVE VAULT.,Timur: TANGGUL UTARA (selamatkan kota fisik)  •  Utara: PEMANCAR (pecah dengan Partition [1])  •  Barat: BRANKAS ARSIP.
+level.level_5_2.title,Tepi City's Final Choice,Pilihan Akhir Kota Tepi
+level.levelshowcase.chapter_subtitle,SPECIAL SHOWCASE  •  ALL FEATURES,SPECIAL SHOWCASE  •  SEMUA FITUR
+level.levelshowcase.clearDialogue.0.text,Showcase demo complete! All mechanic and audio-visual systems verified working.,Demo Showcase selesai! Semua sistem mekanik dan audio-visual terverifikasi berfungsi.
+level.levelshowcase.district_label,SANDBOX & DEMO,SANDBOX & DEMO
+level.levelshowcase.fragment_title,POLYMULATOR Demo Archive,Arsip Demo POLYMULATOR
+level.levelshowcase.hints.0,"LEFT (Partition [1] + [3]): Approach DEMO-PARTITION (2.4 t) to see the orange laser cutting plane. Press [3] to change the cut axis, then [1] to split into 2 x 1.2 t.","KIRI (Partition [1] + [3]): Dekati DEMO-PARTITION (2.4 t) untuk melihat bidang potong laser oranye. Tekan [3] untuk mengganti sumbu potong, lalu [1] untuk membelah jadi 2 x 1.2 t."
+level.levelshowcase.hints.1,"RIGHT (Hybrid Fusion [2] + [TAB]/[F]): Bring the DEMO-FUSE-A cube & DEMO-FUSE-B prism close, press [2] to combine two different shapes into 2.4 t, then lift them to PAD-FUSE-ATAS.","KANAN (Fusion Hibrid [2] + [TAB]/[F]): Dekatkan Kubus DEMO-FUSE-A & Prisma DEMO-FUSE-B, tekan [2] untuk menggabung dua bentuk berbeda jadi 2.4 t, lalu naikkan ke PAD-FUSE-ATAS."
+level.levelshowcase.hints.2,"CENTER (Rotation [R]): Take CORE-01, press [R] three times until 0° (North), then attach it to ANCHOR-01 at the top.","TENGAH (Rotasi [R]): Ambil CORE-01, tekan [R] tiga kali sampai 0° (Utara), lalu pasang ke ANCHOR-01 di puncak."
+level.levelshowcase.openingDialogue.0.text,Welcome to the Showcase Chamber! All mechanics are ready to test with the Partition laser preview & Fusion link.,Selamat datang di Ruang Showcase! Semua mekanik siap diuji dengan pratinjau laser Partition & tautan Fusion.
+level.levelshowcase.openingDialogue.1.text,Left: test Partition [1] & cut axis [3]  •  Right: test Fusion [2] on Cube+Prism objects  •  Center: Rotation [R] of CORE-01.,Kiri: uji Partition [1] & sumbu potong [3]  •  Kanan: uji Fusion [2] objek Kubus+Prisma  •  Tengah: Rotasi [R] CORE-01.
+level.levelshowcase.title,Showcase Chamber: All Mechanics,Ruang Showcase: Semua Mekanik
+partition.axis.auto,AUTOMATIC (Follows Rect facing and object length),OTOMATIS (Mengikuti hadap Rect & panjang objek)
+partition.axis.front_back,FRONT | BACK (Split on Z axis),DEPAN | BELAKANG (Belah sumbu Z)
+partition.axis.horizontal,TOP | BOTTOM (Split horizontally on Y),ATAS | BAWAH (Belah horizontal Y)
+partition.axis.left_right,LEFT | RIGHT (Split on X axis),KIRI | KANAN (Belah sumbu X)
+partition.axis_notice,Partition Direction [3]: {0},Arah Partition [3]: {0}
+partition.cannot_split,{0} cannot be split further,{0} tidak dapat dibelah lagi
+partition.completed,Partition ({0}): {1} -> {2} & {3} ({4:0.0}t x 2),Partition ({0}): {1} -> {2} & {3} ({4:0.0}t x 2)
+partition.no_target,Approach or hold an object to split it [1],Dekati atau pegang sebuah objek untuk dibelah [1]
+partition.reason.auto_facing,Auto (Rect Facing),Auto (Hadap Rect)
+partition.reason.auto_long,Auto (Object Length),Auto (Panjang Objek)
+partition.reason.auto_wide,Auto (Object Width),Auto (Lebar Objek)
+partition.reason.front_back,Front | Back (Z),Depan | Belakang (Z)
+partition.reason.horizontal,Top | Bottom (Y),Atas | Bawah (Y)
+partition.reason.left_right,Left | Right (X),Kiri | Kanan (X)
+partition.unfused,Joint Partition: {0} & {1} separated,Partition Sambungan: {0} & {1} dipisah
+ui.anchor.core_rematerialized,CORE-01 RE-MATERIALIZED AT PLATFORM HIGH,CORE-01 RE-MATERIALIZED AT PLATFORM HIGH
+ui.anchor.release_to_lock,Aligned with Anchor: release to lock CORE-01,Posisi sejajar Anchor: lepas untuk mengunci CORE-01
+ui.anchor.requires_core,ANCHOR REQUIRES CORE-01 (PLATFORM HIGH),ANCHOR REQUIRES CORE-01 (PLATFORM HIGH)
+ui.anchor.rotate_core,Rotate CORE [R] to {0} deg first,Putar CORE [R] ke {0} deg dulu
+ui.anchor.rotation_mismatch,Rotation direction does not match ({0} deg): rotate to {1} deg [R],Arah rotasi belum pas ({0} deg): putar ke {1} deg [R]
+ui.hud.ability.elevation,Elevation,Elevasi
+ui.hud.ability.fusion,Fusion,Fusion
+ui.hud.ability.partition,Partition,Partition
+ui.hud.ability.rotation,Rotation,Rotasi
+ui.hud.ability.telekinesis,Telekinesis,Telekinesis
+ui.hud.ability.throw,Throw,Lempar
+ui.hud.ability.translation,Translation,Translasi
+ui.hud.blueprint.intro,Blueprint Mode [V]: Axis Direction & Target Lines Active,Mode Cetak Biru [V]: Arah Sumbu & Garis Target Aktif
+ui.hud.blueprint.off,Blueprint Mode: Inactive,Mode Cetak Biru: Nonaktif
+ui.hud.blueprint.on,Blueprint Mode: Active,Mode Cetak Biru: Aktif
+ui.hud.controls.abilities,Partition / Axis / Fusion,Partition / Sumbu / Fusion
+ui.hud.controls.axis_hints,3D Axes / Hints,Sumbu 3D / Petunjuk
+ui.hud.controls.camera,Camera Peek / Reset,Intip Kamera / Reset
+ui.hud.controls.distance_height,Distance / Height,Jarak / Ketinggian
+ui.hud.controls.move,Movement,Gerak
+ui.hud.controls.pause,Pause / Menu,Jeda / Menu
+ui.hud.controls.pickup,Pick Up / Drop / Pull,Angkat / Lepas / Tarik
+ui.hud.controls.rotate_throw,Rotate / Throw,Putar / Lempar
+ui.hud.controls.switch_mode,Switch Mode,Ganti Mode
+ui.hud.controls.title,Controls,Kontrol
+ui.hud.default_level,SIMULATION CHAMBER,RUANG SIMULASI
+ui.hud.fragment.saved,Memory Saved: {0},Memori Tersimpan: {0}
+ui.hud.fusion.stage.blocked,Fusion Stage  •  {0}  •  Side: {1} (Blocked),Tahap Fusing  •  {0}  •  Sisi: {1} (Terhalang)
+ui.hud.fusion.stage.hint,[WASD / Q / 3] Select Side   •   [2 / Enter] Fuse   •   [Esc] Cancel,[WASD / Q / 3] Pilih Sisi   •   [2 / Enter] Gabung   •   [Esc] Batal
+ui.hud.fusion.stage.valid,Fusion Stage  •  {0}  •  Side: {1},Tahap Fusing  •  {0}  •  Sisi: {1}
+ui.hud.hint.completed,Chamber complete: continue to the next chamber,Ruangan selesai: lanjut ke ruangan berikutnya
+ui.hud.hint.core_to_anchor,Hint: Carry the yellow CORE-01 cube toward the Anchor socket,Petunjuk: Bawa kubus kuning CORE-01 ke arah soket Anchor
+ui.hud.hint.custom,Hint: {0},Petunjuk: {0}
+ui.hud.hint.modes,"Hint: Use [E] to lift, [TAB] for Flexible Mode, or [1]/[3]/[2] when active","Petunjuk: Gunakan [E] untuk mengangkat, [TAB] untuk Mode Fleksibel, atau [1]/[3]/[2] bila aktif"
+ui.hud.hint.plate_place,Hint: Place a weight block on the floor plate until it turns green,Petunjuk: Letakkan balok pemberat di atas pelat lantai hingga berubah hijau
+ui.hud.hint.rotate_core,"Hint: If the socket has an arrow marker, press [R] to rotate CORE-01","Petunjuk: Jika soket memiliki tanda panah, tekan [R] untuk memutar CORE-01"
+ui.hud.metrics.concept_note,"Spatial concept: Translation (X, Y, Z), Y-axis rotation, and weight balance.","Konsep ruang: Translasi (X, Y, Z), Rotasi sumbu Y, dan keseimbangan beban."
+ui.hud.metrics.throw_tether,Throw / Pull,Lempar / Tarik
+ui.hud.mode.flexible_active,Flexible Mode active: Free Movement & Telekinesis [F],Mode Fleksibel aktif: Gerak Bebas & Telekinesis [F]
+ui.hud.objective.bring_core,Carry CORE-01 to the Anchor Socket,Bawa CORE-01 ke Soket Anchor
+ui.hud.objective.chapter_complete,Chapter Complete,Chapter Selesai
+ui.hud.objective.completed,Chamber {0} complete: Anchor locked,Ruangan {0} selesai: Anchor terkunci
+ui.hud.objective.core_locked,CORE-01 Locked in Anchor,CORE-01 Terkunci di Anchor
+ui.hud.objective.decision_set,District Decision Recorded,Keputusan Kota Tepi Ditetapkan
+ui.hud.objective.final_choice,Choose Final Path  •  0/1 Complete,Pilih Jalur Akhir  •  0/1 Selesai
+ui.hud.objective.final_paths,East (Levee)  •  North (Transmitter)  •  West (Vault),Timur (Tanggul)  •  Utara (Pemancar)  •  Barat (Brankas)
+ui.hud.objective.lock_core,Lock CORE-01 to Anchor  •  0/1 Complete,Kunci CORE-01 ke Anchor  •  0/1 Selesai
+ui.hud.objective.plate_weight,Plate Weight: {0:0.0} / {1:0.0} t,Beban Pelat: {0:0.0} / {1:0.0} t
+ui.hud.objective.plates,Weight Plates {0}/{1} Active  •  {2}/{3} Complete,Pelat Beban {0}/{1} Aktif  •  {2}/{3} Selesai
+ui.hud.objective.total_weight,Total Plate Weight: {0:0.0} / {1:0.0} t,Total Beban Pelat: {0:0.0} / {1:0.0} t
+ui.hud.objective.weight_item,{0:0.0}/{1:0.0} t,{0:0.0}/{1:0.0} t
+ui.hud.objective.weights,Weight: ,Beban: 
+ui.hud.overlay.back_to_menu,Back to Main Menu  [M],Kembali ke Menu Utama  [M]
+ui.hud.overlay.cleared_subtitle,{0}  •  Anchor Locked,{0}  •  Anchor Terkunci
+ui.hud.overlay.cleared_title,Chamber {0} Complete,Ruangan {0} Selesai
+ui.hud.overlay.main_menu,Main Menu  [M],Menu Utama  [M]
+ui.hud.overlay.memory_saved,   •   Memory Saved,   •   Memori Tersimpan
+ui.hud.overlay.next_generic,Next Chamber  [Enter],Ruangan Berikutnya  [Enter]
+ui.hud.overlay.next_room,Chamber {0}  [Enter],Ruangan {0}  [Enter]
+ui.hud.overlay.paused_subtitle,Chamber {0}  •  {1},Ruangan {0}  •  {1}
+ui.hud.overlay.paused_title,Simulation Paused,Simulasi Dijeda
+ui.hud.overlay.replay,Replay Chamber  [R],Ulangi Ruangan  [R]
+ui.hud.overlay.replay_ending,Replay Final Choice  [R],Ulangi Pilihan Akhir  [R]
+ui.hud.overlay.resume,Resume  [Esc],Lanjutkan  [Esc]
+ui.hud.overlay.total_memories,Total Memories Collected: {0} District Fragments,Total Memori Terkumpul: {0} Fragmen Kota Tepi
+ui.hud.plate.active,Weight plate active: energy bridge lit,Pelat beban aktif: jembatan energi menyala
+ui.hud.plate.released,Weight plate released: energy bridge off,Pelat beban lepas: jembatan energi padam
+ui.hud.start.room,Chamber {0}: ,Ruangan {0}: 
+ui.hud.start.showcase,Showcase Chamber: ,Ruang Showcase: 
+ui.hud.story.next,[SPACE] Continue,[SPACE] Lanjut
+ui.hud.target.weight,Weight {0:0.0} t,Bobot {0:0.0} t
+ui.language.english,ENGLISH,INGGRIS
+ui.language.indonesian,INDONESIAN,INDONESIA
+ui.menu.active_badge,ACTIVE,AKTIF
+ui.menu.archive_short,ARCHIVE,ARSIP
+ui.menu.buttons.chapters,Select Chamber,Pilih Ruangan
+ui.menu.buttons.home,[Esc] Home,[Esc] Beranda
+ui.menu.buttons.open_demo,Open Demo,Buka Demo
+ui.menu.buttons.quit,Quit,Keluar
+ui.menu.buttons.showcase,Showcase Chamber,Ruang Showcase
+ui.menu.chapter_pill,CHAPTER 0{0},CHAPTER 0{0}
+ui.menu.continue,Continue Chamber {0}.{1},Lanjutkan Ruangan {0}.{1}
+ui.menu.demo.off,[F2] Unlock All: Off,[F2] Buka Semua: Mati
+ui.menu.demo.on,[F2] Unlock All: On,[F2] Buka Semua: Nyala
+ui.menu.hints.ribbon_nav,Drag / Scroll / A-D: Browse Chapters   •   Click a chamber node or press Enter to enter,Geser / Scroll / A-D: Telusuri Chapter   •   Klik titik ruangan atau tekan Enter untuk masuk
+ui.menu.hints.title_nav,Arrow / W-S: Select   •   Enter: Open,Panah / W-S: Pilih   •   Enter: Buka
+ui.menu.kicker,DISTRICT EDGE  /  SPATIAL ARCHIVE,KOTA TEPI  /  ARSIP SPASIAL
+ui.menu.preview.chapter,Chapter {0}  •  {1},Chapter {0}  •  {1}
+ui.menu.preview.launch.locked,Locked,Terkunci
+ui.menu.preview.launch.replay,Replay,Main Ulang
+ui.menu.preview.launch.start,Start,Mulai
+ui.menu.preview.memory_saved,  •  Memory saved,  •  Memori tersimpan
+ui.menu.preview.showcase.chapter,Showcase Chamber  •  All Mechanics Unlocked,Ruang Showcase  •  Semua Mekanik Terbuka
+ui.menu.preview.showcase.launch,Open Showcase,Buka Showcase
+ui.menu.preview.showcase.status,"Partition [1], Fusion [2], Telekinesis [F], Rotation [R], and Flexible Mode are active immediately","Partition [1], Fusion [2], Telekinesis [F], Rotasi [R], dan Mode Fleksibel langsung aktif"
+ui.menu.preview.showcase.title,Full POLYMULATOR Demo,Demo Lengkap POLYMULATOR
+ui.menu.preview.status.cleared,Cleared  [{0}]{1},Selesai  [{0}]{1}
+ui.menu.preview.status.locked,Chamber locked: clear the previous chamber first,Ruangan terkunci: selesaikan ruangan sebelumnya lebih dulu
+ui.menu.preview.status.ready,Ready to start  •  Click a chamber node or press Enter,Siap dimulai  •  Klik titik ruangan atau tekan Enter
+ui.menu.preview.title,{0}.{1}  •  {2},{0}.{1}  •  {2}
+ui.menu.progress.ribbon,{0}/{1} Chambers  •  {2} Memories,{0}/{1} Ruangan  •  {2} Memori
+ui.menu.progress.title,{0}/{1} Chambers Cleared  •  {2} Memories,{0}/{1} Ruangan Selesai  •  {2} Memori
+ui.menu.room_fallback,Chamber {0}.{1},Ruangan {0}.{1}
+ui.menu.sandbox,SANDBOX,SANDBOX
+ui.menu.settings.close,Close Settings,Tutup Pengaturan
+ui.menu.settings.done,Done  [Esc],Selesai  [Esc]
+ui.menu.settings.language,Language,Bahasa
+ui.menu.settings.reduce_motion,Reduce Motion,Kurangi Gerak
+ui.menu.settings.reset,Reset Progress,Reset Progres
+ui.menu.settings.reset_confirm,Click Again to Delete,Klik Lagi untuk Hapus
+ui.menu.settings.sensitivity,Camera Sensitivity,Sensitivitas Kamera
+ui.menu.settings.subtitle,"Audio, camera sensitivity, and motion comfort","Audio, sensitivitas kamera, dan kenyamanan gerak"
+ui.menu.settings.title,Settings,Pengaturan
+ui.menu.settings.volume,Master Volume,Volume Utama
+ui.menu.showcase,SHOWCASE,SHOWCASE
+ui.menu.start,Start Simulation  1.1,Mulai Simulasi  1.1
+ui.menu.tagline,"Reconstruct space through translation, rotation, partition, and fusion.","Rekonstruksi ruang melalui translasi, rotasi, partisi, dan fusi."
+ui.mode.active,{0} MODE ACTIVE,{0} MODE ACTIVE
+ui.mode.flexible,FLEXIBLE,FLEXIBLE
+ui.mode.flexible_summary,Free Movement  /  Telekinesis,Gerak Bebas  /  Telekinesis
+ui.mode.fusion_locked,FUSION [2] is not active in this chapter,FUSION [2] belum aktif di chapter ini
+ui.mode.limited,LIMITED,LIMITED
+ui.mode.limited_summary,Lift  /  Rotate 90°  /  Throw,Angkat  /  Putar 90°  /  Lempar
+ui.mode.partition_locked,PARTITION [1] is not active in this chapter,PARTITION [1] belum aktif di chapter ini
+ui.object.cannot_tether,{0} CANNOT BE TETHERED,{0} CANNOT BE TETHERED
+ui.object.returned,{0} returned to the test chamber,{0} dikembalikan ke ruang uji
+ui.object.static_anchor,{0} IS STATIC ANCHOR,{0} IS STATIC ANCHOR

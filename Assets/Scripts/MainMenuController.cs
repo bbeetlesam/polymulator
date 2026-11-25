@@ -28,7 +28,6 @@ namespace Polymulator
         private MainMenuCameraOrbit cameraOrbit;
 
         private VisualElement titleView;
-        private Label titleIterLabel;
         private Label titleProgressLabel;
         private Button btnEnter;
         private Button btnChapters;
@@ -58,6 +57,7 @@ namespace Polymulator
         private Slider sliderSensitivity;
         private Label valSensitivity;
         private Toggle toggleReduceMotion;
+        private Button btnLanguage;
         private Button btnResetSave;
         private Button btnSettingsClose;
         private Button settingsReturnFocus;
@@ -103,7 +103,13 @@ namespace Polymulator
 
         private void OnEnable()
         {
+            L.OnLanguageChanged += RefreshLocalizedMenuText;
             TryBindAndRefresh();
+        }
+
+        private void OnDisable()
+        {
+            L.OnLanguageChanged -= RefreshLocalizedMenuText;
         }
 
         private void Start()
@@ -149,7 +155,6 @@ namespace Polymulator
             ApplyReduceMotionClass();
 
             titleView = root.Q<VisualElement>("title-view");
-            titleIterLabel = root.Q<Label>("title-iter-label");
             titleProgressLabel = root.Q<Label>("title-progress-label");
             btnEnter = root.Q<Button>("btn-enter");
             btnChapters = root.Q<Button>("btn-chapters");
@@ -178,6 +183,7 @@ namespace Polymulator
             sliderSensitivity = root.Q<Slider>("slider-sensitivity");
             valSensitivity = root.Q<Label>("val-sensitivity");
             toggleReduceMotion = root.Q<Toggle>("toggle-reduce-motion");
+            btnLanguage = root.Q<Button>("btn-language");
             btnResetSave = root.Q<Button>("btn-reset-save");
             btnSettingsClose = root.Q<Button>("btn-settings-close");
 
@@ -205,6 +211,7 @@ namespace Polymulator
             if (btnRibbonSettings != null) btnRibbonSettings.clicked += () => OpenSettings(btnRibbonSettings);
             if (btnRibbonBack != null) btnRibbonBack.clicked += ReturnToTitle;
             if (btnSettingsClose != null) btnSettingsClose.clicked += CloseSettings;
+            if (btnLanguage != null) btnLanguage.clicked += ToggleLanguage;
             if (btnResetSave != null) btnResetSave.clicked += HandleResetSaveClicked;
             if (btnPreviewLaunch != null) btnPreviewLaunch.clicked += LaunchSelectedChamber;
 
@@ -270,7 +277,7 @@ namespace Polymulator
                     {
                         if (SimulationProgress.Catalog[k].chapter == c && SimulationProgress.Catalog[k].level == l)
                         {
-                            levelTitles[c, l] = SimulationProgress.Catalog[k].fallbackTitle;
+                            levelTitles[c, l] = SimulationProgress.CampaignTitle(SimulationProgress.Catalog[k]);
                             break;
                         }
                     }
@@ -287,14 +294,11 @@ namespace Polymulator
 
         private void UpdateTitleAndMetaLabels()
         {
-            if (titleIterLabel != null)
-                titleIterLabel.text = "KOTA TEPI  /  ARSIP SPASIAL";
-
             if (btnEnter != null)
             {
                 btnEnter.text = currentChapter > 1 || currentLevel > 1
-                    ? string.Format("Lanjutkan Ruangan {0}.{1}", currentChapter, currentLevel)
-                    : "Mulai Simulasi  1.1";
+                    ? L.T("ui.menu.continue", currentChapter, currentLevel)
+                    : L.T("ui.menu.start");
             }
 
             int totalLevels = SimulationProgress.Catalog.Length;
@@ -310,16 +314,14 @@ namespace Polymulator
 
             int fragments = SimulationProgress.GetCollectedFragmentCount();
             if (titleProgressLabel != null)
-                titleProgressLabel.text = string.Format("{0}/{1} Ruangan Selesai  •  {2} Memori",
-                    totalCleared, totalLevels, fragments);
+                titleProgressLabel.text = L.T("ui.menu.progress.title", totalCleared, totalLevels, fragments);
             if (ribbonMetaLabel != null)
-                ribbonMetaLabel.text = string.Format("{0}/{1} Ruangan  •  {2} Memori",
-                    totalCleared, totalLevels, fragments);
+                ribbonMetaLabel.text = L.T("ui.menu.progress.ribbon", totalCleared, totalLevels, fragments);
 
             if (btnDemoToggle != null)
             {
                 bool on = SimulationProgress.IsDemoUnlocked;
-                btnDemoToggle.text = on ? "[F2] Buka Semua: Nyala" : "[F2] Buka Semua: Mati";
+                btnDemoToggle.text = on ? L.T("ui.menu.demo.on") : L.T("ui.menu.demo.off");
                 btnDemoToggle.EnableInClassList("top-action-btn--on", on);
             }
         }
@@ -343,7 +345,7 @@ namespace Polymulator
                 if (reached) card.AddToClassList("chapter-node-card--reached");
                 card.style.borderTopColor = chapColor;
 
-                Label sectorLbl = new Label("CHAPTER 0" + c);
+                Label sectorLbl = new Label(L.T("ui.menu.chapter_pill", c));
                 sectorLbl.AddToClassList("chapter-sector-pill");
                 if (reached) sectorLbl.style.color = chapColor;
                 card.Add(sectorLbl);
@@ -353,8 +355,7 @@ namespace Polymulator
                 if (reached) numLbl.style.color = chapColor;
                 card.Add(numLbl);
 
-                string themeName = c < SimulationProgress.ChapterNames.Length
-                    ? SimulationProgress.ChapterNames[c] : string.Empty;
+                string themeName = SimulationProgress.ChapterName(c);
                 Label themeLbl = new Label(themeName);
                 themeLbl.AddToClassList("chapter-node-theme");
                 card.Add(themeLbl);
@@ -407,7 +408,7 @@ namespace Polymulator
 
                     if (isTarget)
                     {
-                        Label nowBadge = new Label("AKTIF");
+                        Label nowBadge = new Label(L.T("ui.menu.active_badge"));
                         nowBadge.AddToClassList("level-dot-badge");
                         nowBadge.style.backgroundColor = chapColor;
                         dotWrap.Add(nowBadge);
@@ -463,7 +464,7 @@ namespace Polymulator
             VisualElement scCard = new VisualElement();
             scCard.AddToClassList("chapter-node-card");
             scCard.AddToClassList("chapter-node-card--showcase");
-            Label scSec = new Label("SANDBOX");
+            Label scSec = new Label(L.T("ui.menu.sandbox"));
             scSec.AddToClassList("chapter-sector-pill");
             scSec.style.color = PaletteSettings.Teal;
             scCard.Add(scSec);
@@ -471,10 +472,10 @@ namespace Polymulator
             scNum.AddToClassList("chapter-node-num");
             scNum.style.color = PaletteSettings.Teal;
             scCard.Add(scNum);
-            Label scTheme = new Label("SHOWCASE");
+            Label scTheme = new Label(L.T("ui.menu.showcase"));
             scTheme.AddToClassList("chapter-node-theme");
             scCard.Add(scTheme);
-            Button scBtn = new Button(LaunchShowcase) { text = "Buka Demo" };
+            Button scBtn = new Button(LaunchShowcase) { text = L.T("ui.menu.buttons.open_demo") };
             scBtn.AddToClassList("showcase-launch-btn");
             scBtn.RegisterCallback<PointerEnterEvent>(_ =>
             {
@@ -496,19 +497,19 @@ namespace Polymulator
             Color teal = PaletteSettings.Teal;
             if (previewChapterLabel != null)
             {
-                previewChapterLabel.text = "Ruang Showcase  •  Semua Mekanik Terbuka";
+                previewChapterLabel.text = L.T("ui.menu.preview.showcase.chapter");
                 previewChapterLabel.style.color = teal;
             }
             if (previewTitleLabel != null)
-                previewTitleLabel.text = "Demo Lengkap POLYMULATOR";
+                previewTitleLabel.text = L.T("ui.menu.preview.showcase.title");
             if (previewStatusLabel != null)
-                previewStatusLabel.text = "Partition [1], Fusion [2], Telekinesis [F], Rotasi [R], dan Mode Fleksibel langsung aktif";
+                previewStatusLabel.text = L.T("ui.menu.preview.showcase.status");
             if (btnPreviewLaunch != null)
             {
                 btnPreviewLaunch.SetEnabled(true);
                 btnPreviewLaunch.style.backgroundColor = teal;
                 btnPreviewLaunch.style.color = PaletteSettings.Crust;
-                btnPreviewLaunch.text = "Buka Showcase";
+                btnPreviewLaunch.text = L.T("ui.menu.preview.showcase.launch");
             }
         }
 
@@ -525,44 +526,46 @@ namespace Polymulator
             bool unlocked = SimulationProgress.IsUnlocked(chapter, level);
             bool cleared = SimulationProgress.IsCleared(sceneName);
             string title = levelTitles[chapter, level];
-            if (string.IsNullOrEmpty(title)) title = "Ruangan " + chapter + "." + level;
+            if (string.IsNullOrEmpty(title)) title = L.T("ui.menu.room_fallback", chapter, level);
 
-            string chapterTheme = chapter < SimulationProgress.ChapterNames.Length
-                ? SimulationProgress.ChapterNames[chapter] : "ARSIP";
+            string chapterTheme = chapter > 0 && chapter < SimulationProgress.ChapterNames.Length
+                ? SimulationProgress.ChapterName(chapter) : L.T("ui.menu.archive_short");
             Color chapColor = ChapterAccentColor(chapter);
 
             if (previewChapterLabel != null)
             {
-                previewChapterLabel.text = string.Format("Chapter {0}  •  {1}", chapter, chapterTheme);
+                previewChapterLabel.text = L.T("ui.menu.preview.chapter", chapter, chapterTheme);
                 previewChapterLabel.style.color = chapColor;
             }
             if (previewTitleLabel != null)
-                previewTitleLabel.text = string.Format("{0}.{1}  •  {2}", chapter, level, title);
+                previewTitleLabel.text = L.T("ui.menu.preview.title", chapter, level, title);
 
             if (btnPreviewLaunch != null)
             {
                 btnPreviewLaunch.SetEnabled(unlocked);
                 btnPreviewLaunch.style.backgroundColor = unlocked ? chapColor : PaletteSettings.Surface1;
                 btnPreviewLaunch.style.color = unlocked ? PaletteSettings.Crust : PaletteSettings.Subtext0;
-                btnPreviewLaunch.text = cleared ? "Main Ulang" : (unlocked ? "Mulai" : "Terkunci");
+                btnPreviewLaunch.text = cleared
+                    ? L.T("ui.menu.preview.launch.replay")
+                    : (unlocked ? L.T("ui.menu.preview.launch.start") : L.T("ui.menu.preview.launch.locked"));
             }
 
             if (previewStatusLabel != null)
             {
                 if (!unlocked)
                 {
-                    previewStatusLabel.text = "Ruangan terkunci: selesaikan ruangan sebelumnya lebih dulu";
+                    previewStatusLabel.text = L.T("ui.menu.preview.status.locked");
                 }
                 else if (cleared)
                 {
                     int stars = SimulationProgress.GetStars(sceneName);
                     string starStr = new string('★', stars) + new string('☆', 3 - stars);
-                    string mem = SimulationProgress.HasFragment(sceneName) ? "  •  Memori tersimpan" : "";
-                    previewStatusLabel.text = string.Format("Selesai  [{0}]{1}", starStr, mem);
+                    string mem = SimulationProgress.HasFragment(sceneName) ? L.T("ui.menu.preview.memory_saved") : "";
+                    previewStatusLabel.text = L.T("ui.menu.preview.status.cleared", starStr, mem);
                 }
                 else
                 {
-                    previewStatusLabel.text = "Siap dimulai  •  Klik titik ruangan atau tekan Enter";
+                    previewStatusLabel.text = L.T("ui.menu.preview.status.ready");
                 }
             }
         }
@@ -582,7 +585,7 @@ namespace Polymulator
             if (resetConfirmUntil > 0f && Time.unscaledTime > resetConfirmUntil)
             {
                 resetConfirmUntil = 0f;
-                if (btnResetSave != null) btnResetSave.text = "Reset Progres";
+                if (btnResetSave != null) btnResetSave.text = L.T("ui.menu.settings.reset");
             }
         }
 
@@ -871,12 +874,12 @@ namespace Polymulator
             if (resetConfirmUntil <= Time.unscaledTime)
             {
                 resetConfirmUntil = Time.unscaledTime + 3.0f;
-                if (btnResetSave != null) btnResetSave.text = "Klik Lagi untuk Hapus";
+                if (btnResetSave != null) btnResetSave.text = L.T("ui.menu.settings.reset_confirm");
                 SimulationAudio.PlayMenuHover();
                 return;
             }
             resetConfirmUntil = 0f;
-            if (btnResetSave != null) btnResetSave.text = "Reset Progres";
+            if (btnResetSave != null) btnResetSave.text = L.T("ui.menu.settings.reset");
             ExecuteResetProgress();
         }
 
@@ -894,7 +897,7 @@ namespace Polymulator
         {
             settingsOpen = false;
             resetConfirmUntil = 0f;
-            if (btnResetSave != null) btnResetSave.text = "Reset Progres";
+            if (btnResetSave != null) btnResetSave.text = L.T("ui.menu.settings.reset");
             if (settingsOverlay != null) settingsOverlay.AddToClassList("settings-overlay--hidden");
             SimulationAudio.PlayMenuHover();
             if (settingsReturnFocus != null) settingsReturnFocus.Focus();
@@ -912,6 +915,32 @@ namespace Polymulator
             if (valSensitivity != null) valSensitivity.text = SimulationSettings.CameraSensitivity.ToString("0.0") + "x";
 
             if (toggleReduceMotion != null) toggleReduceMotion.SetValueWithoutNotify(SimulationSettings.ReduceMotion);
+            if (btnLanguage != null)
+                btnLanguage.text = L.T(L.Language == GameLanguage.English
+                    ? "ui.language.english"
+                    : "ui.language.indonesian");
+            if (btnResetSave != null) btnResetSave.text = L.T("ui.menu.settings.reset");
+        }
+
+        private void ToggleLanguage()
+        {
+            L.SetLanguage(L.Language == GameLanguage.English ? GameLanguage.Indonesian : GameLanguage.English);
+            SimulationAudio.PlayMenuClick();
+        }
+
+        private void RefreshLocalizedMenuText()
+        {
+            if (uiDocument == null || boundRoot == null)
+            {
+                TryBindAndRefresh();
+                return;
+            }
+
+            LoadLevelCatalogTitles();
+            UpdateTitleAndMetaLabels();
+            RebuildRibbonNodes();
+            UpdatePreviewCard(selectedChapter, selectedLevel);
+            ApplySettingsValuesToUI();
         }
 
         private void ReturnToTitle()

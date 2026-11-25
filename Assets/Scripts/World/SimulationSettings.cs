@@ -11,6 +11,7 @@ namespace Polymulator
         private const string KeyVolume = "POLY_SET_VOL";
         private const string KeySensitivity = "POLY_SET_SENS";
         private const string KeyReduceMotion = "POLY_SET_REDUCE_MOTION";
+        private const string KeyLanguage = "POLY_SET_LANG";
 
         public static float MasterVolume
         {
@@ -39,6 +40,18 @@ namespace Polymulator
             set
             {
                 PlayerPrefs.SetInt(KeyReduceMotion, value ? 1 : 0);
+                PlayerPrefs.Save();
+            }
+        }
+
+        public static GameLanguage Language
+        {
+            get => PlayerPrefs.GetInt(KeyLanguage, (int)GameLanguage.English) == (int)GameLanguage.Indonesian
+                ? GameLanguage.Indonesian
+                : GameLanguage.English;
+            set
+            {
+                PlayerPrefs.SetInt(KeyLanguage, (int)value);
                 PlayerPrefs.Save();
             }
         }

@@ -38,6 +38,17 @@ namespace Polymulator
             "BADAI & PILIHAN AKHIR"
         };
 
+        public static string ChapterName(int chapter)
+        {
+            if (chapter <= 0 || chapter >= ChapterNames.Length) return string.Empty;
+            return L.TOr("chapter." + chapter, ChapterNames[chapter]);
+        }
+
+        public static string CampaignTitle(CampaignEntry entry)
+        {
+            return L.TOr(LocalizationKeys.Level(entry.sceneName, "title"), entry.fallbackTitle);
+        }
+
         public static readonly CampaignEntry[] Catalog =
         {
             new CampaignEntry(1, 1, "Bangun di Ruangan Kosong"),

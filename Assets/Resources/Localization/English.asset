@@ -1,0 +1,810 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: a0d02a4cf07250320999e9672b344f2a, type: 3}
+  m_Name: English
+  m_EditorClassIdentifier: Assembly-CSharp::Polymulator.LocalizationCatalog
+  keys:
+  - chapter.1
+  - chapter.2
+  - chapter.3
+  - chapter.4
+  - chapter.5
+  - ending.archivist.badge
+  - ending.archivist.epilogue.0
+  - ending.archivist.epilogue.1
+  - ending.archivist.epilogue.2
+  - ending.archivist.summary
+  - ending.archivist.title
+  - ending.feedback.archivist_requires_partition
+  - ending.feedback.requires_core
+  - ending.preservation.badge
+  - ending.preservation.epilogue.0
+  - ending.preservation.epilogue.1
+  - ending.preservation.epilogue.2
+  - ending.preservation.summary
+  - ending.preservation.title
+  - ending.prompt_hint
+  - ending.restoration.badge
+  - ending.restoration.epilogue.0
+  - ending.restoration.epilogue.1
+  - ending.restoration.epilogue.2
+  - ending.restoration.summary
+  - ending.restoration.title
+  - fragment.level_1_1.line
+  - fragment.level_1_1.reply_line
+  - fragment.level_1_1.title
+  - fragment.level_1_2.line
+  - fragment.level_1_2.reply_line
+  - fragment.level_1_2.title
+  - fragment.level_1_3.line
+  - fragment.level_1_3.reply_line
+  - fragment.level_1_3.title
+  - fragment.level_2_1.line
+  - fragment.level_2_1.reply_line
+  - fragment.level_2_1.title
+  - fragment.level_2_3.line
+  - fragment.level_2_3.reply_line
+  - fragment.level_2_3.title
+  - fragment.level_3_1.line
+  - fragment.level_3_1.reply_line
+  - fragment.level_3_1.title
+  - fragment.level_3_3.line
+  - fragment.level_3_3.reply_line
+  - fragment.level_3_3.title
+  - fragment.level_4_1.line
+  - fragment.level_4_1.reply_line
+  - fragment.level_4_1.title
+  - fragment.level_4_2.line
+  - fragment.level_4_2.reply_line
+  - fragment.level_4_2.title
+  - fragment.level_4_3.line
+  - fragment.level_4_3.reply_line
+  - fragment.level_4_3.title
+  - fragment.level_5_1.line
+  - fragment.level_5_1.reply_line
+  - fragment.level_5_1.title
+  - fragment.level_5_2.line
+  - fragment.level_5_2.reply_line
+  - fragment.level_5_2.title
+  - fragment.levelshowcase.line
+  - fragment.levelshowcase.reply_line
+  - fragment.levelshowcase.title
+  - fusion.axis_rule.auto
+  - fusion.axis_rule.front_back
+  - fusion.axis_rule.horizontal
+  - fusion.axis_rule.left_right
+  - fusion.axis_short.auto
+  - fusion.axis_short.front_back
+  - fusion.axis_short.horizontal
+  - fusion.axis_short.left_right
+  - fusion.bring_closer
+  - fusion.cannot_merge
+  - fusion.completed
+  - fusion.core_needs_core_piece
+  - fusion.core_restored
+  - fusion.max_parts
+  - fusion.no_target
+  - fusion.pair_label
+  - fusion.preset.box_box.horizontal
+  - fusion.preset.box_box.vertical
+  - fusion.preset.box_sphere.horizontal
+  - fusion.preset.box_sphere.vertical
+  - fusion.preset.compound_any.horizontal
+  - fusion.preset.compound_any.vertical
+  - fusion.preset.cylinder_box.horizontal
+  - fusion.preset.cylinder_box.vertical
+  - fusion.preset.cylinder_cylinder.horizontal
+  - fusion.preset.cylinder_cylinder.vertical
+  - fusion.preset.cylinder_sphere.horizontal
+  - fusion.preset.cylinder_sphere.vertical
+  - fusion.preset.sphere_sphere.horizontal
+  - fusion.preset.sphere_sphere.vertical
+  - fusion.shape.box
+  - fusion.shape.compound
+  - fusion.shape.cylinder
+  - fusion.shape.sphere
+  - fusion.side.back
+  - fusion.side.front
+  - fusion.side.left
+  - fusion.side.right
+  - fusion.side.top
+  - fusion.side_blocked
+  - fusion.stage_cancelled
+  - level.level_1_1.chapter_subtitle
+  - level.level_1_1.clearDialogue.0.text
+  - level.level_1_1.clearDialogue.1.text
+  - level.level_1_1.district_label
+  - level.level_1_1.fragment_title
+  - level.level_1_1.hints.0
+  - level.level_1_1.hints.1
+  - level.level_1_1.hints.2
+  - level.level_1_1.openingDialogue.0.text
+  - level.level_1_1.openingDialogue.1.text
+  - level.level_1_1.title
+  - level.level_1_2.chapter_subtitle
+  - level.level_1_2.clearDialogue.0.text
+  - level.level_1_2.district_label
+  - level.level_1_2.fragment_title
+  - level.level_1_2.hints.0
+  - level.level_1_2.hints.1
+  - level.level_1_2.hints.2
+  - level.level_1_2.openingDialogue.0.text
+  - level.level_1_2.openingDialogue.1.text
+  - level.level_1_2.title
+  - level.level_1_3.chapter_subtitle
+  - level.level_1_3.clearDialogue.0.text
+  - level.level_1_3.district_label
+  - level.level_1_3.fragment_title
+  - level.level_1_3.hints.0
+  - level.level_1_3.hints.1
+  - level.level_1_3.hints.2
+  - level.level_1_3.openingDialogue.0.text
+  - level.level_1_3.openingDialogue.1.text
+  - level.level_1_3.title
+  - level.level_2_1.chapter_subtitle
+  - level.level_2_1.clearDialogue.0.text
+  - level.level_2_1.district_label
+  - level.level_2_1.fragment_title
+  - level.level_2_1.hints.0
+  - level.level_2_1.hints.1
+  - level.level_2_1.hints.2
+  - level.level_2_1.openingDialogue.0.text
+  - level.level_2_1.openingDialogue.1.text
+  - level.level_2_1.title
+  - level.level_2_2.chapter_subtitle
+  - level.level_2_2.clearDialogue.0.text
+  - level.level_2_2.district_label
+  - level.level_2_2.hints.0
+  - level.level_2_2.hints.1
+  - level.level_2_2.hints.2
+  - level.level_2_2.openingDialogue.0.text
+  - level.level_2_2.openingDialogue.1.text
+  - level.level_2_2.title
+  - level.level_2_3.chapter_subtitle
+  - level.level_2_3.clearDialogue.0.text
+  - level.level_2_3.district_label
+  - level.level_2_3.fragment_title
+  - level.level_2_3.hints.0
+  - level.level_2_3.hints.1
+  - level.level_2_3.hints.2
+  - level.level_2_3.openingDialogue.0.text
+  - level.level_2_3.openingDialogue.1.text
+  - level.level_2_3.title
+  - level.level_3_1.chapter_subtitle
+  - level.level_3_1.clearDialogue.0.text
+  - level.level_3_1.district_label
+  - level.level_3_1.fragment_title
+  - level.level_3_1.hints.0
+  - level.level_3_1.hints.1
+  - level.level_3_1.hints.2
+  - level.level_3_1.openingDialogue.0.text
+  - level.level_3_1.openingDialogue.1.text
+  - level.level_3_1.title
+  - level.level_3_2.chapter_subtitle
+  - level.level_3_2.clearDialogue.0.text
+  - level.level_3_2.district_label
+  - level.level_3_2.hints.0
+  - level.level_3_2.hints.1
+  - level.level_3_2.hints.2
+  - level.level_3_2.openingDialogue.0.text
+  - level.level_3_2.openingDialogue.1.text
+  - level.level_3_2.title
+  - level.level_3_3.chapter_subtitle
+  - level.level_3_3.clearDialogue.0.text
+  - level.level_3_3.district_label
+  - level.level_3_3.fragment_title
+  - level.level_3_3.hints.0
+  - level.level_3_3.hints.1
+  - level.level_3_3.hints.2
+  - level.level_3_3.openingDialogue.0.text
+  - level.level_3_3.openingDialogue.1.text
+  - level.level_3_3.title
+  - level.level_4_1.chapter_subtitle
+  - level.level_4_1.clearDialogue.0.text
+  - level.level_4_1.district_label
+  - level.level_4_1.fragment_title
+  - level.level_4_1.hints.0
+  - level.level_4_1.hints.1
+  - level.level_4_1.hints.2
+  - level.level_4_1.openingDialogue.0.text
+  - level.level_4_1.openingDialogue.1.text
+  - level.level_4_1.title
+  - level.level_4_2.chapter_subtitle
+  - level.level_4_2.clearDialogue.0.text
+  - level.level_4_2.district_label
+  - level.level_4_2.fragment_title
+  - level.level_4_2.hints.0
+  - level.level_4_2.hints.1
+  - level.level_4_2.hints.2
+  - level.level_4_2.openingDialogue.0.text
+  - level.level_4_2.openingDialogue.1.text
+  - level.level_4_2.title
+  - level.level_4_3.chapter_subtitle
+  - level.level_4_3.clearDialogue.0.text
+  - level.level_4_3.district_label
+  - level.level_4_3.fragment_title
+  - level.level_4_3.hints.0
+  - level.level_4_3.hints.1
+  - level.level_4_3.hints.2
+  - level.level_4_3.openingDialogue.0.text
+  - level.level_4_3.openingDialogue.1.text
+  - level.level_4_3.title
+  - level.level_5_1.chapter_subtitle
+  - level.level_5_1.clearDialogue.0.text
+  - level.level_5_1.district_label
+  - level.level_5_1.fragment_title
+  - level.level_5_1.hints.0
+  - level.level_5_1.hints.1
+  - level.level_5_1.hints.2
+  - level.level_5_1.openingDialogue.0.text
+  - level.level_5_1.openingDialogue.1.text
+  - level.level_5_1.title
+  - level.level_5_2.chapter_subtitle
+  - level.level_5_2.clearDialogue.0.text
+  - level.level_5_2.district_label
+  - level.level_5_2.fragment_title
+  - level.level_5_2.hints.0
+  - level.level_5_2.hints.1
+  - level.level_5_2.hints.2
+  - level.level_5_2.openingDialogue.0.text
+  - level.level_5_2.openingDialogue.1.text
+  - level.level_5_2.title
+  - level.levelshowcase.chapter_subtitle
+  - level.levelshowcase.clearDialogue.0.text
+  - level.levelshowcase.district_label
+  - level.levelshowcase.fragment_title
+  - level.levelshowcase.hints.0
+  - level.levelshowcase.hints.1
+  - level.levelshowcase.hints.2
+  - level.levelshowcase.openingDialogue.0.text
+  - level.levelshowcase.openingDialogue.1.text
+  - level.levelshowcase.title
+  - partition.axis.auto
+  - partition.axis.front_back
+  - partition.axis.horizontal
+  - partition.axis.left_right
+  - partition.axis_notice
+  - partition.cannot_split
+  - partition.completed
+  - partition.no_target
+  - partition.reason.auto_facing
+  - partition.reason.auto_long
+  - partition.reason.auto_wide
+  - partition.reason.front_back
+  - partition.reason.horizontal
+  - partition.reason.left_right
+  - partition.unfused
+  - ui.anchor.core_rematerialized
+  - ui.anchor.release_to_lock
+  - ui.anchor.requires_core
+  - ui.anchor.rotate_core
+  - ui.anchor.rotation_mismatch
+  - ui.hud.ability.elevation
+  - ui.hud.ability.fusion
+  - ui.hud.ability.partition
+  - ui.hud.ability.rotation
+  - ui.hud.ability.telekinesis
+  - ui.hud.ability.throw
+  - ui.hud.ability.translation
+  - ui.hud.blueprint.intro
+  - ui.hud.blueprint.off
+  - ui.hud.blueprint.on
+  - ui.hud.controls.abilities
+  - ui.hud.controls.axis_hints
+  - ui.hud.controls.camera
+  - ui.hud.controls.distance_height
+  - ui.hud.controls.move
+  - ui.hud.controls.pause
+  - ui.hud.controls.pickup
+  - ui.hud.controls.rotate_throw
+  - ui.hud.controls.switch_mode
+  - ui.hud.controls.title
+  - ui.hud.default_level
+  - ui.hud.fragment.saved
+  - ui.hud.fusion.stage.blocked
+  - ui.hud.fusion.stage.hint
+  - ui.hud.fusion.stage.valid
+  - ui.hud.hint.completed
+  - ui.hud.hint.core_to_anchor
+  - ui.hud.hint.custom
+  - ui.hud.hint.modes
+  - ui.hud.hint.plate_place
+  - ui.hud.hint.rotate_core
+  - ui.hud.metrics.concept_note
+  - ui.hud.metrics.throw_tether
+  - ui.hud.mode.flexible_active
+  - ui.hud.objective.bring_core
+  - ui.hud.objective.chapter_complete
+  - ui.hud.objective.completed
+  - ui.hud.objective.core_locked
+  - ui.hud.objective.decision_set
+  - ui.hud.objective.final_choice
+  - ui.hud.objective.final_paths
+  - ui.hud.objective.lock_core
+  - ui.hud.objective.plate_weight
+  - ui.hud.objective.plates
+  - ui.hud.objective.total_weight
+  - ui.hud.objective.weight_item
+  - ui.hud.objective.weights
+  - ui.hud.overlay.back_to_menu
+  - ui.hud.overlay.cleared_subtitle
+  - ui.hud.overlay.cleared_title
+  - ui.hud.overlay.main_menu
+  - ui.hud.overlay.memory_saved
+  - ui.hud.overlay.next_generic
+  - ui.hud.overlay.next_room
+  - ui.hud.overlay.paused_subtitle
+  - ui.hud.overlay.paused_title
+  - ui.hud.overlay.replay
+  - ui.hud.overlay.replay_ending
+  - ui.hud.overlay.resume
+  - ui.hud.overlay.total_memories
+  - ui.hud.plate.active
+  - ui.hud.plate.released
+  - ui.hud.start.room
+  - ui.hud.start.showcase
+  - ui.hud.story.next
+  - ui.hud.target.weight
+  - ui.language.english
+  - ui.language.indonesian
+  - ui.menu.active_badge
+  - ui.menu.archive_short
+  - ui.menu.buttons.chapters
+  - ui.menu.buttons.home
+  - ui.menu.buttons.open_demo
+  - ui.menu.buttons.quit
+  - ui.menu.buttons.showcase
+  - ui.menu.chapter_pill
+  - ui.menu.continue
+  - ui.menu.demo.off
+  - ui.menu.demo.on
+  - ui.menu.hints.ribbon_nav
+  - ui.menu.hints.title_nav
+  - ui.menu.kicker
+  - ui.menu.preview.chapter
+  - ui.menu.preview.launch.locked
+  - ui.menu.preview.launch.replay
+  - ui.menu.preview.launch.start
+  - ui.menu.preview.memory_saved
+  - ui.menu.preview.showcase.chapter
+  - ui.menu.preview.showcase.launch
+  - ui.menu.preview.showcase.status
+  - ui.menu.preview.showcase.title
+  - ui.menu.preview.status.cleared
+  - ui.menu.preview.status.locked
+  - ui.menu.preview.status.ready
+  - ui.menu.preview.title
+  - ui.menu.progress.ribbon
+  - ui.menu.progress.title
+  - ui.menu.room_fallback
+  - ui.menu.sandbox
+  - ui.menu.settings.close
+  - ui.menu.settings.done
+  - ui.menu.settings.language
+  - ui.menu.settings.reduce_motion
+  - ui.menu.settings.reset
+  - ui.menu.settings.reset_confirm
+  - ui.menu.settings.sensitivity
+  - ui.menu.settings.subtitle
+  - ui.menu.settings.title
+  - ui.menu.settings.volume
+  - ui.menu.showcase
+  - ui.menu.start
+  - ui.menu.tagline
+  - ui.mode.active
+  - ui.mode.flexible
+  - ui.mode.flexible_summary
+  - ui.mode.fusion_locked
+  - ui.mode.limited
+  - ui.mode.limited_summary
+  - ui.mode.partition_locked
+  - ui.object.cannot_tether
+  - ui.object.returned
+  - ui.object.static_anchor
+  texts:
+  - TRANSLATION
+  - ELEVATION
+  - ROTATION
+  - FUSION & PARTITION
+  - STORM & FINAL CHOICE
+  - "Ending C  \u2022  Open Archive"
+  - Vela climbs the observation fence as an old radio signal comes back. It is not the SIM system voice but a recording of residents who once planted a message in the silent room.
+  - Danu never returned to the control tower, but his piano score played across every district speaker before the storm subsided.
+  - 'You stand as Rect at the edge of the pier: the simulation system slowly opens, giving the city room to remember who it is.'
+  - 'With Partition [1], the energy core is split: half closes the emergency floodgate, half powers the community transmitter tower.'
+  - The District Goes on Air
+  - 'Community Transmitter: partition CORE-01 with [1] or activate the transmitter plate in the center.'
+  - The final-choice socket requires CORE-01.
+  - "Ending B  \u2022  Eternal Vault"
+  - Outside the archive walls, waves still strike the old foundation. Several piers must be abandoned while residents move to higher ground.
+  - Inside the vault, though, the warm yellow light stays on. Every fragment you collected is laid out neatly so the next generation still knows this city's song.
+  - The system stops counting score; all that remains is a silent keeper named Rect.
+  - The energy core is placed in the West Archive Vault. Every photo, letter, and recording from the district is perfectly protected from storm corrosion.
+  - Memories Kept Behind Glass
+  - 'Final Choice: Carry CORE-01 East (Levee), North (Transmitter + Partition [1]), or West (Vault)'
+  - "Ending A  \u2022  Levee Closed"
+  - The seawater recedes, leaving a dry pier and an intact market street. Mira helps residents relight the apartment block.
+  - In the archive building, frozen silent, the SIM display shows a green status. No names remain in the history list, only tidy building coordinates.
+  - Rect gazes at the sea from behind the levee, holding a single piano note whose owner is unknown.
+  - All core power is routed to the North Levee. The storm surge is held outside the wall, but the entire underground memory bank floods with it.
+  - City Saved, Memory Buried
+  - If you can still hear this recording, Rect... Tepi City isn't truly gone yet.
+  - We live in this quiet room with the voices that were left behind.
+  - Voices Behind the Glass
+  - Back then, the smell of bread always reached the corner before the sun came up.
+  - Now all that's left are containment boxes and light barriers.
+  - Morning Bread Stall
+  - If the archive bridge rises again someday, it means someone refuses to forget this city.
+  - The bridge needs two weights at once. Don't leave either one behind.
+  - Shift Closing Letter
+  - When the power flickered, these stairs were the only way out for the residents.
+  - In Flexible Mode you can jump and pull weights from a distance.
+  - Second-Floor Clothesline
+  - From this roof we can see the entire north dyke before the water rises.
+  - Keep the elevation path intact, Nara. The archive is on the other side.
+  - Nara's Transmitter Antenna
+  - All the old archive doors only lock when the symbol on their side faces the right direction.
+  - The wrong angle will only bounce the core out.
+  - Archive Chamber Twist Lock
+  - Danu always said music can't be measured by a grid. He put it in an unindexed corner of the room.
+  - If the system starts freezing the residents' memories, this tone will unlock them again.
+  - Untitled Score
+  - "Two objects combined with Fusion don't have to be the same kind \u2014 a cube and a prism still merge into a new composite."
+  - 'FUSION [2] active: combine two objects of different shape and mass into one composite core.'
+  - Law of Conservation of Space
+  - Storing all the data in one big lump is dangerous. Split it so it can fill both guardians at once.
+  - 'PARTITION [1] active: split one heavy object into two balanced parts.'
+  - Controlled Fragments
+  - When Partition and Fusion are used alternately, no mass is wasted.
+  - The storm at the outer levee is starting to be heard. Get ready to head to the main city.
+  - Final Laboratory Notes
+  - Stormwater has reached the outer side of the control room. Soon all paths lead to the final decision chamber.
+  - Remember, you still have full control to split or join whatever remains.
+  - North Levee Wave
+  - We won't force you to choose, Rect.
+  - Save the levee, lock the archive, or split its energy so our voices survive too.
+  - Voices of Tepi City Residents
+  - 'All main mechanics active in this room: Translation, Elevation, Rotation, Partition [1]/[3], and Hybrid Fusion [2].'
+  - Use [TAB] for Flexible Mode, [F] Telekinesis, [R] Rotation, [1] Partition, [3] Cut Direction, and [2] Fusion.
+  - POLYMULATOR Demo Archive
+  - Auto (Rect Facing)
+  - Front | Back Axis (Z)
+  - Top | Bottom Axis (Y)
+  - Left | Right Axis (X)
+  - AUTOMATIC
+  - FRONT | BACK
+  - TOP | BOTTOM
+  - LEFT | RIGHT
+  - 'Bring held {0} near another object to begin Fusion [2]'
+  - '{0} cannot be fused'
+  - '{0} ({1}): {2} + {3}'
+  - '{0} can only be fused with another CORE-01 piece nearby'
+  - CORE-01 restored intact through Fusion!
+  - Maximum fusion limit ({0} parts) reached
+  - 'Lift an object first [E], then move it near another object to Fuse [2]'
+  - '{0} + {1}'
+  - TWIN-BLOCK
+  - TWIN-PILLAR
+  - ORB-SOCKET
+  - ORB-PEDESTAL
+  - MODULAR-ASSEMBLY
+  - MODULAR-TOWER
+  - AXLE-MODULE
+  - CYLINDER-TURRET
+  - TWIN-TURBINE
+  - TOWER-PISTON
+  - ORB-PISTON
+  - ORB-BEACON
+  - ORB-BARBELL
+  - TWIN-CORE
+  - Block
+  - Assembly
+  - Cylinder
+  - Sphere
+  - BACK
+  - FRONT
+  - LEFT
+  - RIGHT
+  - TOP
+  - 'Side {0} is blocked. Choose another side [WASD / Q / 3]'
+  - Fusion stage cancelled
+  - "CHAPTER 1  \u2022  TRANSLATION"
+  - Main key installed. The door to the Market District is open.
+  - Behind the light on this chamber's walls, shadows of the old streets begin to appear.
+  - TEST CHAMBER 01
+  - Voices Behind the Glass
+  - Move Rect with WASD or the arrow keys toward the yellow cube CORE-01.
+  - Press [E] to lift CORE-01, carry it to the round socket ANCHOR-01 to the north, then press [E] or [Q] to put it down.
+  - "The pink crystal on the left side is optional \u2014 touch it to hear a story fragment."
+  - Simulation session starting. Unit Rect is back online in Test Chamber 01.
+  - A yellow core glows in the middle of the floor. Someone left it right on your path.
+  - Build in an Empty Chamber
+  - "CHAPTER 1  \u2022  TRANSLATION"
+  - Good, the path is open again. Let's keep going toward the archive building.
+  - OLD MARKET STREET
+  - Morning Bread Stall
+  - Lift the BEBAN-PASAR block with [E], then place it on the PAD-PASAR floor plate on the left.
+  - When the plate turns green and the red barrier disappears, bring CORE-01 to ANCHOR-01 to the north.
+  - 'Tip: press [Left Click] while holding a block if you want to push it forward.'
+  - The red gate ahead is locked by the weight plate on the left floor.
+  - Find a weight block around the hallway to turn off the barrier.
+  - Market Street
+  - "CHAPTER 1  \u2022  TRANSLATION"
+  - Translation Sector complete. Access to the apartment building's elevation level is open.
+  - ARCHIVE GATE
+  - Shift Closing Letter
+  - Place BEBAN-BARAT on PAD-BARAT and BEBAN-TIMUR on PAD-TIMUR.
+  - If both plates are green, the bridge stairs in the middle will extend until they reach the upper deck.
+  - Carry CORE-01 up along the bridge stairs to ANCHOR-01.
+  - The stairs to the archive deck are broken in the middle.
+  - Activate both floor plates so the energy bridge connects fully.
+  - East Archive Gate
+  - "CHAPTER 2  \u2022  ELEVATION"
+  - Slowly, this old building is starting to respond to our steps again.
+  - MATAHARI APARTMENTS // L1
+  - Second-Floor Clothesline
+  - Press [TAB] to switch movement mode to Flexible Mode (purple).
+  - Lift BEBAN-UNGU via the left balcony stairs, or aim at BEBAN-UNGU and press [F] to lift it with telekinesis onto PAD-BALKON.
+  - Once the right bridge is active, bring CORE-01 up to the Anchor Deck.
+  - The bridge trigger plate is on the left balcony!
+  - Press [TAB] to switch to Flexible Mode so Rect can jump and use [F] telekinesis.
+  - Matahari Apartments Stairs
+  - "CHAPTER 2  \u2022  ELEVATION"
+  - Your telekinesis beam is getting steadier. The tower top is one step away.
+  - MATAHARI APARTMENTS // L2
+  - Press [TAB] to switch to Flexible Mode so Telekinesis is active.
+  - Aim at BEBAN-RAK on the upper-right platform, press [F] to pull it down to PAD-UTARA.
+  - Aim at CORE-01 on the upper-left tower, press [F] to lower it, then bring it in through the open barrier.
+  - CORE-01 is stuck on top of the west pole with no stairs!
+  - In Flexible Mode [TAB], use the [F] Telekinesis beam to lower objects from high places.
+  - Apartment Upper Terrace
+  - "CHAPTER 2  \u2022  ELEVATION"
+  - Elevation Sector connected. The Archive Building door is starting to register.
+  - APARTMENT TOWER
+  - Nara's Transmitter Antenna
+  - Put PEMBERAT-A on PAD-PINTU at the lower left to open the middle barrier.
+  - Use Flexible Mode [TAB] and lift PEMBERAT-B (with the stairs or [F]) to PAD-PUNCAK on the right balcony.
+  - Once the bridge to the top is active, bring CORE-01 up to ANCHOR-01.
+  - The tower top is guarded by a middle barrier and broken stairs.
+  - Open the barrier with the left plate first, then bring the second weight to the right balcony.
+  - Top of the Apartment Tower
+  - "CHAPTER 3  \u2022  ROTATION"
+  - Exactly right. The door to the inner archive chamber clicks immediately.
+  - ARCHIVE LOBBY
+  - Archive Chamber Twist Lock
+  - "The Anchor socket requires the core facing NORTH (0\xB0), matching the arrow on the mount."
+  - While holding CORE-01 [E] or aiming at it with [F], press [R] to rotate it until the cube's arrow matches the socket.
+  - Place the aligned CORE-01 right into the center of ANCHOR-01.
+  - This Anchor socket has a direction lock. Pay attention to the arrow on the Anchor mount.
+  - Press [R] while holding or pulling the cube to rotate it 90 degrees.
+  - Archive Direction Lock
+  - "CHAPTER 3  \u2022  ROTATION"
+  - The city's archive recordings are hidden in a unit never recorded on any official map...
+  - ARCHIVE MIRROR CHAMBER
+  - Bring PRISMA-BERAT to PAD-CERMIN on the left to turn on the upward stairs.
+  - "Pick up CORE-01 and press [R] TWO TIMES until its facing direction becomes 180\xB0 (South)."
+  - Bring CORE-01 up the bridge to ANCHOR-01.
+  - "This socket flips to SOUTH \u2014 opposite the direction you came from."
+  - Rotate CORE-01 twice before installing it.
+  - Archive Mirror Chamber
+  - "CHAPTER 3  \u2022  ROTATION"
+  - "The final tone sounds. The keys to the Reconstruction system \u2014 Fusion and Partition \u2014 are now open to you."
+  - DANU PIANO UNIT
+  - Untitled Score
+  - Place PEMBERAT-KIRI on PAD-KUNCI and PEMBERAT-KANAN on PAD-NADA.
+  - "Pick up CORE-01, press [R] twice (from 90\xB0 to 270\xB0 / facing WEST, toward the piano)."
+  - Climb the bridge stairs in the middle and install CORE-01 into ANCHOR-01.
+  - That room in the left corner is Danu's old apartment... even in the simulation, his piano is still there.
+  - "Activate both plates to raise the bridge, then lock the core facing WEST (270\xB0)."
+  - Unindexed Apartment
+  - "CHAPTER 4  \u2022  FUSION & PARTITION"
+  - Success! Now you've mastered FUSION [2] to combine heavy loads.
+  - FUSION WORKSHOP // 01
+  - Law of Conservation of Space
+  - Approach RINGAN-A or RINGAN-B (or hold one and bring it close to its pair until a green link line appears).
+  - "Press [2] to run FUSION \u2014 both will merge into one 2.4 t block."
+  - Bring the combined 2.4 t block to PAD-BERAT so the red barrier goes out, then place CORE-01 at ANCHOR-01.
+  - The PAD-BERAT plate needs at least 2.2 t. In front of you are the RINGAN-A cube (1.2 t) and the RINGAN-B prism (1.2 t).
+  - Bring one near its pair until the green curved line lights up, then press [2] FUSION to merge the different shapes.
+  - Two Weights Become One
+  - "CHAPTER 4  \u2022  FUSION & PARTITION"
+  - One object becomes two keys. A fair split saves this path.
+  - PARTITION CHAMBER // 02
+  - Controlled Fragments
+  - 'Approach or hold the large MONOLIT block (2.4 t): the laser plane line shows the cut direction in real-time.'
+  - Use [3] to change the cut axis (Auto / X / Z / Y), then press [1] to split MONOLIT into MONOLIT-A & -B (1.2 t x 2).
+  - Place each fragment on PAD-KIRI and PAD-KANAN, then bring CORE-01 up the bridge.
+  - There is only one MONOLIT block weighing 2.4 t. The orange laser plane shows where the pieces will fall.
+  - By default the cut direction follows Rect's facing; press [3] to rotate the cutting plane (Left|Right, Front|Back, Top|Bottom), then [1] PARTITION.
+  - One Split into Two
+  - "CHAPTER 4  \u2022  FUSION & PARTITION"
+  - All basic mechanics have been mastered. The main storm in Tepi City is right in front of us.
+  - RECONSTRUCTION JUNCTION
+  - Final Laboratory Notes
+  - 'Step 1: Split BLOK-UTAMA (2.4 t) with [1] Partition -> into two 1.2 t pieces.'
+  - 'Step 2: Place one 1.2 t piece on PAD-RINGAN (left). Bring the second piece near BLOK-TAMBAH (1.2 t), press [2] Fusion to make 2.4 t, then place it on PAD-GABUNG (right).'
+  - "Step 3: Rotate CORE-01 with [R] twice until it faces 180\xB0 (South) and attach it to ANCHOR-01."
+  - 'Combined test: left plate needs >= 1.0 t, right plate needs >= 2.2 t.'
+  - "Use Partition [1] then Fusion [2] in sequence, then rotate CORE-01 [R] to 180\xB0."
+  - Harmony of Two Directions
+  - "CHAPTER 5  \u2022  STORM & FINAL CHOICE"
+  - 'Warning: Final Choice Chamber reached. Prepare to make a decision for Tepi City.'
+  - NORTH LEVEE THRESHOLD
+  - North Levee Wave
+  - Split PENAHAN-BESAR (2.4 t) with [1] Partition (rotate the cutting plane with [3] if needed) -> lift one 1.2 t part to PAD-GARDU on the left balcony ([TAB] + [F] or stairs).
+  - Combine the second 1.2 t part with PENAHAN-TAMBAH (1.2 t) using [2] Fusion -> place the 2.4 t block on PAD-TANGGUL (right).
+  - "Rotate CORE-01 with [R] to 90\xB0 (East), then bring it past the barrier and bridge to ANCHOR-01."
+  - An energy barrier and a broken bridge block the door to the levee control core.
+  - 'Use all your abilities: Partition [1], Fusion [2], Telekinesis [F], and Rotation [R].'
+  - Storm Threshold
+  - "CHAPTER 5  \u2022  FINAL CHOICE"
+  - The decision has been recorded in the history of Tepi City.
+  - TEPI CITY CENTER JUNCTION
+  - Voices of Tepi City Residents
+  - "Choice A (Restoration \u2014 East): Take CORE-01 directly to the East Socket to fully close the city levee."
+  - "Choice B (Preservation \u2014 West): Take CORE-01 to the West Socket to preserve all archive recordings."
+  - "Choice C (Archivist \u2014 North): Press [1] Partition on CORE-01 (or split BALOK-ARSIP on PAD-PEMANCAR) then attach it to the North Socket!"
+  - 'Three final paths light up before you. Decide where CORE-01 will be channeled:'
+  - "East: NORTH LEVEE (save the physical city)  \u2022  North: TRANSMITTER (split with Partition [1])  \u2022  West: ARCHIVE VAULT."
+  - Tepi City's Final Choice
+  - "SPECIAL SHOWCASE  \u2022  ALL FEATURES"
+  - Showcase demo complete! All mechanic and audio-visual systems verified working.
+  - SANDBOX & DEMO
+  - POLYMULATOR Demo Archive
+  - 'LEFT (Partition [1] + [3]): Approach DEMO-PARTITION (2.4 t) to see the orange laser cutting plane. Press [3] to change the cut axis, then [1] to split into 2 x 1.2 t.'
+  - 'RIGHT (Hybrid Fusion [2] + [TAB]/[F]): Bring the DEMO-FUSE-A cube & DEMO-FUSE-B prism close, press [2] to combine two different shapes into 2.4 t, then lift them to PAD-FUSE-ATAS.'
+  - "CENTER (Rotation [R]): Take CORE-01, press [R] three times until 0\xB0 (North), then attach it to ANCHOR-01 at the top."
+  - Welcome to the Showcase Chamber! All mechanics are ready to test with the Partition laser preview & Fusion link.
+  - "Left: test Partition [1] & cut axis [3]  \u2022  Right: test Fusion [2] on Cube+Prism objects  \u2022  Center: Rotation [R] of CORE-01."
+  - 'Showcase Chamber: All Mechanics'
+  - AUTOMATIC (Follows Rect facing and object length)
+  - FRONT | BACK (Split on Z axis)
+  - TOP | BOTTOM (Split horizontally on Y)
+  - LEFT | RIGHT (Split on X axis)
+  - 'Partition Direction [3]: {0}'
+  - '{0} cannot be split further'
+  - 'Partition ({0}): {1} -> {2} & {3} ({4:0.0}t x 2)'
+  - 'Approach or hold an object to split it [1]'
+  - Auto (Rect Facing)
+  - Auto (Object Length)
+  - Auto (Object Width)
+  - Front | Back (Z)
+  - Top | Bottom (Y)
+  - Left | Right (X)
+  - 'Joint Partition: {0} & {1} separated'
+  - CORE-01 RE-MATERIALIZED AT PLATFORM HIGH
+  - 'Aligned with Anchor: release to lock CORE-01'
+  - ANCHOR REQUIRES CORE-01 (PLATFORM HIGH)
+  - Rotate CORE [R] to {0} deg first
+  - 'Rotation direction does not match ({0} deg): rotate to {1} deg [R]'
+  - Elevation
+  - Fusion
+  - Partition
+  - Rotation
+  - Telekinesis
+  - Throw
+  - Translation
+  - 'Blueprint Mode [V]: Axis Direction & Target Lines Active'
+  - 'Blueprint Mode: Inactive'
+  - 'Blueprint Mode: Active'
+  - Partition / Axis / Fusion
+  - 3D Axes / Hints
+  - Camera Peek / Reset
+  - Distance / Height
+  - Movement
+  - Pause / Menu
+  - Pick Up / Drop / Pull
+  - Rotate / Throw
+  - Switch Mode
+  - Controls
+  - SIMULATION CHAMBER
+  - 'Memory Saved: {0}'
+  - "Fusion Stage  \u2022  {0}  \u2022  Side: {1} (Blocked)"
+  - "[WASD / Q / 3] Select Side   \u2022   [2 / Enter] Fuse   \u2022   [Esc] Cancel"
+  - "Fusion Stage  \u2022  {0}  \u2022  Side: {1}"
+  - 'Chamber complete: continue to the next chamber'
+  - 'Hint: Carry the yellow CORE-01 cube toward the Anchor socket'
+  - 'Hint: {0}'
+  - 'Hint: Use [E] to lift, [TAB] for Flexible Mode, or [1]/[3]/[2] when active'
+  - 'Hint: Place a weight block on the floor plate until it turns green'
+  - 'Hint: If the socket has an arrow marker, press [R] to rotate CORE-01'
+  - 'Spatial concept: Translation (X, Y, Z), Y-axis rotation, and weight balance.'
+  - Throw / Pull
+  - 'Flexible Mode active: Free Movement & Telekinesis [F]'
+  - Carry CORE-01 to the Anchor Socket
+  - Chapter Complete
+  - 'Chamber {0} complete: Anchor locked'
+  - CORE-01 Locked in Anchor
+  - District Decision Recorded
+  - "Choose Final Path  \u2022  0/1 Complete"
+  - "East (Levee)  \u2022  North (Transmitter)  \u2022  West (Vault)"
+  - "Lock CORE-01 to Anchor  \u2022  0/1 Complete"
+  - 'Plate Weight: {0:0.0} / {1:0.0} t'
+  - "Weight Plates {0}/{1} Active  \u2022  {2}/{3} Complete"
+  - 'Total Plate Weight: {0:0.0} / {1:0.0} t'
+  - '{0:0.0}/{1:0.0} t'
+  - 'Weight: '
+  - 'Back to Main Menu  [M]'
+  - "{0}  \u2022  Anchor Locked"
+  - Chamber {0} Complete
+  - 'Main Menu  [M]'
+  - "   \u2022   Memory Saved"
+  - 'Next Chamber  [Enter]'
+  - 'Chamber {0}  [Enter]'
+  - "Chamber {0}  \u2022  {1}"
+  - Simulation Paused
+  - 'Replay Chamber  [R]'
+  - 'Replay Final Choice  [R]'
+  - 'Resume  [Esc]'
+  - 'Total Memories Collected: {0} District Fragments'
+  - 'Weight plate active: energy bridge lit'
+  - 'Weight plate released: energy bridge off'
+  - 'Chamber {0}: '
+  - 'Showcase Chamber: '
+  - '[SPACE] Continue'
+  - Weight {0:0.0} t
+  - ENGLISH
+  - INDONESIAN
+  - ACTIVE
+  - ARCHIVE
+  - Select Chamber
+  - '[Esc] Home'
+  - Open Demo
+  - Quit
+  - Showcase Chamber
+  - CHAPTER 0{0}
+  - Continue Chamber {0}.{1}
+  - '[F2] Unlock All: Off'
+  - '[F2] Unlock All: On'
+  - "Drag / Scroll / A-D: Browse Chapters   \u2022   Click a chamber node or press Enter to enter"
+  - "Arrow / W-S: Select   \u2022   Enter: Open"
+  - DISTRICT EDGE  /  SPATIAL ARCHIVE
+  - "Chapter {0}  \u2022  {1}"
+  - Locked
+  - Replay
+  - Start
+  - "  \u2022  Memory saved"
+  - "Showcase Chamber  \u2022  All Mechanics Unlocked"
+  - Open Showcase
+  - Partition [1], Fusion [2], Telekinesis [F], Rotation [R], and Flexible Mode are active immediately
+  - Full POLYMULATOR Demo
+  - Cleared  [{0}]{1}
+  - 'Chamber locked: clear the previous chamber first'
+  - "Ready to start  \u2022  Click a chamber node or press Enter"
+  - "{0}.{1}  \u2022  {2}"
+  - "{0}/{1} Chambers  \u2022  {2} Memories"
+  - "{0}/{1} Chambers Cleared  \u2022  {2} Memories"
+  - Chamber {0}.{1}
+  - SANDBOX
+  - Close Settings
+  - 'Done  [Esc]'
+  - Language
+  - Reduce Motion
+  - Reset Progress
+  - Click Again to Delete
+  - Camera Sensitivity
+  - Audio, camera sensitivity, and motion comfort
+  - Settings
+  - Master Volume
+  - SHOWCASE
+  - Start Simulation  1.1
+  - Reconstruct space through translation, rotation, partition, and fusion.
+  - '{0} MODE ACTIVE'
+  - FLEXIBLE
+  - Free Movement  /  Telekinesis
+  - FUSION [2] is not active in this chapter
+  - LIMITED
+  - "Lift  /  Rotate 90\xB0  /  Throw"
+  - PARTITION [1] is not active in this chapter
+  - '{0} CANNOT BE TETHERED'
+  - '{0} returned to the test chamber'
+  - '{0} IS STATIC ANCHOR'
