@@ -39,6 +39,8 @@ namespace Polymulator
         private static readonly Dictionary<uint, Material> SharedOutlineMaterials = new Dictionary<uint, Material>();
         private static readonly Dictionary<uint, Material> SharedRimMaterials = new Dictionary<uint, Material>();
         private static readonly Dictionary<uint, Material> SharedRuntimeSurfaceMaterials = new Dictionary<uint, Material>();
+        private static readonly Dictionary<uint, Material> SharedRuntimeEmissiveMaterials = new Dictionary<uint, Material>();
+        private static readonly Dictionary<uint, Material> SharedRuntimeMetallicMaterials = new Dictionary<uint, Material>();
         private static readonly Dictionary<Mesh, Mesh> SmoothedOutlineMeshes = new Dictionary<Mesh, Mesh>();
 
         private static Material sharedOutlineTemplate;
@@ -66,6 +68,8 @@ namespace Polymulator
             SharedOutlineMaterials.Clear();
             SharedRimMaterials.Clear();
             SharedRuntimeSurfaceMaterials.Clear();
+            SharedRuntimeEmissiveMaterials.Clear();
+            SharedRuntimeMetallicMaterials.Clear();
             foreach (var kv in SmoothedOutlineMeshes)
             {
                 if (kv.Value != null) Object.Destroy(kv.Value);
@@ -198,7 +202,7 @@ namespace Polymulator
             for (int i = 0; i < all.Length; i++)
             {
                 Renderer r = all[i];
-                if (r == null || r.GetComponent<OutlineShell>() != null) continue;
+                if (r == null || r is LineRenderer || r.GetComponent<OutlineShell>() != null) continue;
                 extentRenderers.Add(r);
                 if (r.GetComponent<ObjectTrim>() == null)
                     primaryRenderers.Add(r);
@@ -242,25 +246,97 @@ namespace Polymulator
         public bool TryGetHalfExtents(out Vector3 halfExtents)
         {
             halfExtents = Vector3.zero;
-            if (boundsRenderers == null) CacheComponents();
-            if (boundsRenderers == null || boundsRenderers.Length == 0) return false;
+            if (renderers == null || boundsRenderers == null) CacheComponents();
+            Renderer[] sourceList = (renderers != null && renderers.Length > 0) ? renderers : boundsRenderers;
+            if (sourceList == null || sourceList.Length == 0) return false;
 
             Vector3 center = transform.position;
-            for (int i = 0; i < boundsRenderers.Length; i++)
+            bool foundAny = false;
+            for (int i = 0; i < sourceList.Length; i++)
             {
-                Renderer targetRenderer = boundsRenderers[i];
-                if (targetRenderer == null) continue;
+                Renderer targetRenderer = sourceList[i];
+                if (targetRenderer == null || !targetRenderer.enabled) continue;
 
                 Bounds bounds = targetRenderer.bounds;
                 halfExtents.x = Mathf.Max(halfExtents.x, Mathf.Abs(bounds.center.x - center.x) + bounds.extents.x);
                 halfExtents.y = Mathf.Max(halfExtents.y, Mathf.Abs(bounds.center.y - center.y) + bounds.extents.y);
                 halfExtents.z = Mathf.Max(halfExtents.z, Mathf.Abs(bounds.center.z - center.z) + bounds.extents.z);
+                foundAny = true;
             }
+            return foundAny;
+        }
+
+        /// <summary>
+        /// Computes the unrotated world-scaled dimensions (width X, height Y, depth Z) of the
+        /// primary object body without AABB rotation inflation or ObjectTrim protrusions (like beacons).
+        /// </summary>
+        public bool TryGetLocalFootprint(out Vector3 localSize)
+        {
+            localSize = Vector3.zero;
+            if (renderers == null) CacheComponents();
+            Renderer[] sourceList = (renderers != null && renderers.Length > 0) ? renderers : boundsRenderers;
+            if (sourceList == null || sourceList.Length == 0) return false;
+
+            Vector3 baseScale = initialLocalScale.sqrMagnitude > 0.00001f ? initialLocalScale : transform.localScale;
+            Vector3 parentScale = transform.parent != null ? transform.parent.lossyScale : Vector3.one;
+            Vector3 absWorldScale = new Vector3(
+                Mathf.Abs(baseScale.x * parentScale.x),
+                Mathf.Abs(baseScale.y * parentScale.y),
+                Mathf.Abs(baseScale.z * parentScale.z));
+
+            Vector3 min = new Vector3(float.MaxValue, float.MaxValue, float.MaxValue);
+            Vector3 max = new Vector3(float.MinValue, float.MinValue, float.MinValue);
+            bool found = false;
+            Matrix4x4 invRoot = transform.worldToLocalMatrix;
+
+            for (int i = 0; i < sourceList.Length; i++)
+            {
+                Renderer r = sourceList[i];
+                if (r == null) continue;
+                MeshFilter mf = r.GetComponent<MeshFilter>();
+                if (mf == null || mf.sharedMesh == null) continue;
+
+                Bounds mb = mf.sharedMesh.bounds;
+                Matrix4x4 rel = invRoot * r.transform.localToWorldMatrix;
+                Vector3 c = mb.center;
+                Vector3 e = mb.extents;
+                for (int sx = -1; sx <= 1; sx += 2)
+                {
+                    for (int sy = -1; sy <= 1; sy += 2)
+                    {
+                        for (int sz = -1; sz <= 1; sz += 2)
+                        {
+                            Vector3 p = rel.MultiplyPoint3x4(c + new Vector3(e.x * sx, e.y * sy, e.z * sz));
+                            min = Vector3.Min(min, p);
+                            max = Vector3.Max(max, p);
+                            found = true;
+                        }
+                    }
+                }
+            }
+
+            if (!found) return false;
+            Vector3 span = max - min;
+            localSize = new Vector3(
+                Mathf.Max(0.05f, span.x * absWorldScale.x),
+                Mathf.Max(0.05f, span.y * absWorldScale.y),
+                Mathf.Max(0.05f, span.z * absWorldScale.z));
             return true;
         }
 
         public bool TryGetPlanarHalfExtents(out float halfExtentX, out float halfExtentZ)
         {
+            if (TryGetLocalFootprint(out Vector3 size))
+            {
+                float yawRad = transform.eulerAngles.y * Mathf.Deg2Rad;
+                float c = Mathf.Abs(Mathf.Cos(yawRad));
+                float s = Mathf.Abs(Mathf.Sin(yawRad));
+                float hx = size.x * 0.5f;
+                float hz = size.z * 0.5f;
+                halfExtentX = c * hx + s * hz;
+                halfExtentZ = s * hx + c * hz;
+                return true;
+            }
             bool found = TryGetHalfExtents(out Vector3 extents);
             halfExtentX = extents.x;
             halfExtentZ = extents.z;
@@ -510,6 +586,83 @@ namespace Polymulator
             if (mat.HasProperty("_RimColor")) mat.SetColor("_RimColor", Color.Lerp(color, PaletteSettings.Text, 0.55f));
             if (mat.HasProperty("_SeamColor")) mat.SetColor("_SeamColor", PaletteSettings.Crust);
             SharedRuntimeSurfaceMaterials[key] = mat;
+            return mat;
+        }
+
+        /// <summary>
+        /// Returns a cached SRP-Batcher-compatible HDR emissive material using POLYMULATOR/Sim Surface
+        /// for glowing Catppuccin Mocha fusion rings, crystals, nozzles, and reactor cores.
+        /// </summary>
+        public static Material GetSharedEmissiveMaterial(Color color, float emissionIntensity = 2.6f)
+        {
+            uint qIntensity = (uint)Mathf.Clamp(Mathf.RoundToInt(emissionIntensity * 20f), 0, 255);
+            uint key = (PackColorKey(color) << 8) | qIntensity;
+            if (SharedRuntimeEmissiveMaterials.TryGetValue(key, out Material cached) && cached != null)
+                return cached;
+
+            Shader shader = Shader.Find("POLYMULATOR/Sim Surface");
+            if (shader == null) shader = Shader.Find("Universal Render Pipeline/Lit");
+            Material mat = new Material(shader);
+            mat.hideFlags = HideFlags.HideAndDontSave;
+            mat.name = "Sim_Emissive_Runtime_" + key.ToString("X8");
+
+            Color baseGlow = Color.Lerp(color, PaletteSettings.Text, 0.36f);
+            baseGlow.a = 1f;
+            Color hdrEmission = new Color(
+                color.r * emissionIntensity,
+                color.g * emissionIntensity,
+                color.b * emissionIntensity,
+                1f);
+
+            mat.SetColor(BaseColorId, baseGlow);
+            mat.SetColor(ColorId, baseGlow);
+            if (mat.HasProperty("_EmissionColor")) mat.SetColor("_EmissionColor", hdrEmission);
+            if (mat.HasProperty("_ShadeColor")) mat.SetColor("_ShadeColor", Color.Lerp(color, PaletteSettings.Base, 0.35f));
+            if (mat.HasProperty("_RimColor")) mat.SetColor("_RimColor", PaletteSettings.Text);
+            if (mat.HasProperty("_RimPower")) mat.SetFloat("_RimPower", 2.1f);
+            if (mat.HasProperty("_RimStrength")) mat.SetFloat("_RimStrength", 0.95f);
+            if (mat.HasProperty("_Metallic")) mat.SetFloat("_Metallic", 0.14f);
+            if (mat.HasProperty("_Smoothness")) mat.SetFloat("_Smoothness", 0.78f);
+            if (mat.HasProperty("_SeamColor")) mat.SetColor("_SeamColor", color);
+            if (mat.HasProperty("_SeamStrength")) mat.SetFloat("_SeamStrength", 0.06f);
+            if (mat.HasProperty("_GrainStrength")) mat.SetFloat("_GrainStrength", 0.08f);
+
+            SharedRuntimeEmissiveMaterials[key] = mat;
+            return mat;
+        }
+
+        /// <summary>
+        /// Returns a cached SRP-Batcher-compatible dark anodized metallic material (Catppuccin Mocha)
+        /// for fusion chassis frames, turbine housings, aero-wings, and containment claws.
+        /// </summary>
+        public static Material GetSharedMetallicMaterial(Color color, float metallic = 0.68f, float smoothness = 0.72f)
+        {
+            uint qMetal = (uint)Mathf.Clamp(Mathf.RoundToInt(metallic * 15f), 0, 15);
+            uint qSmooth = (uint)Mathf.Clamp(Mathf.RoundToInt(smoothness * 15f), 0, 15);
+            uint key = (PackColorKey(color) << 8) | (qMetal << 4) | qSmooth;
+            if (SharedRuntimeMetallicMaterials.TryGetValue(key, out Material cached) && cached != null)
+                return cached;
+
+            Shader shader = Shader.Find("POLYMULATOR/Sim Surface");
+            if (shader == null) shader = Shader.Find("Universal Render Pipeline/Lit");
+            Material mat = new Material(shader);
+            mat.hideFlags = HideFlags.HideAndDontSave;
+            mat.name = "Sim_Metallic_Runtime_" + key.ToString("X8");
+
+            color.a = 1f;
+            mat.SetColor(BaseColorId, color);
+            mat.SetColor(ColorId, color);
+            if (mat.HasProperty("_ShadeColor")) mat.SetColor("_ShadeColor", PaletteSettings.Crust);
+            if (mat.HasProperty("_RimColor")) mat.SetColor("_RimColor", Color.Lerp(color, PaletteSettings.Subtext1, 0.52f));
+            if (mat.HasProperty("_RimPower")) mat.SetFloat("_RimPower", 2.8f);
+            if (mat.HasProperty("_RimStrength")) mat.SetFloat("_RimStrength", 0.48f);
+            if (mat.HasProperty("_Metallic")) mat.SetFloat("_Metallic", metallic);
+            if (mat.HasProperty("_Smoothness")) mat.SetFloat("_Smoothness", smoothness);
+            if (mat.HasProperty("_SeamColor")) mat.SetColor("_SeamColor", PaletteSettings.Crust);
+            if (mat.HasProperty("_SeamStrength")) mat.SetFloat("_SeamStrength", 0.36f);
+            if (mat.HasProperty("_GrainStrength")) mat.SetFloat("_GrainStrength", 0.22f);
+
+            SharedRuntimeMetallicMaterials[key] = mat;
             return mat;
         }
 

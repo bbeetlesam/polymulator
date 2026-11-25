@@ -1,0 +1,85 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 0a41faf3839118445b67aef93720acc3, type: 3}
+  m_Name: FusionPresetCatalog
+  m_EditorClassIdentifier: Assembly-CSharp::Polymulator.FusionPresetCatalog
+  presets:
+  - presetId: cylinder_cylinder
+    horizontalName: TURBIN-GANDA
+    verticalTopName: PISTON-MENARA
+    shapeA: 1
+    shapeB: 1
+    joineryStyle: 1
+    horizontalGapGrid: 0.22
+    verticalGapGrid: 0.06
+    orientHeldCylinderAlongSide: 0
+    accentTint: {r: 0.45490196, g: 0.78039217, b: 0.9254902, a: 1}
+  - presetId: cylinder_box
+    horizontalName: MODUL-POROS
+    verticalTopName: TURRET-SILINDER
+    shapeA: 1
+    shapeB: 0
+    joineryStyle: 2
+    horizontalGapGrid: -0.02
+    verticalGapGrid: 0.02
+    orientHeldCylinderAlongSide: 1
+    accentTint: {r: 0.98039216, g: 0.7019608, b: 0.5294118, a: 1}
+  - presetId: box_sphere
+    horizontalName: SOKET-ORB
+    verticalTopName: PEDESTAL-ORB
+    shapeA: 0
+    shapeB: 2
+    joineryStyle: 3
+    horizontalGapGrid: 0.12
+    verticalGapGrid: 0.14
+    orientHeldCylinderAlongSide: 0
+    accentTint: {r: 0.79607844, g: 0.6509804, b: 0.96862745, a: 1}
+  - presetId: sphere_sphere
+    horizontalName: BARBEL-ORB
+    verticalTopName: INTI-KEMBAR
+    shapeA: 2
+    shapeB: 2
+    joineryStyle: 4
+    horizontalGapGrid: 0.3
+    verticalGapGrid: 0.22
+    orientHeldCylinderAlongSide: 0
+    accentTint: {r: 0.5803922, g: 0.8862745, b: 0.8352941, a: 1}
+  - presetId: cylinder_sphere
+    horizontalName: PISTON-ORB
+    verticalTopName: MERCU-ORB
+    shapeA: 1
+    shapeB: 2
+    joineryStyle: 5
+    horizontalGapGrid: 0.12
+    verticalGapGrid: 0.12
+    orientHeldCylinderAlongSide: 1
+    accentTint: {r: 0.9764706, g: 0.8862745, b: 0.6862745, a: 1}
+  - presetId: box_box
+    horizontalName: BALOK-GANDA
+    verticalTopName: PILAR-GANDA
+    shapeA: 0
+    shapeB: 0
+    joineryStyle: 0
+    horizontalGapGrid: -0.02
+    verticalGapGrid: -0.02
+    orientHeldCylinderAlongSide: 0
+    accentTint: {r: 0.6509804, g: 0.8901961, b: 0.6313726, a: 1}
+  - presetId: compound_any
+    horizontalName: RAKITAN-MODULAR
+    verticalTopName: MENARA-MODULAR
+    shapeA: 3
+    shapeB: 3
+    joineryStyle: 6
+    horizontalGapGrid: -0.01
+    verticalGapGrid: -0.01
+    orientHeldCylinderAlongSide: 0
+    accentTint: {r: 0.5803922, g: 0.8862745, b: 0.8352941, a: 1}

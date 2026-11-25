@@ -197,7 +197,30 @@ def build_rect_character() -> List[MeshPart]:
     antenna_beacon.add_prism_y(0.18, 0.37, -0.06, 0.055, 0.012, 0.06, segments=6)
     antenna_beacon.add_prism_y(0.18, 0.315, -0.06, 0.012, 0.055, 0.055, segments=6)
 
-    return [hover_base, hover_glow, torso, torso_trim, chest_core, back_fin, head_cowl, visor_mask, optic_visor, antenna_beacon]
+    # 5. Articulated modular arm (centered around shoulder pivot at (0, 0, 0), hanging down -Y)
+    arm_chassis = MeshPart("Rect_ArmChassis", material_name="Primary")
+    # Upper arm housing
+    arm_chassis.add_tapered_frustum(0.0, -0.11, 0.0, 0.135, 0.135, 0.115, 0.115, 0.20, bevel_x=0.025)
+    # Tapered forearm cuff
+    arm_chassis.add_tapered_frustum(0.0, -0.34, 0.02, 0.145, 0.155, 0.125, 0.135, 0.21, bevel_x=0.028)
+
+    arm_trim = MeshPart("Rect_ArmTrim", material_name="Secondary")
+    # Shoulder ball joint & elbow actuator ring
+    arm_trim.add_prism_y(0.0, -0.01, 0.0, 0.075, 0.075, 0.08, segments=10)
+    arm_trim.add_prism_y(0.0, -0.225, 0.01, 0.068, 0.068, 0.065, segments=10)
+    # Dual clamp fingers at palm end
+    arm_trim.add_box(0.0, -0.475, 0.065, 0.095, 0.075, 0.045, bevel=0.012)
+    arm_trim.add_box(0.0, -0.475, -0.015, 0.095, 0.075, 0.045, bevel=0.012)
+
+    arm_glow = MeshPart("Rect_ArmGlow", material_name="Accent")
+    # Glowing magnetic grip emitter pad at wrist/palm
+    arm_glow.add_ring_y(0.0, -0.435, 0.025, 0.088, 0.056, 0.028, segments=12)
+
+    return [
+        hover_base, hover_glow, torso, torso_trim, chest_core, back_fin,
+        head_cowl, visor_mask, optic_visor, antenna_beacon,
+        arm_chassis, arm_trim, arm_glow,
+    ]
 
 
 def build_core_unit() -> List[MeshPart]:

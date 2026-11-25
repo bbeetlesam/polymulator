@@ -107,8 +107,8 @@ namespace Polymulator
                 core.Body.linearVelocity = kick.normalized * GridSettings.ToWorld(2.2f) + Vector3.up * GridSettings.ToWorld(1.8f);
             }
             OnObjectiveFeedback?.Invoke(
-                "ROTATION MISMATCH (" + Mathf.RoundToInt(core.transform.eulerAngles.y) +
-                " deg) — ALIGN TO " + Mathf.RoundToInt(Mathf.Repeat(requiredFacingYaw, 360f)) + " deg [R]",
+                "Arah rotasi belum pas (" + Mathf.RoundToInt(core.transform.eulerAngles.y) +
+                " deg): putar ke " + Mathf.RoundToInt(Mathf.Repeat(requiredFacingYaw, 360f)) + " deg [R]",
                 PaletteSettings.Peach);
         }
 
@@ -161,8 +161,8 @@ namespace Polymulator
             {
                 awaitingReleaseCore = obj;
                 string orientHint = requireFacingAngle && !IsOrientationMatched(obj)
-                    ? "ALIGN CORE [R] TO " + Mathf.RoundToInt(Mathf.Repeat(requiredFacingYaw, 360f)) + " deg FIRST"
-                    : "ALIGNED WITH ANCHOR — RELEASE TO LOCK CORE-01";
+                    ? "Putar CORE [R] ke " + Mathf.RoundToInt(Mathf.Repeat(requiredFacingYaw, 360f)) + " deg dulu"
+                    : "Posisi sejajar Anchor: lepas untuk mengunci CORE-01";
                 Color hintCol = requireFacingAngle && !IsOrientationMatched(obj)
                     ? PaletteSettings.Yellow
                     : PaletteSettings.Green;
