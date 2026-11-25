@@ -5,7 +5,7 @@ namespace Polymulator
 {
     /// <summary>
     /// Elevated 2.5D isometric camera with arrival zoom-in -> smooth zoom-out reveal on RECT,
-    /// horizontal player tracking, impulse trauma, right-drag look-around peek (+/- 24 deg),
+    /// horizontal player tracking, impulse trauma, unbounded right-drag horizontal orbit around RECT,
     /// [C] recenter, and scroll zoom when idle.
     /// </summary>
     [RequireComponent(typeof(Camera))]
@@ -38,13 +38,11 @@ namespace Polymulator
         public float CurrentActivePitch { get; private set; }
         public bool IsIntroPlaying => introZoomActive;
 
-        [Header("Follow & Peek")]
+        [Header("Follow & Orbit")]
         public bool followTarget = true;
         [Min(0f)] public float followSmoothTime = 0.15f;
         public float minOrthoSize = 2.8f;
         public float maxOrthoSize = 5.4f;
-        public float maxPeekYaw = 24f;
-        public float maxPeekPitch = 7f;
 
         private Camera cam;
         private Quaternion fixedRotation;
@@ -54,10 +52,8 @@ namespace Polymulator
         private float impulseTrauma;
         private float targetOrthoSize;
         private float currentOrthoSize;
-        private float targetPeekYaw;
-        private float currentPeekYaw;
-        private float targetPeekPitch;
-        private float currentPeekPitch;
+        private float targetYawOffset;
+        private float currentYawOffset;
         private bool introZoomActive;
         private float introElapsed;
         private ObjectCarryController carryController;
@@ -133,7 +129,7 @@ namespace Polymulator
         {
             if (!followTarget || target == null) return;
 
-            HandlePeekAndZoomInput();
+            HandleOrbitAndZoomInput();
 
             Vector3 desiredFocus = GetDesiredFocus();
             focus = followSmoothTime > 0f
@@ -152,11 +148,10 @@ namespace Polymulator
             }
 
             float blend = 1f - Mathf.Exp(-12f * Time.deltaTime);
-            currentPeekYaw = Mathf.Lerp(currentPeekYaw, targetPeekYaw, blend);
-            currentPeekPitch = Mathf.Lerp(currentPeekPitch, targetPeekPitch, blend);
+            currentYawOffset = WrapYawOffset(Mathf.LerpAngle(currentYawOffset, targetYawOffset, blend));
 
-            float activeYaw = yaw + currentPeekYaw;
-            float activePitch = pitch + currentPeekPitch;
+            float activeYaw = yaw + currentYawOffset;
+            float activePitch = pitch;
             float activeDist = cameraDistance;
             float activeHeight = cameraHeight;
 
@@ -184,8 +179,8 @@ namespace Polymulator
                 if (introStartBehindRect && target != null)
                 {
                     float behindYaw = target.eulerAngles.y;
-                    activeYaw = Mathf.LerpAngle(behindYaw, yaw + currentPeekYaw, eased);
-                    activePitch = Mathf.Lerp(introStartPitch, pitch + currentPeekPitch, eased);
+                    activeYaw = Mathf.LerpAngle(behindYaw, yaw + currentYawOffset, eased);
+                    activePitch = Mathf.Lerp(introStartPitch, pitch, eased);
                     activeDist = Mathf.Lerp(introStartDistance, cameraDistance, eased);
                     activeHeight = Mathf.Lerp(introStartHeight, cameraHeight, eased);
                 }
@@ -201,7 +196,7 @@ namespace Polymulator
             transform.SetPositionAndRotation(focus + positionOffset + shakeOffset, fixedRotation);
         }
 
-        private void HandlePeekAndZoomInput()
+        private void HandleOrbitAndZoomInput()
         {
             if (Time.timeScale <= 0f) return;
 
@@ -210,10 +205,8 @@ namespace Polymulator
 
             if (mouse != null && mouse.rightButton.isPressed)
             {
-                Vector2 delta = mouse.delta.ReadValue();
                 float sens = SimulationSettings.CameraSensitivity;
-                targetPeekYaw = Mathf.Clamp(targetPeekYaw + delta.x * 0.16f * sens, -maxPeekYaw, maxPeekYaw);
-                targetPeekPitch = Mathf.Clamp(targetPeekPitch - delta.y * 0.08f * sens, -maxPeekPitch, maxPeekPitch);
+                targetYawOffset = WrapYawOffset(targetYawOffset + mouse.delta.ReadValue().x * 0.16f * sens);
             }
 
             bool manipulatingObject = (carryController != null && carryController.IsCarrying) ||
@@ -231,11 +224,13 @@ namespace Polymulator
             if (keyboard != null && keyboard.cKey.wasPressedThisFrame)
             {
                 introZoomActive = false;
-                targetPeekYaw = 0f;
-                targetPeekPitch = 0f;
+                targetYawOffset = 0f;
                 targetOrthoSize = orthographicSize;
             }
         }
+
+        private static float WrapYawOffset(float degrees)
+            => Mathf.Repeat(degrees + 180f, 360f) - 180f;
 
         private void ApplyFraming(float activeYaw, float activePitch, float activeOrthoGrid)
             => ApplyFraming(activeYaw, activePitch, activeOrthoGrid, cameraDistance, cameraHeight);
