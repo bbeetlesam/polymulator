@@ -12,27 +12,30 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 2763873eddf04f878f13270a059f332a, type: 3}
   m_Name: Level3.3
   m_EditorClassIdentifier: Assembly-CSharp::Polymulator.LevelInfo
-  levelTitle: Ruang Piano
-  chapterSubtitle: ROTASI
-  districtLabel: APARTEMEN TAK TERINDEKS
-  parActions: 10
+  levelTitle: Apartemen Tak Terindeks
+  chapterSubtitle: "CHAPTER 3  \u2022  ROTASI"
+  districtLabel: UNIT PIANO DANU
+  parActions: 11
   requireFacingAngle: 1
-  requiredFacingYaw: 0
-  fragmentTitle: Pita Rekaman Ruang Piano
+  requiredFacingYaw: 270
+  fragmentTitle: Partitur Tanpa Judul
   triggerGlitchOnClear: 0
   playPianoOnClear: 1
+  allowPartition: 0
+  allowFusion: 0
   openingDialogue:
-  - speaker: SIM
-    text: 'PERINGATAN: Anomali ruangan tak terindeks terdeteksi di barat.'
-  - speaker: MIRA
-    text: Jangan sentuh penghapusannya, SIM. Biarkan saja di situ.
+  - speaker: HALIM
+    text: Ruangan di sudut kiri itu apartemen lama Danu... bahkan di dalam simulasi,
+      pianonya masih ada.
+  - speaker: VELA
+    text: "Aktifkan kedua pelat agar jembatan naik, lalu kunci inti menghadap BARAT
+      (270\xB0)."
   clearDialogue:
   - speaker: DANU
-    text: ITERATION 47 // JANGAN HAPUS. Mereka juga mencoba melindunginya.
-  - speaker: SIM
-    text: 'Memasuki Babak IV: Jembatan Lama & Peringatan Badai.'
+    text: "Nada terakhir berbunyi. Kunci sistem Rekonstruksi \u2014 Fusion dan Partition
+      \u2014 kini terbuka untukmu."
   hints:
-  - Aktifkan Pad Barat (>= 1.4t) untuk membuka Ruang Piano hangat dan dengarkan rekaman
-    Adi.
-  - Aktifkan Pad Timur (2.0t), ambil CORE-01, dan putar [R] hingga menghadap 0 deg
-    (Utara) ke Anchor.
+  - Taruh PEMBERAT-KIRI di PAD-KUNCI dan PEMBERAT-KANAN di PAD-NADA.
+  - "Ambil CORE-01, tekan [R] dua kali (dari 90\xB0 ke 270\xB0 / menghadap BARAT,
+    ke arah piano)."
+  - Naiki tangga jembatan di tengah dan pasang CORE-01 ke ANCHOR-01.

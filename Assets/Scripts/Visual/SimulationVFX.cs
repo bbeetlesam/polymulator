@@ -4,16 +4,16 @@ using UnityEngine;
 namespace Polymulator
 {
     /// <summary>
-    /// Centralized pooled Catppuccin Mocha VFX service: ambient chamber dust motes,
-    /// directional pickup/drop/rotation/throw particle bursts, hover puffs, and
-    /// expanding horizontal pulse rings. Zero Instantiate/Destroy per action.
+    /// Centralized pooled Catppuccin Mocha VFX service: procedural soft-glow bokeh motes,
+    /// directional pickup/drop/rotation/throw/portal bursts, hover puffs, beam sparkles,
+    /// and expanding horizontal pulse rings. Zero Instantiate/Destroy per action.
     /// </summary>
     public sealed class SimulationVFX : MonoBehaviour
     {
         public static SimulationVFX Instance { get; private set; }
 
         [Header("Particle Budget")]
-        public int ambientParticleCount = 90;
+        public int ambientParticleCount = 95;
         public float hoverEmitInterval = 0.08f;
 
         private ParticleSystem ambientParticles;
@@ -21,8 +21,9 @@ namespace Polymulator
         private ParticleSystem hoverParticles;
         private Material particleMaterial;
         private Material ringMaterial;
+        private Texture2D softOrbTexture;
 
-        private readonly List<RingSlot> ringPool = new List<RingSlot>(8);
+        private readonly List<RingSlot> ringPool = new List<RingSlot>(10);
         private float nextHoverEmitTime;
         private RectController rectController;
 
@@ -48,6 +49,7 @@ namespace Polymulator
             Instance = this;
 
             rectController = Object.FindFirstObjectByType<RectController>();
+            CreateSoftOrbTexture();
             CreateMaterials();
             BuildAmbientSystem();
             BuildBurstSystem();
@@ -58,28 +60,69 @@ namespace Polymulator
         private void OnDestroy()
         {
             if (Instance == this) Instance = null;
+            if (softOrbTexture != null) Destroy(softOrbTexture);
+        }
+
+        private void CreateSoftOrbTexture()
+        {
+            const int size = 64;
+            softOrbTexture = new Texture2D(size, size, TextureFormat.RGBA32, false)
+            {
+                hideFlags = HideFlags.HideAndDontSave,
+                wrapMode = TextureWrapMode.Clamp,
+                filterMode = FilterMode.Bilinear
+            };
+
+            Color[] pixels = new Color[size * size];
+            float half = (size - 1) * 0.5f;
+            for (int y = 0; y < size; y++)
+            {
+                for (int x = 0; x < size; x++)
+                {
+                    float dx = (x - half) / half;
+                    float dy = (y - half) / half;
+                    float r = Mathf.Sqrt(dx * dx + dy * dy);
+                    float soft = Mathf.Pow(Mathf.Clamp01(1f - r), 2.15f);
+                    float hotCore = Mathf.Exp(-r * r * 14f) * 0.65f;
+                    float a = Mathf.Clamp01(soft + hotCore);
+                    pixels[y * size + x] = new Color(1f, 1f, 1f, a);
+                }
+            }
+            softOrbTexture.SetPixels(pixels);
+            softOrbTexture.Apply();
         }
 
         private void CreateMaterials()
         {
-            Shader particleShader = Shader.Find("Universal Render Pipeline/Particles/Unlit");
-            if (particleShader == null) particleShader = Shader.Find("Universal Render Pipeline/Unlit");
-            if (particleShader == null) particleShader = Shader.Find("Sprites/Default");
+            Material resourceMat = Resources.Load<Material>("Sim_ParticleGlow");
+            if (resourceMat != null)
+            {
+                particleMaterial = new Material(resourceMat) { hideFlags = HideFlags.HideAndDontSave };
+            }
+            else
+            {
+                Shader particleShader = Shader.Find("Universal Render Pipeline/Particles/Unlit");
+                if (particleShader == null) particleShader = Shader.Find("Universal Render Pipeline/Unlit");
+                if (particleShader == null) particleShader = Shader.Find("Sprites/Default");
+                particleMaterial = new Material(particleShader) { hideFlags = HideFlags.HideAndDontSave };
+            }
 
-            particleMaterial = new Material(particleShader);
-            particleMaterial.hideFlags = HideFlags.HideAndDontSave;
             if (particleMaterial.HasProperty("_Surface")) particleMaterial.SetFloat("_Surface", 1f);
-            if (particleMaterial.HasProperty("_Blend")) particleMaterial.SetFloat("_Blend", 0f);
+            if (particleMaterial.HasProperty("_Blend")) particleMaterial.SetFloat("_Blend", 2f); // Additive
             if (particleMaterial.HasProperty("_SrcBlend")) particleMaterial.SetFloat("_SrcBlend", (float)UnityEngine.Rendering.BlendMode.SrcAlpha);
             if (particleMaterial.HasProperty("_DstBlend")) particleMaterial.SetFloat("_DstBlend", (float)UnityEngine.Rendering.BlendMode.One);
             if (particleMaterial.HasProperty("_ZWrite")) particleMaterial.SetFloat("_ZWrite", 0f);
+            if (softOrbTexture != null)
+            {
+                particleMaterial.mainTexture = softOrbTexture;
+                if (particleMaterial.HasProperty("_BaseMap")) particleMaterial.SetTexture("_BaseMap", softOrbTexture);
+            }
             particleMaterial.SetColor("_BaseColor", Color.white);
             particleMaterial.SetColor("_Color", Color.white);
 
             Shader unlitShader = Shader.Find("Universal Render Pipeline/Unlit");
             if (unlitShader == null) unlitShader = Shader.Find("Sprites/Default");
-            ringMaterial = new Material(unlitShader);
-            ringMaterial.hideFlags = HideFlags.HideAndDontSave;
+            ringMaterial = new Material(unlitShader) { hideFlags = HideFlags.HideAndDontSave };
             if (ringMaterial.HasProperty("_Surface")) ringMaterial.SetFloat("_Surface", 1f);
             if (ringMaterial.HasProperty("_SrcBlend")) ringMaterial.SetFloat("_SrcBlend", (float)UnityEngine.Rendering.BlendMode.SrcAlpha);
             if (ringMaterial.HasProperty("_DstBlend")) ringMaterial.SetFloat("_DstBlend", (float)UnityEngine.Rendering.BlendMode.OneMinusSrcAlpha);
@@ -100,15 +143,15 @@ namespace Polymulator
             main.maxParticles = ambientParticleCount;
             main.startLifetime = new ParticleSystem.MinMaxCurve(5f, 9f);
             main.startSpeed = new ParticleSystem.MinMaxCurve(GridSettings.ToWorld(0.06f), GridSettings.ToWorld(0.22f));
-            main.startSize = new ParticleSystem.MinMaxCurve(GridSettings.ToWorld(0.035f), GridSettings.ToWorld(0.085f));
+            main.startSize = new ParticleSystem.MinMaxCurve(GridSettings.ToWorld(0.07f), GridSettings.ToWorld(0.16f));
             main.simulationSpace = ParticleSystemSimulationSpace.World;
 
-            Color c1 = PaletteSettings.Sapphire; c1.a = 0.28f;
-            Color c2 = PaletteSettings.Lavender; c2.a = 0.24f;
+            Color c1 = PaletteSettings.Sapphire; c1.a = 0.34f;
+            Color c2 = PaletteSettings.Lavender; c2.a = 0.28f;
             main.startColor = new ParticleSystem.MinMaxGradient(c1, c2);
 
             var emission = ambientParticles.emission;
-            emission.rateOverTime = 12f;
+            emission.rateOverTime = 14f;
 
             var shape = ambientParticles.shape;
             shape.shapeType = ParticleSystemShapeType.Box;
@@ -143,11 +186,12 @@ namespace Polymulator
             var main = burstParticles.main;
             main.loop = false;
             main.playOnAwake = false;
-            main.maxParticles = 256;
-            main.startLifetime = new ParticleSystem.MinMaxCurve(0.28f, 0.55f);
-            main.startSize = new ParticleSystem.MinMaxCurve(GridSettings.ToWorld(0.06f), GridSettings.ToWorld(0.13f));
-            main.gravityModifier = 0.12f;
+            main.maxParticles = 320;
+            main.startLifetime = new ParticleSystem.MinMaxCurve(0.28f, 0.65f);
+            main.startSize = new ParticleSystem.MinMaxCurve(GridSettings.ToWorld(0.10f), GridSettings.ToWorld(0.24f));
+            main.gravityModifier = 0.10f;
             main.simulationSpace = ParticleSystemSimulationSpace.World;
+            main.useUnscaledTime = true;
 
             var emission = burstParticles.emission;
             emission.enabled = false;
@@ -171,9 +215,9 @@ namespace Polymulator
             var main = hoverParticles.main;
             main.loop = false;
             main.playOnAwake = false;
-            main.maxParticles = 64;
-            main.startLifetime = 0.36f;
-            main.startSize = new ParticleSystem.MinMaxCurve(GridSettings.ToWorld(0.05f), GridSettings.ToWorld(0.1f));
+            main.maxParticles = 80;
+            main.startLifetime = 0.38f;
+            main.startSize = new ParticleSystem.MinMaxCurve(GridSettings.ToWorld(0.09f), GridSettings.ToWorld(0.18f));
             main.simulationSpace = ParticleSystemSimulationSpace.World;
 
             var emission = hoverParticles.emission;
@@ -191,8 +235,8 @@ namespace Polymulator
 
         private void BuildRingPool()
         {
-            const int poolCount = 8;
-            const int segments = 32;
+            const int poolCount = 10;
+            const int segments = 40;
 
             for (int i = 0; i < poolCount; i++)
             {
@@ -220,6 +264,36 @@ namespace Polymulator
             if (Instance != null) Instance.EmitBurstInternal(worldPos, color, count, speedGrid);
         }
 
+        public static void EmitMote(Vector3 worldPos, Color color, float sizeGrid = 0.14f, float lifetime = 0.35f, Vector3 velocity = default)
+        {
+            if (Instance == null || Instance.burstParticles == null) return;
+            color.a = 0.9f;
+            var ep = new ParticleSystem.EmitParams
+            {
+                position = worldPos,
+                velocity = velocity,
+                startColor = color,
+                startSize = GridSettings.ToWorld(sizeGrid),
+                startLifetime = lifetime
+            };
+            Instance.burstParticles.Emit(ep, 1);
+        }
+
+        public static void PlaySpawnAperture(Vector3 worldPos, Color color)
+        {
+            if (Instance == null) return;
+            Instance.SpawnRingInternal(worldPos, color, 1.9f, 0.55f);
+            Instance.SpawnRingInternal(worldPos + Vector3.up * 0.25f, PaletteSettings.Teal, 1.25f, 0.42f);
+            for (int i = 0; i < 18; i++)
+            {
+                float ang = (Mathf.PI * 2f / 18f) * i;
+                Vector3 radial = new Vector3(Mathf.Cos(ang), 0f, Mathf.Sin(ang));
+                Vector3 vel = radial * GridSettings.ToWorld(0.6f) + Vector3.up * GridSettings.ToWorld(Random.Range(0.9f, 2.2f));
+                EmitMote(worldPos + radial * GridSettings.ToWorld(0.45f), Color.Lerp(color, PaletteSettings.Text, 0.35f),
+                    Random.Range(0.11f, 0.20f), Random.Range(0.35f, 0.65f), vel);
+            }
+        }
+
         public static void Ring(Vector3 worldPos, Color color, float maxRadiusGrid = 1.6f, float duration = 0.42f)
         {
             if (Instance != null) Instance.SpawnRingInternal(worldPos, color, maxRadiusGrid, duration);
@@ -236,15 +310,15 @@ namespace Polymulator
                 dir.y = Mathf.Abs(dir.y) * 0.8f + 0.15f;
                 dir.Normalize();
 
-                Color c = color;
-                c.a = 0.92f;
+                Color c = Color.Lerp(color, PaletteSettings.Text, Random.Range(0f, 0.32f));
+                c.a = 0.94f;
                 var emitParams = new ParticleSystem.EmitParams
                 {
-                    position = worldPos + dir * GridSettings.ToWorld(0.12f),
+                    position = worldPos + dir * GridSettings.ToWorld(0.10f),
                     velocity = dir * Random.Range(speed * 0.45f, speed),
                     startColor = c,
-                    startSize = Random.Range(GridSettings.ToWorld(0.06f), GridSettings.ToWorld(0.14f)),
-                    startLifetime = Random.Range(0.28f, 0.55f)
+                    startSize = Random.Range(GridSettings.ToWorld(0.10f), GridSettings.ToWorld(0.24f)),
+                    startLifetime = Random.Range(0.30f, 0.62f)
                 };
                 burstParticles.Emit(emitParams, 1);
             }
@@ -282,7 +356,7 @@ namespace Polymulator
 
         private void UpdateHoverEmission()
         {
-            if (rectController == null || hoverParticles == null) return;
+            if (rectController == null || hoverParticles == null || Time.timeScale <= 0f) return;
             if (!rectController.IsGrounded || rectController.CurrentSpeed < GridSettings.ToWorld(1.5f)) return;
             if (Time.time < nextHoverEmitTime) return;
 
@@ -290,7 +364,7 @@ namespace Polymulator
             Color tint = PaletteSettings.Sapphire;
             SimulationModeController modeCtrl = SimulationModeController.Instance;
             if (modeCtrl != null) tint = modeCtrl.ModeColor;
-            tint.a = 0.35f;
+            tint.a = 0.45f;
 
             Vector3 foot = rectController.transform.position + Vector3.up * GridSettings.ToWorld(0.05f);
             Vector3 back = -rectController.transform.forward * GridSettings.ToWorld(0.32f);
@@ -305,12 +379,13 @@ namespace Polymulator
 
         private void UpdateActiveRings()
         {
+            float dt = Time.unscaledDeltaTime;
             for (int i = 0; i < ringPool.Count; i++)
             {
                 RingSlot slot = ringPool[i];
                 if (!slot.active) continue;
 
-                slot.elapsed += Time.deltaTime;
+                slot.elapsed += dt;
                 float t = Mathf.Clamp01(slot.elapsed / slot.duration);
                 if (t >= 1f)
                 {
@@ -326,12 +401,12 @@ namespace Polymulator
         {
             float eased = 1f - Mathf.Pow(1f - t, 3f);
             float radius = Mathf.Lerp(GridSettings.ToWorld(0.22f), slot.maxRadius, eased);
-            float width = GridSettings.ToWorld(0.06f) * (1f - t * 0.7f);
+            float width = GridSettings.ToWorld(0.065f) * (1f - t * 0.72f);
             slot.line.startWidth = width;
             slot.line.endWidth = width;
 
             Color c = slot.color;
-            c.a = (1f - t) * 0.85f;
+            c.a = (1f - t) * 0.88f;
             slot.material.SetColor("_BaseColor", c);
 
             int count = slot.line.positionCount;

@@ -24,6 +24,16 @@ namespace Polymulator
         public SpatialBlueprintVisualizer blueprintVisualizer;
 
         private UIDocument uiDocument;
+        private VisualElement boundVisualRoot;
+        private static int interactiveHoverCount;
+
+        public static bool IsPointerOverInteractiveUI => interactiveHoverCount > 0;
+
+        [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.SubsystemRegistration)]
+        private static void ResetStaticHoverCount()
+        {
+            interactiveHoverCount = 0;
+        }
 
         private VisualElement modeAccentBar;
         private HudVectorIcon modeIcon;
@@ -33,6 +43,7 @@ namespace Polymulator
         private Label modeSummaryLabel;
 
         private VisualElement chamberOverlay;
+        private VisualElement modalCard;
         private VisualElement modalAccentBar;
         private VisualElement modalMetrics;
         private Label modalTitle;
@@ -41,13 +52,21 @@ namespace Polymulator
         private Label metricTranslations;
         private Label metricRotations;
         private Label metricTethers;
+        private VisualElement pauseSettingsPanel;
+        private Slider pauseSliderVolume;
+        private Label pauseValVolume;
+        private Slider pauseSliderSensitivity;
+        private Label pauseValSensitivity;
+        private Toggle pauseToggleReduce;
         private Button btnNext;
         private Button btnResume;
+        private Button btnPauseSettings;
         private Button btnReplay;
         private Button btnMainMenu;
 
         private VisualElement storyFeed;
         private Label storySpeakerLabel;
+        private Label storyProgressLabel;
         private Label storyTextLabel;
 
         private VisualElement targetCard;
@@ -63,6 +82,18 @@ namespace Polymulator
         private Label statusToastLabel;
 
         private VisualElement controlsCard;
+        private VisualElement slotPartition;
+        private VisualElement slotFusion;
+        private Label keyPartitionLabel;
+        private Label keyFusionLabel;
+        private PartitionFusionController partitionFusionController;
+        private EndingChoiceController endingController;
+        private VisualElement endingEpilogueBox;
+        private Label endingSummaryLabel;
+        private Label endingPara1;
+        private Label endingPara2;
+        private Label endingPara3;
+        private Label endingMemoriesLabel;
         private VisualElement contextPrompt;
         private VisualElement contextPromptAccent;
         private Label contextPromptLabel;
@@ -79,22 +110,33 @@ namespace Polymulator
         private Label titleSpecial;
         private Label keySpecial;
 
-        private bool controlsExpanded = true;
+        private bool controlsExpanded = false;
         private float toastTimer;
         private string lastPromptText;
         private Color lastPromptColor;
         private bool hasShownFlexNarrative;
         private bool isPaused;
+        private bool pauseSettingsOpen;
         private bool chamberCompleted;
         private float clearOverlayDelay = -1f;
-        private string levelDisplayName = "WARMING UP";
+        private string levelDisplayName = "Ruangan Uji 01";
         private string levelNumberLabel = "1.1";
         private string nextSceneName = string.Empty;
         private LevelInfo activeLevelInfo;
+        private WeightedPressurePlate[] allPlates;
         private int lastClearStars = 1;
         private bool fragmentCollectedThisRun;
         private readonly Queue<LevelInfo.StoryLine> storyQueue = new Queue<LevelInfo.StoryLine>();
-        private float storyTimer;
+        private float storyHoldTimer;
+        private bool storyShowing;
+        private bool storyTyping;
+        private string currentSpeakerRaw = "SIM";
+        private string currentFullLine = string.Empty;
+        private int currentTypedChars;
+        private float nextTypeCharAt;
+        private float cursorBlinkTimer;
+        private int storyBatchTotal;
+        private int storyBatchIndex;
         private int translationCount;
         private int rotationCount;
         private int throwOrTetherCount;
@@ -110,7 +152,10 @@ namespace Polymulator
 
         private void Start()
         {
-            HandleStatusBanner("SIM // CHAMBER " + levelNumberLabel + " — " + levelDisplayName, PaletteSettings.Sapphire);
+            string prefix = SimulationProgress.IsSpecialShowcase(SceneManager.GetActiveScene().name)
+                ? "Ruang Showcase — "
+                : "Ruangan " + levelNumberLabel + " — ";
+            HandleStatusBanner(prefix + levelDisplayName, PaletteSettings.Sapphire);
             RefreshObjectiveText();
             if (activeLevelInfo != null && activeLevelInfo.OpeningDialogue != null && activeLevelInfo.OpeningDialogue.Length > 0)
                 EnqueueStoryLines(activeLevelInfo.OpeningDialogue);
@@ -141,6 +186,7 @@ namespace Polymulator
         private void OnDisable()
         {
             UnsubscribeEvents();
+            interactiveHoverCount = 0;
             if (isPaused)
             {
                 isPaused = false;
@@ -155,14 +201,20 @@ namespace Polymulator
             if (carryController == null) carryController = Object.FindFirstObjectByType<ObjectCarryController>();
             if (telekinesisController == null) telekinesisController = Object.FindFirstObjectByType<TelekinesisController>();
             if (pressurePlate == null) pressurePlate = Object.FindFirstObjectByType<WeightedPressurePlate>();
+            allPlates = Object.FindObjectsByType<WeightedPressurePlate>(FindObjectsSortMode.None);
             if (anchorObjective == null) anchorObjective = Object.FindFirstObjectByType<AnchorSocketObjective>();
             if (blueprintVisualizer == null) blueprintVisualizer = Object.FindFirstObjectByType<SpatialBlueprintVisualizer>();
+            if (partitionFusionController == null) partitionFusionController = Object.FindFirstObjectByType<PartitionFusionController>();
+            if (endingController == null) endingController = Object.FindFirstObjectByType<EndingChoiceController>();
+            SimulationSettings.ApplyAudioVolume();
         }
 
         private void BindVisualTree()
         {
             if (uiDocument == null || uiDocument.rootVisualElement == null) return;
             VisualElement root = uiDocument.rootVisualElement;
+            bool firstBind = boundVisualRoot != root;
+            boundVisualRoot = root;
 
             modeAccentBar = root.Q<VisualElement>("mode-accent-bar");
             modeIcon = root.Q<HudVectorIcon>("mode-icon");
@@ -172,35 +224,100 @@ namespace Polymulator
             modeSummaryLabel = root.Q<Label>("mode-summary-label");
 
             chamberOverlay = root.Q<VisualElement>("chamber-overlay");
+            modalCard = root.Q<VisualElement>("modal-card");
             modalAccentBar = root.Q<VisualElement>("modal-accent-bar");
             modalMetrics = root.Q<VisualElement>("modal-metrics");
             modalTitle = root.Q<Label>("modal-title");
             modalSubtitle = root.Q<Label>("modal-subtitle");
             modalRankLabel = root.Q<Label>("modal-rank-label");
+            endingEpilogueBox = root.Q<VisualElement>("ending-epilogue-box");
+            endingSummaryLabel = root.Q<Label>("ending-summary-label");
+            endingPara1 = root.Q<Label>("ending-epilogue-p1");
+            endingPara2 = root.Q<Label>("ending-epilogue-p2");
+            endingPara3 = root.Q<Label>("ending-epilogue-p3");
+            endingMemoriesLabel = root.Q<Label>("ending-memories-label");
             metricTranslations = root.Q<Label>("metric-translations");
             metricRotations = root.Q<Label>("metric-rotations");
             metricTethers = root.Q<Label>("metric-tethers");
+            pauseSettingsPanel = root.Q<VisualElement>("pause-settings-panel");
+            pauseSliderVolume = root.Q<Slider>("pause-slider-volume");
+            pauseValVolume = root.Q<Label>("pause-val-volume");
+            pauseSliderSensitivity = root.Q<Slider>("pause-slider-sensitivity");
+            pauseValSensitivity = root.Q<Label>("pause-val-sensitivity");
+            pauseToggleReduce = root.Q<Toggle>("pause-toggle-reduce");
             btnNext = root.Q<Button>("btn-next");
             btnResume = root.Q<Button>("btn-resume");
+            btnPauseSettings = root.Q<Button>("btn-pause-settings");
             btnReplay = root.Q<Button>("btn-replay");
             btnMainMenu = root.Q<Button>("btn-mainmenu");
 
             storyFeed = root.Q<VisualElement>("story-feed");
             storySpeakerLabel = root.Q<Label>("story-speaker-label");
+            storyProgressLabel = root.Q<Label>("story-progress-label");
             storyTextLabel = root.Q<Label>("story-text-label");
 
-            if (chamberSubtitleLabel != null)
-                chamberSubtitleLabel.text = "CHAMBER " + levelNumberLabel + "  //  " + levelDisplayName +
-                    "  //  ITER #" + SimulationProgress.IterationNumber;
-            if (btnNext != null)
+            if (firstBind)
             {
-                btnNext.clicked += LoadNextChamber;
-                if (!string.IsNullOrEmpty(nextSceneName))
-                    btnNext.text = "NEXT CHAMBER " + nextSceneName.Replace("Level", "") + "   [ ENTER ]";
+                if (storyFeed != null)
+                {
+                    storyFeed.RegisterCallback<PointerDownEvent>(OnStoryCardClicked);
+                    RegisterInteractiveHover(storyFeed);
+                }
+                RegisterInteractiveHover(modalCard);
+                RegisterInteractiveHover(controlsCard);
+                if (btnNext != null)
+                {
+                    btnNext.clicked += LoadNextChamber;
+                    btnNext.RegisterCallback<PointerEnterEvent>(_ => SimulationAudio.PlayMenuHover());
+                }
+                if (btnResume != null)
+                {
+                    btnResume.clicked += TogglePauseMenu;
+                    btnResume.RegisterCallback<PointerEnterEvent>(_ => SimulationAudio.PlayMenuHover());
+                }
+                if (btnPauseSettings != null)
+                {
+                    btnPauseSettings.clicked += TogglePauseSettingsPanel;
+                    btnPauseSettings.RegisterCallback<PointerEnterEvent>(_ => SimulationAudio.PlayMenuHover());
+                }
+                if (btnReplay != null)
+                {
+                    btnReplay.clicked += ReplayCurrentChamber;
+                    btnReplay.RegisterCallback<PointerEnterEvent>(_ => SimulationAudio.PlayMenuHover());
+                }
+                if (btnMainMenu != null)
+                {
+                    btnMainMenu.clicked += ReturnToMainMenu;
+                    btnMainMenu.RegisterCallback<PointerEnterEvent>(_ => SimulationAudio.PlayMenuHover());
+                }
+
+                if (pauseSliderVolume != null) pauseSliderVolume.RegisterValueChangedCallback(evt =>
+                {
+                    SimulationSettings.MasterVolume = evt.newValue / 100f;
+                    if (pauseValVolume != null) pauseValVolume.text = Mathf.RoundToInt(evt.newValue) + "%";
+                });
+                if (pauseSliderSensitivity != null) pauseSliderSensitivity.RegisterValueChangedCallback(evt =>
+                {
+                    SimulationSettings.CameraSensitivity = evt.newValue / 100f;
+                    if (pauseValSensitivity != null) pauseValSensitivity.text = (evt.newValue / 100f).ToString("0.0") + "x";
+                });
+                if (pauseToggleReduce != null) pauseToggleReduce.RegisterValueChangedCallback(evt =>
+                {
+                    SimulationSettings.ReduceMotion = evt.newValue;
+                    SimulationAudio.PlayMenuHover();
+                });
             }
-            if (btnResume != null) btnResume.clicked += TogglePauseMenu;
-            if (btnReplay != null) btnReplay.clicked += ReplayCurrentChamber;
-            if (btnMainMenu != null) btnMainMenu.clicked += ReturnToMainMenu;
+
+            if (chamberSubtitleLabel != null)
+            {
+                string tag = SimulationProgress.IsSpecialShowcase(SceneManager.GetActiveScene().name)
+                    ? "Ruang Showcase"
+                    : "Ruangan " + levelNumberLabel;
+                chamberSubtitleLabel.text = tag + "  •  " + levelDisplayName +
+                    "  •  Iterasi #" + SimulationProgress.IterationNumber;
+            }
+            if (btnNext != null && !string.IsNullOrEmpty(nextSceneName))
+                btnNext.text = "Ruangan " + nextSceneName.Replace("Level", "") + "   [ ENTER ]";
 
             targetCard = root.Q<VisualElement>("target-card");
             targetAccentBar = root.Q<VisualElement>("target-accent-bar");
@@ -215,12 +332,19 @@ namespace Polymulator
             statusToastLabel = root.Q<Label>("status-toast-label");
 
             controlsCard = root.Q<VisualElement>("controls-card");
+            if (controlsCard != null)
+            {
+                controlsCard.EnableInClassList("controls-card--collapsed", !controlsExpanded);
+                EnsurePartitionFusionControlHints();
+            }
             contextPrompt = root.Q<VisualElement>("context-prompt");
             contextPromptAccent = root.Q<VisualElement>("context-prompt-accent");
             contextPromptLabel = root.Q<Label>("context-prompt-label");
 
             slotRotasi = root.Q<VisualElement>("slot-rotasi");
             slotSpecial = root.Q<VisualElement>("slot-special");
+            slotPartition = root.Q<VisualElement>("slot-partition");
+            slotFusion = root.Q<VisualElement>("slot-fusion");
             iconTranslasi = root.Q<HudVectorIcon>("icon-translasi");
             iconElevasi = root.Q<HudVectorIcon>("icon-elevasi");
             iconRotasi = root.Q<HudVectorIcon>("icon-rotasi");
@@ -230,6 +354,8 @@ namespace Polymulator
             keyRotasi = root.Q<Label>("key-rotasi");
             titleSpecial = root.Q<Label>("title-special");
             keySpecial = root.Q<Label>("key-special");
+            keyPartitionLabel = root.Q<Label>("key-partition");
+            keyFusionLabel = root.Q<Label>("key-fusion");
 
             if (iconPartition != null) iconPartition.SetTint(PaletteSettings.Peach);
             if (iconFusion != null) iconFusion.SetTint(PaletteSettings.Green);
@@ -254,8 +380,17 @@ namespace Polymulator
                 telekinesisController.OnTetherStarted += HandleTetherStarted;
                 telekinesisController.OnTetherReleased += HandleTargetAction;
             }
-            if (pressurePlate != null)
+            if (allPlates != null && allPlates.Length > 0)
+            {
+                for (int i = 0; i < allPlates.Length; i++)
+                {
+                    if (allPlates[i] != null) allPlates[i].OnActivatedChanged += HandlePlateChanged;
+                }
+            }
+            else if (pressurePlate != null)
+            {
                 pressurePlate.OnActivatedChanged += HandlePlateChanged;
+            }
             if (anchorObjective != null)
             {
                 anchorObjective.OnObjectiveCompleted += HandleObjectiveCompleted;
@@ -263,6 +398,17 @@ namespace Polymulator
             }
             if (blueprintVisualizer != null)
                 blueprintVisualizer.OnBlueprintToggled += HandleBlueprintToggled;
+            if (partitionFusionController != null)
+            {
+                partitionFusionController.OnPartitionPerformed += HandlePartitionPerformed;
+                partitionFusionController.OnFusionPerformed += HandleFusionPerformed;
+                partitionFusionController.OnCutAxisModeChanged += HandleCutAxisModeChanged;
+            }
+            if (endingController != null)
+            {
+                endingController.OnEndingChosen += HandleEndingChosen;
+                endingController.OnChoiceFeedback += HandleChoiceFeedback;
+            }
             MemoryFragment.OnCollected += HandleFragmentCollected;
         }
 
@@ -285,8 +431,17 @@ namespace Polymulator
                 telekinesisController.OnTetherStarted -= HandleTetherStarted;
                 telekinesisController.OnTetherReleased -= HandleTargetAction;
             }
-            if (pressurePlate != null)
+            if (allPlates != null && allPlates.Length > 0)
+            {
+                for (int i = 0; i < allPlates.Length; i++)
+                {
+                    if (allPlates[i] != null) allPlates[i].OnActivatedChanged -= HandlePlateChanged;
+                }
+            }
+            else if (pressurePlate != null)
+            {
                 pressurePlate.OnActivatedChanged -= HandlePlateChanged;
+            }
             if (anchorObjective != null)
             {
                 anchorObjective.OnObjectiveCompleted -= HandleObjectiveCompleted;
@@ -294,9 +449,22 @@ namespace Polymulator
             }
             if (blueprintVisualizer != null)
                 blueprintVisualizer.OnBlueprintToggled -= HandleBlueprintToggled;
+            if (partitionFusionController != null)
+            {
+                partitionFusionController.OnPartitionPerformed -= HandlePartitionPerformed;
+                partitionFusionController.OnFusionPerformed -= HandleFusionPerformed;
+                partitionFusionController.OnCutAxisModeChanged -= HandleCutAxisModeChanged;
+            }
+            if (endingController != null)
+            {
+                endingController.OnEndingChosen -= HandleEndingChosen;
+                endingController.OnChoiceFeedback -= HandleChoiceFeedback;
+            }
             MemoryFragment.OnCollected -= HandleFragmentCollected;
+            if (storyFeed != null) storyFeed.UnregisterCallback<PointerDownEvent>(OnStoryCardClicked);
             if (btnNext != null) btnNext.clicked -= LoadNextChamber;
             if (btnResume != null) btnResume.clicked -= TogglePauseMenu;
+            if (btnPauseSettings != null) btnPauseSettings.clicked -= TogglePauseSettingsPanel;
             if (btnReplay != null) btnReplay.clicked -= ReplayCurrentChamber;
             if (btnMainMenu != null) btnMainMenu.clicked -= ReturnToMainMenu;
         }
@@ -310,7 +478,7 @@ namespace Polymulator
             if (!hasShownBlueprintConcept)
             {
                 hasShownBlueprintConcept = true;
-                HandleStatusBanner("BLUEPRINT [V] // LOCAL AXES (X,Y,Z) & ANCHOR VECTOR", PaletteSettings.Teal);
+                HandleStatusBanner("Mode Cetak Biru [V]: Arah Sumbu & Garis Target Aktif", PaletteSettings.Teal);
             }
             else
             {
@@ -325,7 +493,7 @@ namespace Polymulator
             if (mode == SimulationMode.Flexible && !hasShownFlexNarrative)
             {
                 hasShownFlexNarrative = true;
-                HandleStatusBanner("SIM // RECT VECTOR OVERRIDE — FREE ELEVATE ENABLED", PaletteSettings.Mauve);
+                HandleStatusBanner("Mode Fleksibel aktif — Gerak Bebas & Telekinesis [F]", PaletteSettings.Mauve);
             }
         }
 
@@ -341,24 +509,64 @@ namespace Polymulator
         private void HandleFragmentCollected(string fragTitle, string speaker, string line, string replySpeaker, string replyLine)
         {
             fragmentCollectedThisRun = true;
-            HandleStatusBanner("MEMORY SAVED // " + fragTitle.ToUpperInvariant(), PaletteSettings.Rosewater);
+            HandleStatusBanner("Memori Tersimpan: " + fragTitle, PaletteSettings.Rosewater);
             storyQueue.Clear();
-            storyTimer = 0f;
-            if (!string.IsNullOrEmpty(line))
-                storyQueue.Enqueue(new LevelInfo.StoryLine { speaker = speaker, text = line });
-            if (!string.IsNullOrEmpty(replyLine))
-                storyQueue.Enqueue(new LevelInfo.StoryLine { speaker = replySpeaker, text = replyLine });
-            AdvanceStoryQueue();
+            storyBatchTotal = 0;
+            storyBatchIndex = 0;
+            var lines = new List<LevelInfo.StoryLine>(2);
+            if (!string.IsNullOrEmpty(line)) lines.Add(new LevelInfo.StoryLine { speaker = speaker, text = line });
+            if (!string.IsNullOrEmpty(replyLine)) lines.Add(new LevelInfo.StoryLine { speaker = replySpeaker, text = replyLine });
+            EnqueueStoryLines(lines.ToArray());
         }
 
         private void EnqueueStoryLines(LevelInfo.StoryLine[] lines)
         {
+            int added = 0;
             for (int i = 0; i < lines.Length; i++)
             {
                 if (!string.IsNullOrEmpty(lines[i].text))
+                {
                     storyQueue.Enqueue(lines[i]);
+                    added++;
+                }
             }
-            if (storyTimer <= 0f) AdvanceStoryQueue();
+            if (added <= 0) return;
+
+            if (!storyShowing)
+            {
+                storyBatchTotal = storyQueue.Count;
+                storyBatchIndex = 0;
+                AdvanceStoryQueue();
+            }
+            else
+            {
+                storyBatchTotal += added;
+                UpdateStoryProgressLabel();
+            }
+        }
+
+        private void OnStoryCardClicked(PointerDownEvent evt)
+        {
+            if (storyShowing && evt.button == 0)
+            {
+                SkipOrAdvanceStory();
+                evt.StopPropagation();
+            }
+        }
+
+        private void SkipOrAdvanceStory()
+        {
+            if (!storyShowing) return;
+            if (storyTyping)
+            {
+                currentTypedChars = currentFullLine.Length;
+                storyTyping = false;
+                storyHoldTimer = Mathf.Clamp(2.8f + currentFullLine.Length * 0.042f, 3.2f, 6.2f);
+                UpdateStoryProgressLabel();
+                RenderStoryTextWithCaret();
+                return;
+            }
+            AdvanceStoryQueue();
         }
 
         private void AdvanceStoryQueue()
@@ -366,34 +574,139 @@ namespace Polymulator
             if (storyFeed == null || storySpeakerLabel == null || storyTextLabel == null) return;
             if (storyQueue.Count == 0)
             {
-                storyTimer = 0f;
+                storyShowing = false;
+                storyTyping = false;
+                storyHoldTimer = 0f;
                 storyFeed.AddToClassList("story-feed--hidden");
                 return;
             }
 
             LevelInfo.StoryLine next = storyQueue.Dequeue();
-            string sp = string.IsNullOrEmpty(next.speaker) ? "SIM" : next.speaker.ToUpperInvariant();
-            storySpeakerLabel.text = sp;
-            storyTextLabel.text = next.text;
-            Color spColor = SpeakerColor(sp);
+            storyBatchIndex++;
+            currentSpeakerRaw = string.IsNullOrEmpty(next.speaker) ? "SIM" : next.speaker.ToUpperInvariant();
+            currentFullLine = next.text ?? string.Empty;
+            currentTypedChars = 0;
+            storyShowing = true;
+            storyTyping = true;
+            nextTypeCharAt = Time.unscaledTime;
+            storyHoldTimer = 0f;
+
+            storySpeakerLabel.text = FormatSpeakerTag(currentSpeakerRaw);
+            Color spColor = SpeakerColor(currentSpeakerRaw);
             storySpeakerLabel.style.color = spColor;
             storyFeed.style.borderLeftColor = spColor;
             storyFeed.RemoveFromClassList("story-feed--hidden");
-            storyTimer = Mathf.Clamp(2.8f + next.text.Length * 0.045f, 3.2f, 6.2f);
-            SimulationAudio.PlayDialogBlip(sp != "SIM");
+            UpdateStoryProgressLabel();
+            RenderStoryTextWithCaret();
+            SimulationAudio.PlayDialogBlip(currentSpeakerRaw != "SIM");
+        }
+
+        private void UpdateStoryTypewriter()
+        {
+            if (!storyShowing || storyTextLabel == null) return;
+
+            cursorBlinkTimer += Time.unscaledDeltaTime * 3.4f;
+
+            if (storyTyping)
+            {
+                while (storyTyping && Time.unscaledTime >= nextTypeCharAt)
+                {
+                    if (currentTypedChars >= currentFullLine.Length)
+                    {
+                        storyTyping = false;
+                        storyHoldTimer = Mathf.Clamp(2.8f + currentFullLine.Length * 0.042f, 3.2f, 6.2f);
+                        UpdateStoryProgressLabel();
+                        break;
+                    }
+
+                    char ch = currentFullLine[currentTypedChars++];
+                    if (ch != ' ' && currentTypedChars % 3 == 1)
+                        SimulationAudio.PlayTypewriterTick(currentSpeakerRaw);
+
+                    float step = 0.022f;
+                    if (ch == '.' || ch == '!' || ch == '?') step = 0.17f;
+                    else if (ch == ',' || ch == ':' || ch == '—' || ch == ';') step = 0.085f;
+                    nextTypeCharAt = Time.unscaledTime + step;
+                }
+                RenderStoryTextWithCaret();
+            }
+            else
+            {
+                RenderStoryTextWithCaret();
+                if (storyHoldTimer > 0f)
+                {
+                    storyHoldTimer -= Time.unscaledDeltaTime;
+                    if (storyHoldTimer <= 0f) AdvanceStoryQueue();
+                }
+            }
+        }
+
+        private void RenderStoryTextWithCaret()
+        {
+            if (storyTextLabel == null) return;
+            string visible = currentTypedChars >= currentFullLine.Length
+                ? currentFullLine
+                : currentFullLine.Substring(0, currentTypedChars);
+            storyTextLabel.text = visible;
+        }
+
+        private void UpdateStoryProgressLabel()
+        {
+            if (storyProgressLabel == null) return;
+            string action = storyTyping ? "[SPACE] Lewati" : (storyQueue.Count > 0 ? "[SPACE] Lanjut" : "[SPACE] Tutup");
+            storyProgressLabel.text = string.Format("{0}  •  {1}/{2}", action, Mathf.Max(1, storyBatchIndex), Mathf.Max(1, storyBatchTotal));
+        }
+
+        private static string FormatSpeakerTag(string speaker)
+        {
+            if (string.IsNullOrEmpty(speaker)) return "SIM";
+            if (speaker.Contains("VELA")) return "VELA  •  Suara Warga";
+            if (speaker.Contains("MIRA")) return "MIRA  •  Arsiparis";
+            if (speaker.Contains("DANU")) return "DANU  •  Catatan Lama";
+            if (speaker.Contains("NARA")) return "NARA  •  Menara Rusun";
+            if (speaker.Contains("HALIM")) return "HALIM  •  Rekaman Akhir";
+            if (speaker.Contains("TEPI")) return "KOTA TEPI";
+            if (speaker.Contains("TIM")) return "TIM 8  •  Demo Showcase";
+            if (speaker.Contains("RECT")) return "RECT";
+            if (speaker.Contains("SIGNAL")) return "SINYAL ANOMALI";
+            return "SIM  •  Sistem Kota Tepi";
         }
 
         private static Color SpeakerColor(string speaker)
         {
+            if (string.IsNullOrEmpty(speaker)) return PaletteSettings.Sapphire;
+            if (speaker.Contains("VELA")) return PaletteSettings.Teal;
             if (speaker.Contains("MIRA")) return PaletteSettings.Peach;
+            if (speaker.Contains("NARA")) return PaletteSettings.Sky;
+            if (speaker.Contains("HALIM")) return PaletteSettings.Rosewater;
+            if (speaker.Contains("TEPI")) return PaletteSettings.Green;
+            if (speaker.Contains("TIM")) return PaletteSettings.Teal;
             if (speaker.Contains("RECT")) return PaletteSettings.Lavender;
             if (speaker.Contains("DANU")) return PaletteSettings.Yellow;
             if (speaker.Contains("SIGNAL")) return PaletteSettings.Red;
             return PaletteSettings.Sapphire;
         }
 
+        private void HandlePartitionPerformed(InteractableObject a, InteractableObject b) => RefreshTargetAndPrompt(true);
+        private void HandleFusionPerformed(InteractableObject merged) => RefreshTargetAndPrompt(true);
+        private void HandleCutAxisModeChanged(PartitionAxisMode mode)
+        {
+            RefreshPartitionFusionDock();
+            RefreshTargetAndPrompt(true);
+        }
+        private void HandleChoiceFeedback(string msg) => HandleStatusBanner(msg, PaletteSettings.Peach);
+
+        private void HandleEndingChosen(EndingOutcome outcome)
+        {
+            if (chamberCompleted) return;
+            chamberCompleted = true;
+            RefreshObjectiveText();
+            ShowEndingOverlay(outcome);
+        }
+
         private void HandleObjectiveCompleted()
         {
+            if (endingController != null) return;
             chamberCompleted = true;
             RefreshObjectiveText();
 
@@ -401,7 +714,7 @@ namespace Polymulator
             int par = activeLevelInfo != null ? activeLevelInfo.ParActions : 8;
             lastClearStars = SimulationProgress.RecordClear(SceneManager.GetActiveScene().name, totalActions, par);
 
-            HandleStatusBanner("CHAMBER " + levelNumberLabel + " CALIBRATED — ANCHOR LOCKED", PaletteSettings.Green);
+            HandleStatusBanner("Ruangan " + levelNumberLabel + " selesai — Anchor terkunci", PaletteSettings.Green);
 
             if (activeLevelInfo != null)
             {
@@ -426,17 +739,54 @@ namespace Polymulator
             if (objectiveLabel == null) return;
             if (chamberCompleted)
             {
-                objectiveLabel.text = "OBJ // CALIBRATED — CORE-01 LOCKED";
+                objectiveLabel.text = endingController != null
+                    ? "Keputusan Kota Tepi telah ditetapkan"
+                    : "Selesai — CORE-01 terkunci di Anchor";
+                objectiveLabel.style.color = PaletteSettings.Green;
+                return;
+            }
+
+            if (endingController != null)
+            {
+                objectiveLabel.text = "Tujuan: Bawa CORE-01 ke Timur (Tanggul), Utara (Pemancar + Partition [1]), atau Barat (Brankas)";
+                objectiveLabel.style.color = PaletteSettings.Teal;
+                return;
+            }
+
+            if (allPlates != null && allPlates.Length > 1)
+            {
+                int activeCount = 0;
+                for (int i = 0; i < allPlates.Length; i++)
+                {
+                    if (allPlates[i] != null && allPlates[i].IsActivated) activeCount++;
+                }
+
+                if (activeCount >= allPlates.Length)
+                {
+                    objectiveLabel.text = "Jalur aktif — Bawa CORE-01 ke Anchor";
+                    objectiveLabel.style.color = PaletteSettings.Green;
+                }
+                else
+                {
+                    objectiveLabel.text = string.Format("Pelat beban {0}/{1} aktif — Buka akses Anchor", activeCount, allPlates.Length);
+                    objectiveLabel.style.color = PaletteSettings.Teal;
+                }
+                return;
+            }
+
+            if (pressurePlate != null && pressurePlate.IsActivated)
+            {
+                objectiveLabel.text = "Jalur aktif — Bawa CORE-01 ke Anchor";
                 objectiveLabel.style.color = PaletteSettings.Green;
             }
-            else if (pressurePlate != null && pressurePlate.IsActivated)
+            else if (pressurePlate != null)
             {
-                objectiveLabel.text = "OBJ // BRIDGE ONLINE — DELIVER CORE-01 TO ANCHOR";
-                objectiveLabel.style.color = PaletteSettings.Green;
+                objectiveLabel.text = "Tujuan: Letakkan beban di pelat lantai -> Buka jalan ke Anchor";
+                objectiveLabel.style.color = PaletteSettings.Teal;
             }
             else
             {
-                objectiveLabel.text = "OBJ // WEIGHT CONDUIT PAD -> UNLOCK CORE-01";
+                objectiveLabel.text = "Tujuan: Bawa CORE-01 menuju soket Anchor";
                 objectiveLabel.style.color = PaletteSettings.Teal;
             }
         }
@@ -474,20 +824,20 @@ namespace Polymulator
             }
             if (modeBadgeLabel != null)
             {
-                modeBadgeLabel.text = isFlexible ? "FLEXIBLE" : "LIMITED";
+                modeBadgeLabel.text = isFlexible ? "FLEKSIBEL" : "TERBATAS";
                 modeBadgeLabel.style.color = accent;
             }
             if (modeSummaryLabel != null)
             {
                 modeSummaryLabel.text = isFlexible
-                    ? "Free-Aim Telekinesis"
-                    : "Carry  /  90 deg Rotate  /  Throw";
+                    ? "Gerak Bebas  •  Telekinesis"
+                    : "Langkah Grid  •  Putar 90°  •  Lempar";
             }
 
             if (iconTranslasi != null) iconTranslasi.SetTint(PaletteSettings.Sky);
             if (iconElevasi != null) iconElevasi.SetTint(PaletteSettings.Teal);
             if (iconRotasi != null) iconRotasi.SetTint(PaletteSettings.Yellow);
-            if (keyRotasi != null) keyRotasi.text = isFlexible ? "[ R ] SPIN" : "[ R ] 90 deg";
+            if (keyRotasi != null) keyRotasi.text = isFlexible ? "[ R ] Bebas" : "[ R ] 90°";
 
             if (slotSpecial != null)
             {
@@ -499,8 +849,80 @@ namespace Polymulator
                 iconSpecial.IconKind = isFlexible ? HudIconKind.Telekinesis : HudIconKind.Throw;
                 iconSpecial.SetTint(accent);
             }
-            if (titleSpecial != null) titleSpecial.text = isFlexible ? "TELEKINESIS" : "THROW";
-            if (keySpecial != null) keySpecial.text = isFlexible ? "[ E / LMB ]" : "[ F ]";
+            if (titleSpecial != null) titleSpecial.text = isFlexible ? "TELEKINESIS" : "LEMPAR";
+            if (keySpecial != null) keySpecial.text = isFlexible ? "[ E / F ]" : "[ Klik ]";
+
+            RefreshPartitionFusionDock();
+        }
+
+        private void EnsurePartitionFusionControlHints()
+        {
+            if (controlsCard == null || controlsCard.Q<VisualElement>("ctrl-row-partition") != null) return;
+            VisualElement content = controlsCard.Q<VisualElement>(className: "controls-content");
+            if (content == null) return;
+
+            Label header = content.Q<Label>(className: "controls-header");
+            if (header != null) header.text = "[ H ]  Kontrol";
+
+            void AddRow(string rowName, string key, string desc, bool isLast)
+            {
+                VisualElement row = new VisualElement { name = rowName, pickingMode = PickingMode.Ignore };
+                row.AddToClassList("control-line");
+                if (isLast) row.AddToClassList("control-line--last");
+
+                Label k = new Label(key) { pickingMode = PickingMode.Ignore };
+                k.AddToClassList("keycap");
+                Label d = new Label(desc) { pickingMode = PickingMode.Ignore };
+                d.AddToClassList("control-desc");
+                row.Add(k);
+                row.Add(d);
+                content.Add(row);
+            }
+
+            AddRow("ctrl-row-partition", "[ 1 ]", "Partition (Belah Beban)", false);
+            AddRow("ctrl-row-cut-axis", "[ 3 ]", "Arah Potong Partition", false);
+            AddRow("ctrl-row-fusion", "[ 2 ]", "Fusion (Gabung Beban)", false);
+            AddRow("ctrl-row-hint", "[ F1 ]", "Petunjuk Ruangan", true);
+        }
+
+        private void RefreshPartitionFusionDock()
+        {
+            bool canPart = modeController != null && modeController.CanUsePartition;
+            bool canFuse = modeController != null && modeController.CanUseFusion;
+            bool pairReady = canFuse && partitionFusionController != null && partitionFusionController.HasFusionPair;
+
+            if (slotPartition != null)
+            {
+                slotPartition.EnableInClassList("ability-slot--queued", !canPart);
+                slotPartition.EnableInClassList("ability-slot--active", canPart);
+                slotPartition.EnableInClassList("ability-slot--partition-ready", canPart);
+            }
+            if (iconPartition != null)
+                iconPartition.SetTint(canPart ? PaletteSettings.Peach : PaletteSettings.Overlay0);
+            if (keyPartitionLabel != null)
+            {
+                string axisBadge = partitionFusionController != null
+                    ? partitionFusionController.CutAxisMode switch
+                    {
+                        PartitionAxisMode.LeftRight => "Sumbu X",
+                        PartitionAxisMode.FrontBack => "Sumbu Z",
+                        PartitionAxisMode.Horizontal => "Sumbu Y",
+                        _ => "Auto [3]"
+                    }
+                    : "Auto [3]";
+                keyPartitionLabel.text = canPart ? "[ 1 ] " + axisBadge : "[ 1 ] Terkunci";
+            }
+
+            if (slotFusion != null)
+            {
+                slotFusion.EnableInClassList("ability-slot--queued", !canFuse);
+                slotFusion.EnableInClassList("ability-slot--active", canFuse && !pairReady);
+                slotFusion.EnableInClassList("ability-slot--fusion-ready", pairReady);
+            }
+            if (iconFusion != null)
+                iconFusion.SetTint(canFuse ? (pairReady ? PaletteSettings.Green : PaletteSettings.Teal) : PaletteSettings.Overlay0);
+            if (keyFusionLabel != null)
+                keyFusionLabel.text = canFuse ? (pairReady ? "[ 2 ] Gabung!" : "[ 2 ] Gabung") : "[ 2 ] Terkunci";
         }
 
         private void Update()
@@ -520,6 +942,9 @@ namespace Polymulator
                 if (keyboard.f1Key.wasPressedThisFrame && !isPaused && !chamberCompleted)
                     ShowContextualSimHint();
 
+                if (keyboard.spaceKey.wasPressedThisFrame && storyShowing && !isPaused && !chamberCompleted)
+                    SkipOrAdvanceStory();
+
                 if (isPaused || chamberCompleted)
                 {
                     if (chamberCompleted && !string.IsNullOrEmpty(nextSceneName) &&
@@ -530,11 +955,8 @@ namespace Polymulator
                 }
             }
 
-            if (storyTimer > 0f)
-            {
-                storyTimer -= Time.unscaledDeltaTime;
-                if (storyTimer <= 0f) AdvanceStoryQueue();
-            }
+            UpdateStoryTypewriter();
+            RefreshPartitionFusionDock();
 
             if (clearOverlayDelay > 0f)
             {
@@ -562,10 +984,43 @@ namespace Polymulator
         private void TogglePauseMenu()
         {
             isPaused = !isPaused;
+            pauseSettingsOpen = false;
+            if (pauseSettingsPanel != null) pauseSettingsPanel.AddToClassList("pause-settings-panel--hidden");
             Time.timeScale = isPaused ? 0f : 1f;
             SimulationAudio.PlayMenuClick();
-            if (isPaused) ShowChamberOverlay(false);
-            else if (chamberOverlay != null) chamberOverlay.AddToClassList("chamber-overlay--hidden");
+            if (isPaused)
+            {
+                SyncPauseSettingsToUI();
+                ShowChamberOverlay(false);
+            }
+            else if (chamberOverlay != null)
+            {
+                chamberOverlay.AddToClassList("chamber-overlay--hidden");
+            }
+        }
+
+        private void TogglePauseSettingsPanel()
+        {
+            if (pauseSettingsPanel == null || chamberCompleted) return;
+            pauseSettingsOpen = !pauseSettingsOpen;
+            if (pauseSettingsOpen) SyncPauseSettingsToUI();
+            pauseSettingsPanel.EnableInClassList("pause-settings-panel--hidden", !pauseSettingsOpen);
+            if (btnPauseSettings != null) btnPauseSettings.text = pauseSettingsOpen ? "HIDE SETTINGS" : "SETTINGS";
+            SimulationAudio.PlayMenuClick();
+        }
+
+        private void SyncPauseSettingsToUI()
+        {
+            float vol = SimulationSettings.MasterVolume * 100f;
+            if (pauseSliderVolume != null) pauseSliderVolume.SetValueWithoutNotify(vol);
+            if (pauseValVolume != null) pauseValVolume.text = Mathf.RoundToInt(vol) + "%";
+
+            float sens = SimulationSettings.CameraSensitivity * 100f;
+            if (pauseSliderSensitivity != null) pauseSliderSensitivity.SetValueWithoutNotify(sens);
+            if (pauseValSensitivity != null) pauseValSensitivity.text = SimulationSettings.CameraSensitivity.ToString("0.0") + "x";
+
+            if (pauseToggleReduce != null) pauseToggleReduce.SetValueWithoutNotify(SimulationSettings.ReduceMotion);
+            if (btnPauseSettings != null) btnPauseSettings.text = pauseSettingsOpen ? "HIDE SETTINGS" : "SETTINGS";
         }
 
         private void ShowContextualSimHint()
@@ -573,7 +1028,7 @@ namespace Polymulator
             SimulationAudio.PlayMenuHover();
             if (chamberCompleted)
             {
-                HandleStatusBanner("SIM // CALIBRATION VERIFIED — NO FURTHER INPUTS REQUIRED", PaletteSettings.Green);
+                HandleStatusBanner("Ruangan selesai — lanjut ke ruangan berikutnya", PaletteSettings.Green);
                 return;
             }
 
@@ -581,7 +1036,7 @@ namespace Polymulator
             {
                 string customHint = activeLevelInfo.Hints[hintStep % activeLevelInfo.Hints.Length];
                 hintStep++;
-                HandleStatusBanner("SIM HINT // " + customHint, PaletteSettings.Sky);
+                HandleStatusBanner("Petunjuk: " + customHint, PaletteSettings.Sky);
                 return;
             }
 
@@ -589,30 +1044,33 @@ namespace Polymulator
             {
                 hintStep = (hintStep + 1) % 2;
                 string msg = hintStep == 0
-                    ? "SIM HINT // CONDUIT PAD NEEDS MASS >= 1.8t (USE CUBE-01 2.0t OR TWO OBJECTS)"
-                    : "SIM HINT // USE [TAB] TELEKINESIS OR LIMITED THROW [F] TO LOAD THE PAD";
+                    ? "Petunjuk: Letakkan balok pemberat di atas pelat lantai hingga berubah hijau"
+                    : "Petunjuk: Gunakan [E] untuk mengangkat, [TAB] untuk Mode Fleksibel, atau [1]/[3]/[2] bila aktif";
                 HandleStatusBanner(msg, PaletteSettings.Peach);
                 return;
             }
 
             hintStep = (hintStep + 1) % 2;
             string bridgeMsg = hintStep == 0
-                ? "SIM HINT // CROSS ENERGY BRIDGE TO PLATFORM HIGH FOR GOLDEN CORE-01"
-                : "SIM HINT // DELIVER CORE-01 INTO ANCHOR-01 CRADLE AT CHAMBER CENTER";
+                ? "Petunjuk: Bawa kubus kuning CORE-01 ke arah soket Anchor"
+                : "Petunjuk: Jika soket memiliki tanda panah, tekan [R] untuk memutar CORE-01";
             HandleStatusBanner(bridgeMsg, PaletteSettings.Teal);
         }
 
         private void ShowChamberOverlay(bool completed)
         {
             if (chamberOverlay == null) return;
+            if (modalCard != null) modalCard.RemoveFromClassList("modal-card--ending");
+            if (endingEpilogueBox != null) endingEpilogueBox.AddToClassList("ending-epilogue-box--hidden");
+
             if (modalAccentBar != null)
                 modalAccentBar.style.backgroundColor = completed ? PaletteSettings.Green : PaletteSettings.Sapphire;
             if (modalTitle != null)
-                modalTitle.text = completed ? "CHAMBER " + levelNumberLabel + " CALIBRATED" : "CHAMBER PAUSED";
+                modalTitle.text = completed ? "Ruangan " + levelNumberLabel + " Selesai" : "Simulasi Dijeda";
             if (modalSubtitle != null)
                 modalSubtitle.text = completed
-                    ? levelDisplayName + "  //  ANCHOR-01 LOCKED"
-                    : "CHAMBER " + levelNumberLabel + "  //  " + levelDisplayName;
+                    ? levelDisplayName + "  •  Anchor Terkunci"
+                    : "Ruangan " + levelNumberLabel + "  •  " + levelDisplayName;
             if (modalRankLabel != null)
             {
                 modalRankLabel.EnableInClassList("modal-rank--hidden", !completed);
@@ -620,7 +1078,7 @@ namespace Polymulator
                 {
                     string stars = new string('★', lastClearStars) + new string('☆', 3 - lastClearStars);
                     string fragTag = fragmentCollectedThisRun || SimulationProgress.HasFragment(SceneManager.GetActiveScene().name)
-                        ? "   •   MEMORY RECORDED"
+                        ? "   •   Memori Tersimpan"
                         : string.Empty;
                     modalRankLabel.text = stars + fragTag;
                 }
@@ -634,10 +1092,97 @@ namespace Polymulator
                 if (metricTethers != null) metricTethers.text = throwOrTetherCount.ToString();
             }
             if (btnNext != null)
+            {
+                btnNext.text = "Ruangan Berikutnya   [ ENTER ]";
                 btnNext.EnableInClassList("modal-btn--hidden", !completed || string.IsNullOrEmpty(nextSceneName));
+            }
             if (btnResume != null)
+            {
+                btnResume.text = "Lanjutkan   [ ESC ]";
                 btnResume.EnableInClassList("modal-btn--hidden", completed);
-            chamberOverlay.RemoveFromClassList("chamber-overlay--hidden");
+            }
+            if (btnPauseSettings != null)
+            {
+                btnPauseSettings.text = "Pengaturan";
+                btnPauseSettings.EnableInClassList("modal-btn--hidden", completed);
+            }
+            if (btnReplay != null) btnReplay.text = "Ulangi Ruangan   [ R ]";
+            if (btnMainMenu != null) btnMainMenu.text = "Menu Utama   [ M ]";
+            if (pauseSettingsPanel != null)
+                pauseSettingsPanel.AddToClassList("pause-settings-panel--hidden");
+
+            if (modalCard != null)
+            {
+                modalCard.AddToClassList("modal-card--entering");
+                chamberOverlay.RemoveFromClassList("chamber-overlay--hidden");
+                modalCard.schedule.Execute(() => modalCard.RemoveFromClassList("modal-card--entering")).ExecuteLater(16);
+            }
+            else
+            {
+                chamberOverlay.RemoveFromClassList("chamber-overlay--hidden");
+            }
+
+            if (completed && btnNext != null && !string.IsNullOrEmpty(nextSceneName)) btnNext.Focus();
+            else if (!completed && btnResume != null) btnResume.Focus();
+            else if (btnReplay != null) btnReplay.Focus();
+        }
+
+        private void ShowEndingOverlay(EndingOutcome outcome)
+        {
+            if (chamberOverlay == null) return;
+            storyQueue.Clear();
+            storyShowing = false;
+            storyTyping = false;
+            if (storyFeed != null) storyFeed.AddToClassList("story-feed--hidden");
+            Color accent = outcome.path switch
+            {
+                EndingPath.Archivist => PaletteSettings.Teal,
+                EndingPath.Restoration => PaletteSettings.Sapphire,
+                _ => PaletteSettings.Lavender
+            };
+
+            if (modalCard != null) modalCard.AddToClassList("modal-card--ending");
+            if (modalAccentBar != null) modalAccentBar.style.backgroundColor = accent;
+            if (modalTitle != null) modalTitle.text = outcome.title;
+            if (modalSubtitle != null) modalSubtitle.text = outcome.badge;
+            if (modalRankLabel != null) modalRankLabel.AddToClassList("modal-rank--hidden");
+            if (modalMetrics != null) modalMetrics.AddToClassList("modal-metrics--hidden");
+            if (pauseSettingsPanel != null) pauseSettingsPanel.AddToClassList("pause-settings-panel--hidden");
+
+            if (endingEpilogueBox != null) endingEpilogueBox.RemoveFromClassList("ending-epilogue-box--hidden");
+            if (endingSummaryLabel != null) endingSummaryLabel.text = outcome.summary;
+            if (endingPara1 != null)
+                endingPara1.text = outcome.epilogueLines != null && outcome.epilogueLines.Length > 0 ? outcome.epilogueLines[0] : "";
+            if (endingPara2 != null)
+                endingPara2.text = outcome.epilogueLines != null && outcome.epilogueLines.Length > 1 ? outcome.epilogueLines[1] : "";
+            if (endingPara3 != null)
+                endingPara3.text = outcome.epilogueLines != null && outcome.epilogueLines.Length > 2 ? outcome.epilogueLines[2] : "";
+            if (endingMemoriesLabel != null)
+                endingMemoriesLabel.text = string.Format("Total Memori Terkumpul: {0} Fragmen Kota Tepi", outcome.fragmentCount);
+
+            if (btnNext != null) btnNext.AddToClassList("modal-btn--hidden");
+            if (btnResume != null) btnResume.AddToClassList("modal-btn--hidden");
+            if (btnPauseSettings != null) btnPauseSettingsPanelButtonState(false);
+            if (btnReplay != null) btnReplay.text = "Ulangi Pilihan Akhir   [ R ]";
+            if (btnMainMenu != null) btnMainMenu.text = "Kembali ke Menu Utama   [ M ]";
+
+            if (modalCard != null)
+            {
+                modalCard.AddToClassList("modal-card--entering");
+                chamberOverlay.RemoveFromClassList("chamber-overlay--hidden");
+                modalCard.schedule.Execute(() => modalCard.RemoveFromClassList("modal-card--entering")).ExecuteLater(16);
+            }
+            else
+            {
+                chamberOverlay.RemoveFromClassList("chamber-overlay--hidden");
+            }
+
+            if (btnMainMenu != null) btnMainMenu.Focus();
+        }
+
+        private void btnPauseSettingsPanelButtonState(bool visible)
+        {
+            if (btnPauseSettings != null) btnPauseSettings.EnableInClassList("modal-btn--hidden", !visible);
         }
 
         public void LoadNextChamber()
@@ -688,38 +1233,66 @@ namespace Polymulator
             string prompt = string.Empty;
             Color promptColor = modeColor;
 
+            bool canSplit = modeController != null && modeController.CanUsePartition;
+            bool canFusePair = modeController != null && modeController.CanUseFusion && partitionFusionController != null && partitionFusionController.HasFusionPair;
+            bool hasCutPreview = canSplit && partitionFusionController != null && partitionFusionController.HasCutPreview;
+
+            string splitAxisTag = partitionFusionController != null ? partitionFusionController.CutAxisShortLabel : "OTOMATIS";
+            string cutRuleInfo = hasCutPreview
+                ? "\nPotong: " + partitionFusionController.CutAxisRuleLabel + " -> 2x " +
+                  partitionFusionController.PreviewSplitHalfMass.ToString("0.0", CultureInfo.InvariantCulture) + "t"
+                : string.Empty;
+
+            string fusePartnerInfo = string.Empty;
+            string fusePromptInfo = string.Empty;
+            if (canFusePair)
+            {
+                InteractableObject srcObj = partitionFusionController.PreviewSource;
+                InteractableObject partnerObj = partitionFusionController.PreviewPartner;
+                float mA = srcObj != null && srcObj.Body != null ? srcObj.Body.mass : 1f;
+                float mB = partnerObj != null && partnerObj.Body != null ? partnerObj.Body.mass : 1f;
+                float sumMass = mA + mB;
+                string partnerName = partnerObj != null ? partnerObj.displayName : "Partner";
+                fusePartnerInfo = "\nSiap Fusion: + " + partnerName + " (" + sumMass.ToString("0.0", CultureInfo.InvariantCulture) + " t)";
+                fusePromptInfo = "   [ 2 ] Gabung (" + partnerName + ")";
+            }
+
+            string cutPromptTag = hasCutPreview ? "   [ 1 ] Belah (" + splitAxisTag + ")   [ 3 ] Arah" : string.Empty;
+
             if (carryController != null && carryController.IsCarrying)
             {
                 showTargetCard = true;
                 InteractableObject held = carryController.CarriedObject;
-                stateText = "CARRYING";
+                stateText = "DIBAWA";
                 objName = carryController.CarriedObjectName;
-                metaText = "Yaw " + Mathf.RoundToInt(carryController.CurrentHeldYawDegrees) +
-                           " deg  |  Reach " + carryController.CurrentDropDistanceGrid.ToString("0.0", CultureInfo.InvariantCulture) + " GU";
+                metaText = "Arah " + Mathf.RoundToInt(carryController.CurrentHeldYawDegrees) +
+                           "°  •  Jangkauan " + carryController.CurrentDropDistanceGrid.ToString("0.0", CultureInfo.InvariantCulture) + " m" +
+                           fusePartnerInfo;
                 string rangeSuffix = carryController.TryGetPredictedThrowLanding(out _, out float rangeGu)
-                    ? "  |  Throw ~" + rangeGu.ToString("0.0", CultureInfo.InvariantCulture) + " GU"
+                    ? "  •  Lempar ~" + rangeGu.ToString("0.0", CultureInfo.InvariantCulture) + " m"
                     : string.Empty;
-                vectorText = FormatGridPos(held != null ? held.transform.position : Vector3.zero) +
-                             "  |  Ry(" + Mathf.RoundToInt(carryController.CurrentHeldYawDegrees) + " deg)" + rangeSuffix;
+                vectorText = FormatGridPos(held != null ? held.transform.position : Vector3.zero) + rangeSuffix + cutRuleInfo;
                 swatchColor = held != null ? held.AssignedColor : PaletteSettings.Green;
-                barColor = PaletteSettings.Green;
+                barColor = canFusePair ? PaletteSettings.Green : PaletteSettings.Sapphire;
 
-                prompt = "[ E ]  DROP    [ R ]  ROTATE 90 deg    [ F ]  THROW    " + objName;
-                promptColor = PaletteSettings.Green;
+                prompt = "[ E ] Letakkan   [ R ] Putar 90°   [ Klik ] Lempar" + cutPromptTag + fusePromptInfo;
+                promptColor = canFusePair ? PaletteSettings.Green : (hasCutPreview ? PaletteSettings.Peach : PaletteSettings.Sapphire);
             }
             else if (telekinesisController != null && telekinesisController.HasTether)
             {
                 showTargetCard = true;
                 InteractableObject tethered = telekinesisController.TetheredObject;
                 stateText = "TELEKINESIS";
-                objName = tethered != null ? tethered.displayName : "OBJECT";
-                metaText = "Elevation " + telekinesisController.CurrentElevationGrid.ToString("0.0", CultureInfo.InvariantCulture) + " GU";
+                objName = tethered != null ? tethered.displayName : "OBJEK";
+                metaText = "Tinggi " + telekinesisController.CurrentElevationGrid.ToString("0.0", CultureInfo.InvariantCulture) + " m" +
+                           fusePartnerInfo;
                 vectorText = FormatGridPos(tethered != null ? tethered.transform.position : Vector3.zero) +
-                             (tethered != null ? "  |  Mass " + (tethered.Body != null ? tethered.Body.mass.ToString("0.0", CultureInfo.InvariantCulture) : "1.0") + "t" : "");
+                             (tethered != null ? "  •  Massa " + (tethered.Body != null ? tethered.Body.mass.ToString("0.0", CultureInfo.InvariantCulture) : "1.0") + " t" : "") +
+                             cutRuleInfo;
                 swatchColor = tethered != null ? tethered.AssignedColor : PaletteSettings.BeamTelekinesis;
                 barColor = PaletteSettings.BeamTelekinesis;
 
-                prompt = "[ E / LMB ]  RELEASE    [ Q / Z ]  ELEVATE    [ R ]  SPIN    [ F ]  PUSH";
+                prompt = "[ E / F ] Lepas   [ Q / Z ] Naik-Turun   [ R ] Putar" + cutPromptTag + fusePromptInfo;
                 promptColor = PaletteSettings.BeamTelekinesis;
             }
             else if (interactor != null && interactor.HasTarget)
@@ -732,22 +1305,21 @@ namespace Polymulator
                 if (interactor.TargetCanBePickedUp)
                 {
                     float mass = target != null && target.Body != null ? target.Body.mass : 1f;
-                    stateText = isFlexible ? "IN TETHER RANGE" : "IN REACH";
-                    metaText = (isFlexible ? "E or Click to tether" : "E to pick up") + "  |  Mass " + mass.ToString("0.0", CultureInfo.InvariantCulture) + "t";
-                    vectorText = target != null ? FormatGridPos(target.transform.position) : string.Empty;
-                    barColor = modeColor;
-                    prompt = isFlexible
-                        ? "[ E / LMB ]  TELEKINESIS   " + objName
-                        : "[ E ]  PICK UP   " + objName;
-                    promptColor = modeColor;
+                    stateText = isFlexible ? "JANGKAUAN SINAR" : "SIAP ANGKAT";
+                    metaText = (isFlexible ? "[E] Angkat atau [F] Telekinesis" : "[E] Angkat objek") +
+                               "  •  Massa " + mass.ToString("0.0", CultureInfo.InvariantCulture) + " t" + fusePartnerInfo;
+                    vectorText = (target != null ? FormatGridPos(target.transform.position) : string.Empty) + cutRuleInfo;
+                    barColor = canFusePair ? PaletteSettings.Green : (hasCutPreview ? PaletteSettings.Peach : modeColor);
+                    prompt = (isFlexible ? "[ E ] Angkat  •  [ F ] Telekinesis  " : "[ E ] Angkat  ") + objName + cutPromptTag + fusePromptInfo;
+                    promptColor = canFusePair ? PaletteSettings.Green : (hasCutPreview ? PaletteSettings.Peach : modeColor);
                 }
                 else
                 {
-                    stateText = "FIXED ANCHOR";
-                    metaText = "Stationary socket geometry";
+                    stateText = "SOKET TETAP";
+                    metaText = "Dudukan Anchor permanen";
                     vectorText = target != null ? FormatGridPos(target.transform.position) : string.Empty;
                     barColor = PaletteSettings.Peach;
-                    prompt = objName + "  //  FIXED SOCKET";
+                    prompt = objName + "  •  Letakkan CORE-01 di sini";
                     promptColor = PaletteSettings.Peach;
                 }
             }
@@ -777,6 +1349,13 @@ namespace Polymulator
                     contextPrompt.RemoveFromClassList("context-prompt--hidden");
                 }
             }
+        }
+
+        private static void RegisterInteractiveHover(VisualElement el)
+        {
+            if (el == null) return;
+            el.RegisterCallback<PointerEnterEvent>(_ => interactiveHoverCount++);
+            el.RegisterCallback<PointerLeaveEvent>(_ => interactiveHoverCount = Mathf.Max(0, interactiveHoverCount - 1));
         }
 
         private static string FormatGridPos(Vector3 worldPos)

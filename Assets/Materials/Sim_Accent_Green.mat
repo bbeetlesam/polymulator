@@ -26,7 +26,10 @@ Material:
     m_Ints: []
     m_Floats:
     - _BevelWidth: 0.045
+    - _GrainStrength: 0.28
     - _GridUnitSize: 1
+    - _HeightFogEnd: -13
+    - _HeightFogStart: -1.2
     - _Metallic: 0.05
     - _RimPower: 3.2
     - _RimStrength: 0.18
@@ -36,6 +39,7 @@ Material:
     m_Colors:
     - _BaseColor: {r: 0.1562353, g: 0.21364705, b: 0.15152942, a: 0.24}
     - _EmissionColor: {r: 0.7811765, g: 1.0682354, b: 0.7576471, a: 1.2}
+    - _FogColor: {r: 0.06666998, g: 0.06666998, b: 0.10587997, a: 1}
     - _RimColor: {r: 0.6509804, g: 0.8901961, b: 0.6313726, a: 1}
     - _SeamColor: {r: 0.06666667, g: 0.06666667, b: 0.105882354, a: 1}
     - _ShadeColor: {r: 0.09411765, g: 0.09411765, b: 0.14509805, a: 1}

@@ -30,6 +30,8 @@ namespace Polymulator
         public float beamWidth = 0.045f;
 
         private const int BeamSegments = 20;
+        private static readonly RaycastHit[] SurfaceProbeBuffer = new RaycastHit[16];
+        private float nextBeamMoteTime;
 
         private InteractableObject tethered;
         private Rigidbody tetheredBody;
@@ -185,7 +187,7 @@ namespace Polymulator
 
             target.SetHighlight(false, false);
             target.TriggerPulse(0.16f);
-            RectVisualRig.NotifyActionStretch(transform, 0.14f);
+            RectVisualRig.NotifyCarryAction(transform, true);
             SimulationVFX.Burst(target.transform.position, PaletteSettings.BeamTelekinesis, 18, 2.4f);
             SimulationVFX.Ring(target.transform.position, PaletteSettings.Mauve, 1.55f, 0.36f);
 
@@ -237,11 +239,13 @@ namespace Polymulator
                     SimulationVFX.Burst(released.transform.position, PaletteSettings.Mauve, 20, 3.0f);
                     SimulationVFX.Ring(released.transform.position, PaletteSettings.Sapphire, 1.8f, 0.35f);
                     RectCameraController.AddImpulse(0.06f);
+                    RectVisualRig.NotifyThrowWhip(transform);
                 }
                 else
                 {
                     body.linearVelocity = Vector3.ClampMagnitude(body.linearVelocity, GridSettings.ToWorld(3f));
                     SimulationVFX.Burst(released.transform.position, PaletteSettings.Teal, 10, 1.4f);
+                    RectVisualRig.NotifyCarryAction(transform, false);
                 }
                 body.WakeUp();
             }
@@ -268,7 +272,7 @@ namespace Polymulator
 
         private void Update()
         {
-            if (tethered == null || tetheredBody == null) return;
+            if (Time.timeScale <= 0f || tethered == null || tetheredBody == null) return;
 
             Keyboard keyboard = Keyboard.current;
             Mouse mouse = Mouse.current;
@@ -332,6 +336,10 @@ namespace Polymulator
             if (spinPressed)
             {
                 desiredRotation = Quaternion.Euler(0f, freeSpinSpeed * Time.deltaTime, 0f) * desiredRotation;
+                bool spinStarted = (keyboard != null && keyboard.rKey.wasPressedThisFrame) ||
+                                   (mouse != null && mouse.rightButton.wasPressedThisFrame);
+                if (spinStarted)
+                    RectVisualRig.NotifyRotateSnap(transform, 1f);
             }
 
             // 4. Telekinetic Push / Throw (F)
@@ -391,6 +399,15 @@ namespace Polymulator
                 beamLine.SetPosition(i, pt);
             }
 
+            if (Time.time >= nextBeamMoteTime)
+            {
+                nextBeamMoteTime = Time.time + 0.045f;
+                float mt = UnityEngine.Random.Range(0.15f, 0.92f);
+                float mu = 1f - mt;
+                Vector3 mPt = (mu * mu) * start + (2f * mu * mt) * mid + (mt * mt) * objPos;
+                SimulationVFX.EmitMote(mPt, PaletteSettings.BeamTelekinesis, 0.11f, 0.28f, Vector3.up * 0.25f);
+            }
+
             float plumbWidth = GridSettings.ToWorld(0.032f);
             plumbLine.startWidth = plumbWidth;
             plumbLine.endWidth = plumbWidth;
@@ -401,17 +418,19 @@ namespace Polymulator
         private static float SampleSurfaceY(Vector3 xzPos, InteractableObject ignoreTarget)
         {
             Vector3 probe = new Vector3(xzPos.x, GridSettings.ToWorld(12f), xzPos.z);
-            RaycastHit[] hits = Physics.RaycastAll(probe, Vector3.down, GridSettings.ToWorld(25f), ~0, QueryTriggerInteraction.Ignore);
-            Array.Sort(hits, (a, b) => a.distance.CompareTo(b.distance));
-            for (int i = 0; i < hits.Length; i++)
+            int hitCount = Physics.RaycastNonAlloc(probe, Vector3.down, SurfaceProbeBuffer, GridSettings.ToWorld(25f), ~0, QueryTriggerInteraction.Ignore);
+            float bestDist = float.MaxValue;
+            float bestY = 0f;
+            for (int i = 0; i < hitCount; i++)
             {
-                Collider col = hits[i].collider;
-                if (col == null) continue;
-                InteractableObject hitObj = col.GetComponentInParent<InteractableObject>();
+                RaycastHit hit = SurfaceProbeBuffer[i];
+                if (hit.collider == null || hit.distance >= bestDist) continue;
+                InteractableObject hitObj = hit.collider.GetComponentInParent<InteractableObject>();
                 if (hitObj != null && (hitObj == ignoreTarget || hitObj.canBePickedUp)) continue;
-                return hits[i].point.y;
+                bestDist = hit.distance;
+                bestY = hit.point.y;
             }
-            return 0f;
+            return bestY;
         }
 
         private void OnDisable()

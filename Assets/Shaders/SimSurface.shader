@@ -16,6 +16,10 @@ Shader "POLYMULATOR/Sim Surface"
         _SeamStrength ("Panel Seam Strength", Range(0.0, 1.0)) = 0.28
         _WorldGridSeam ("Use World Grid Seam (0=UV, 1=World)", Float) = 0.0
         _GridUnitSize ("Grid Unit Size (m)", Float) = 1.0
+        _GrainStrength ("Surface Micro-Grain", Range(0.0, 1.0)) = 0.28
+        _FogColor ("Abyss Mist Color", Color) = (0.06667, 0.06667, 0.10588, 1)
+        _HeightFogStart ("Abyss Fog Start Y", Float) = -1.2
+        _HeightFogEnd ("Abyss Fog End Y", Float) = -13.0
     }
 
     SubShader
@@ -46,6 +50,10 @@ Shader "POLYMULATOR/Sim Surface"
             float _SeamStrength;
             float _WorldGridSeam;
             float _GridUnitSize;
+            float _GrainStrength;
+            half4 _FogColor;
+            float _HeightFogStart;
+            float _HeightFogEnd;
         CBUFFER_END
         ENDHLSL
 
@@ -116,19 +124,74 @@ Shader "POLYMULATOR/Sim Surface"
                 return output;
             }
 
+            float Hash21(float2 p)
+            {
+                p = frac(p * float2(123.34, 456.21));
+                p += dot(p, p + 45.32);
+                return frac(p.x * p.y);
+            }
+
+            float ValueNoise2D(float2 p)
+            {
+                float2 i = floor(p);
+                float2 f = frac(p);
+                float2 u = f * f * (3.0 - 2.0 * f);
+                float a = Hash21(i);
+                float b = Hash21(i + float2(1.0, 0.0));
+                float c = Hash21(i + float2(0.0, 1.0));
+                float d = Hash21(i + float2(1.0, 1.0));
+                return lerp(lerp(a, b, u.x), lerp(c, d, u.x), u.y);
+            }
+
+            void TriplanarGrain(float3 posWS, float3 nWS, out float macroGrain, out float fineGrain, out float3 bumpWS)
+            {
+                float3 blend = abs(nWS);
+                blend = pow(blend + 1e-4, 4.0);
+                blend /= max(dot(blend, 1.0), 1e-4);
+
+                float2 uvX = posWS.zy;
+                float2 uvY = posWS.xz;
+                float2 uvZ = posWS.xy;
+
+                float gX = ValueNoise2D(uvX * 3.2) * 0.65 + ValueNoise2D(uvX * 14.5) * 0.35;
+                float gY = ValueNoise2D(uvY * 3.2) * 0.65 + ValueNoise2D(uvY * 14.5) * 0.35;
+                float gZ = ValueNoise2D(uvZ * 3.2) * 0.65 + ValueNoise2D(uvZ * 14.5) * 0.35;
+                macroGrain = gX * blend.x + gY * blend.y + gZ * blend.z;
+
+                float fX = Hash21(floor(uvX * 48.0));
+                float fY = Hash21(floor(uvY * 48.0));
+                float fZ = Hash21(floor(uvZ * 48.0));
+                fineGrain = fX * blend.x + fY * blend.y + fZ * blend.z;
+
+                float dGx = ValueNoise2D((uvY + float2(0.03, 0.0)) * 12.0) - ValueNoise2D((uvY - float2(0.03, 0.0)) * 12.0);
+                float dGz = ValueNoise2D((uvY + float2(0.0, 0.03)) * 12.0) - ValueNoise2D((uvY - float2(0.0, 0.03)) * 12.0);
+                bumpWS = float3(dGx, 0.0, dGz) * blend.y + float3(0.0, macroGrain - 0.5, dGz) * (blend.x + blend.z);
+            }
+
             half4 SimFrag(Varyings input) : SV_Target
             {
                 UNITY_SETUP_INSTANCE_ID(input);
                 UNITY_SETUP_STEREO_EYE_INDEX_POST_VERTEX(input);
 
-                float3 normalWS = normalize(input.normalWS);
+                float3 geomNormalWS = normalize(input.normalWS);
                 half3 viewDirWS = GetWorldSpaceNormalizeViewDir(input.positionWS);
 
-                // Subtle top/underside Mocha separation gradient
-                float topLift = saturate(normalWS.y * 0.5 + 0.5);
-                half3 albedo = lerp(lerp(_BaseColor.rgb, _ShadeColor.rgb, 0.16), _BaseColor.rgb, topLift);
+                float macroGrain, fineGrain;
+                float3 grainBump;
+                TriplanarGrain(input.positionWS, geomNormalWS, macroGrain, fineGrain, grainBump);
 
-                // Architectural seam & panel bevel
+                float3 normalWS = normalize(geomNormalWS + grainBump * (0.09 * _GrainStrength));
+
+                // Subtle top/underside Mocha separation gradient + architectural grain modulation
+                float topLift = saturate(geomNormalWS.y * 0.5 + 0.5);
+                half3 albedo = lerp(lerp(_BaseColor.rgb, _ShadeColor.rgb, 0.18), _BaseColor.rgb, topLift);
+                float tonalDelta = (macroGrain - 0.5) * 0.10 + (fineGrain - 0.5) * 0.035;
+                albedo = saturate(albedo * (1.0 + tonalDelta * _GrainStrength));
+
+                float groundProximityAO = lerp(0.84, 1.0, smoothstep(-0.08, 0.55, abs(input.positionWS.y)));
+                albedo *= groundProximityAO;
+
+                // Architectural seam & machined panel bevel
                 float seamMask = 0.0;
                 float bevelHighlight = 0.0;
                 if (_SeamStrength > 0.001 && _BevelWidth > 0.0001)
@@ -140,7 +203,10 @@ Shader "POLYMULATOR/Sim Surface"
                         float2 deriv = max(fwidth(g), 1e-4);
                         float2 dist = abs(frac(g - 0.5) - 0.5) / deriv;
                         float pxWidth = _BevelWidth / max(deriv.x + deriv.y, 1e-4);
-                        seamMask = (1.0 - smoothstep(max(0.0, pxWidth - 0.6), pxWidth + 0.6, min(dist.x, dist.y))) * smoothstep(0.55, 0.9, abs(normalWS.y));
+                        seamMask = (1.0 - smoothstep(max(0.0, pxWidth - 0.6), pxWidth + 0.6, min(dist.x, dist.y))) * smoothstep(0.55, 0.9, abs(geomNormalWS.y));
+                        float2 innerG = abs(frac(g - 0.5) - 0.5);
+                        float edgeBevel = 1.0 - smoothstep(0.42, 0.48, max(innerG.x, innerG.y));
+                        bevelHighlight = (1.0 - edgeBevel) * 0.07 * smoothstep(0.55, 0.9, abs(geomNormalWS.y));
                     }
                     else
                     {
@@ -149,16 +215,16 @@ Shader "POLYMULATOR/Sim Surface"
                         float aa = max(fwidth(edge), 0.004);
                         float outerLine = 1.0 - smoothstep(_BevelWidth - aa, _BevelWidth + aa, edge);
                         float innerLine = smoothstep(_BevelWidth, _BevelWidth + aa * 2.0, edge)
-                                        * (1.0 - smoothstep(_BevelWidth * 1.8, _BevelWidth * 1.8 + aa * 2.0, edge));
+                                        * (1.0 - smoothstep(_BevelWidth * 1.9, _BevelWidth * 1.9 + aa * 2.0, edge));
                         seamMask = outerLine;
-                        bevelHighlight = innerLine * 0.18;
+                        bevelHighlight = innerLine * 0.22;
                     }
                 }
 
                 albedo = lerp(albedo, _SeamColor.rgb, seamMask * _SeamStrength);
                 albedo += _RimColor.rgb * bevelHighlight;
 
-                // Stylized Fresnel rim for crystal-clear object & character silhouette separation
+                // Stylized Fresnel rim for clear silhouette separation
                 float fresnel = pow(1.0 - saturate(dot(normalWS, viewDirWS)), max(1.0, _RimPower));
                 half3 rimEmission = _RimColor.rgb * (fresnel * _RimStrength);
 
@@ -177,13 +243,21 @@ Shader "POLYMULATOR/Sim Surface"
                 surfaceData.albedo = albedo;
                 surfaceData.metallic = _Metallic;
                 surfaceData.specular = half3(0, 0, 0);
-                surfaceData.smoothness = lerp(_Smoothness, _Smoothness * 0.55, seamMask * _SeamStrength);
+                float roughJitter = (macroGrain - 0.5) * 0.16 * _GrainStrength;
+                surfaceData.smoothness = saturate(lerp(_Smoothness + roughJitter, _Smoothness * 0.52, seamMask * _SeamStrength));
                 surfaceData.normalTS = half3(0, 0, 1);
                 surfaceData.emission = _EmissionColor.rgb + rimEmission;
-                surfaceData.occlusion = 1.0 - seamMask * 0.15;
+                surfaceData.occlusion = saturate((1.0 - seamMask * 0.22) * groundProximityAO);
                 surfaceData.alpha = 1.0;
 
-                return UniversalFragmentPBR(inputData, surfaceData);
+                half4 lit = UniversalFragmentPBR(inputData, surfaceData);
+
+                float subMist = smoothstep(_HeightFogStart, _HeightFogEnd, input.positionWS.y);
+                float radialDist = max(0.0, length(input.positionWS.xz) - 18.0);
+                float radialMist = 1.0 - exp(-radialDist * 0.045);
+                float mistFactor = saturate(max(subMist * 0.92, radialMist * 0.65));
+                lit.rgb = lerp(lit.rgb, _FogColor.rgb, mistFactor);
+                return lit;
             }
             ENDHLSL
         }

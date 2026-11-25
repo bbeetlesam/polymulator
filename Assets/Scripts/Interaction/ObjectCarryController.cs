@@ -49,6 +49,19 @@ namespace Polymulator
         public float CurrentDropDistanceGrid => placementGhost != null ? placementGhost.forwardDistance : defaultDropDistance;
         public float CurrentHeldYawDegrees => heldYawDegrees;
 
+        public bool TryGetPredictedDropPosition(out Vector3 dropWorldPos)
+        {
+            if (carried == null)
+            {
+                dropWorldPos = Vector3.zero;
+                return false;
+            }
+            dropWorldPos = placementGhost != null
+                ? placementGhost.GetPlacementPosition(carried)
+                : FallbackDropPosition(carried);
+            return true;
+        }
+
         public bool TryGetPredictedThrowLanding(out Vector3 landingPoint, out float horizontalRangeGrid)
         {
             landingPoint = predictedLandingPoint;
@@ -114,7 +127,7 @@ namespace Polymulator
             target.transform.rotation = Quaternion.Euler(0f, heldYawDegrees, 0f);
 
             target.TriggerPulse(0.15f, 0.22f);
-            RectVisualRig.NotifyActionStretch(transform, 0.14f);
+            RectVisualRig.NotifyCarryAction(transform, true);
             SimulationVFX.Burst(target.transform.position, target.AssignedColor, 14, 2.0f);
             SimulationVFX.Ring(transform.position, PaletteSettings.Green, 1.35f, 0.32f);
             SimulationAudio.PlayPickup(target.transform.position);
@@ -145,7 +158,7 @@ namespace Polymulator
                 placementGhost.SetTargetRotation(Quaternion.Euler(0f, heldYawDegrees, 0f));
 
             carried.TriggerPulse(0.10f, 0.16f);
-            RectVisualRig.NotifyActionStretch(transform, 0.08f);
+            RectVisualRig.NotifyRotateSnap(transform, 1f);
             SimulationVFX.Ring(carried.transform.position, PaletteSettings.Yellow, 1.1f, 0.28f);
             SimulationAudio.PlayRotate(carried.transform.position);
             OnRotated?.Invoke(carried, heldYawDegrees);
@@ -201,7 +214,7 @@ namespace Polymulator
             }
 
             thrown.TriggerPulse(0.16f, 0.22f);
-            RectVisualRig.NotifyActionStretch(transform, 0.16f);
+            RectVisualRig.NotifyThrowWhip(transform);
             RectCameraController.AddImpulse(0.06f);
             SimulationVFX.Burst(launchPos, PaletteSettings.Sapphire, 20, 3.0f);
             SimulationVFX.Ring(launchPos, PaletteSettings.Sky, 1.65f, 0.36f);
@@ -291,6 +304,7 @@ namespace Polymulator
             SimulationVisualBridge.TriggerFloorRipple(destination, dropping.AssignedColor,
                 Mathf.Clamp(3.2f + mass * 1.1f, 3.2f, 6.0f), 0.72f, 0.52f);
             SimulationAudio.PlayDrop(destination, mass);
+            RectVisualRig.NotifyCarryAction(transform, false);
             RectCameraController.AddImpulse(0.03f);
             OnDropped?.Invoke(dropping);
             return true;
@@ -304,6 +318,14 @@ namespace Polymulator
             Vector3 position = transform.position + transform.forward * GridSettings.ToWorld(defaultDropDistance);
             position.y = halfExtents.y + GridSettings.ToWorld(0.02f);
             return WorldBounds.ClampInside(position, halfExtents.x, halfExtents.z);
+        }
+
+        /// <summary>Immediate release returning the released object for Partition/Fusion replacement.</summary>
+        public InteractableObject ReleaseAndReturn()
+        {
+            InteractableObject obj = carried;
+            Release();
+            return obj;
         }
 
         /// <summary>Immediate release, used for forced cleanup rather than player input.</summary>

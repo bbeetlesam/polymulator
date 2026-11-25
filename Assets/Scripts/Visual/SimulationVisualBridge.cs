@@ -3,8 +3,9 @@ using UnityEngine;
 namespace Polymulator
 {
     /// <summary>
-    /// Updates global URP shader coordinates so ChamberGrid renders subtle reactive rings
-    /// around Rect and Anchor without modifying per-renderer MaterialPropertyBlocks.
+    /// Updates global URP shader coordinates so ChamberGrid renders reactive rings,
+    /// Limited-mode orthogonal movement clue grid tiles, carry target tile highlight,
+    /// and cleanly dissolves grid lines in Flexible mode without per-renderer MaterialPropertyBlocks.
     /// </summary>
     public sealed class SimulationVisualBridge : MonoBehaviour
     {
@@ -14,12 +15,17 @@ namespace Polymulator
         private static readonly int RippleOriginId = Shader.PropertyToID("_SimRippleOrigin");
         private static readonly int RippleParamsId = Shader.PropertyToID("_SimRippleParams");
         private static readonly int RippleColorId = Shader.PropertyToID("_SimRippleColor");
+        private static readonly int FlexGridFadeId = Shader.PropertyToID("_SimFlexGridFade");
+        private static readonly int LimitedClueActiveId = Shader.PropertyToID("_SimLimitedClueActive");
+        private static readonly int CarryTargetPosId = Shader.PropertyToID("_SimCarryTargetPos");
+        private static readonly int CarryClueColorId = Shader.PropertyToID("_SimCarryClueColor");
 
         private static SimulationVisualBridge activeBridge;
 
         public Transform playerTransform;
         public Transform anchorTransform;
         public SimulationModeController modeController;
+        public ObjectCarryController carryController;
 
         private Vector3 rippleOrigin;
         private Color rippleColor;
@@ -27,6 +33,7 @@ namespace Polymulator
         private float ripplePeakStrength;
         private float rippleElapsed = -1f;
         private float rippleDuration = 0.72f;
+        private float flexGridFade;
 
         /// <summary>Emits a GPU floor grid shockwave ripple without mutating per-renderer materials.</summary>
         public static void TriggerFloorRipple(Vector3 worldPos, Color color, float maxRadiusGrid = 6.5f,
@@ -57,11 +64,18 @@ namespace Polymulator
             if (modeController == null)
                 modeController = Object.FindFirstObjectByType<SimulationModeController>();
 
+            if (carryController == null)
+                carryController = Object.FindFirstObjectByType<ObjectCarryController>();
+
             if (anchorTransform == null)
             {
                 AnchorVisualRig anchorRig = Object.FindFirstObjectByType<AnchorVisualRig>();
                 if (anchorRig != null) anchorTransform = anchorRig.transform;
             }
+
+            flexGridFade = (modeController != null && modeController.IsFlexible) ? 1f : 0f;
+            Shader.SetGlobalFloat(FlexGridFadeId, flexGridFade);
+            Shader.SetGlobalFloat(LimitedClueActiveId, (modeController != null && modeController.IsLimited) ? 1f : 0f);
         }
 
         private void LateUpdate()
@@ -86,9 +100,28 @@ namespace Polymulator
                 Shader.SetGlobalVector(AnchorWorldPosId, Vector4.zero);
             }
 
+            bool isFlexible = modeController != null && modeController.IsFlexible;
+            flexGridFade = Mathf.MoveTowards(flexGridFade, isFlexible ? 1f : 0f, Time.deltaTime * 5.2f);
+            Shader.SetGlobalFloat(FlexGridFadeId, flexGridFade);
+            Shader.SetGlobalFloat(LimitedClueActiveId, (modeController != null && modeController.IsLimited) ? 1f : 0f);
+
             Color modeTint = modeController != null ? modeController.ModeColor : PaletteSettings.Sapphire;
             modeTint.a = 1f;
             Shader.SetGlobalVector(ModeTintId, modeTint);
+
+            Color carryCol = PaletteSettings.Yellow;
+            carryCol.a = 1f;
+            Shader.SetGlobalVector(CarryClueColorId, carryCol);
+
+            if (!isFlexible && carryController != null && carryController.IsCarrying &&
+                carryController.TryGetPredictedDropPosition(out Vector3 dropPos))
+            {
+                Shader.SetGlobalVector(CarryTargetPosId, new Vector4(dropPos.x, dropPos.y, dropPos.z, 1f));
+            }
+            else
+            {
+                Shader.SetGlobalVector(CarryTargetPosId, Vector4.zero);
+            }
 
             UpdateFloorRipple();
         }
@@ -123,6 +156,9 @@ namespace Polymulator
             Shader.SetGlobalVector(AnchorWorldPosId, Vector4.zero);
             Shader.SetGlobalVector(RippleOriginId, Vector4.zero);
             Shader.SetGlobalVector(RippleParamsId, Vector4.zero);
+            Shader.SetGlobalVector(CarryTargetPosId, Vector4.zero);
+            Shader.SetGlobalFloat(FlexGridFadeId, 0f);
+            Shader.SetGlobalFloat(LimitedClueActiveId, 0f);
         }
     }
 }

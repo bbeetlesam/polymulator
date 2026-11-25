@@ -1,149 +1,274 @@
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.InputSystem;
+using UnityEngine.UIElements;
 
 namespace Polymulator
 {
     /// <summary>
-    /// First scene of the game. Draws one flat palette colour with no lighting or
-    /// shadows. Selecting Enter drops a Blue chapter node that eases into a slow
-    /// stop: it crushes the Enter button on the way down and lands exactly on the
-    /// current chapter's node, so the falling node IS that chapter node with no
-    /// morph or fade, while the rest of the ribbon is visible throughout the fall.
-    /// Selecting Shutdown keeps the original drop-and-fall quit sequence.
+    /// Modern UI Toolkit Main Menu & Chapter Ribbon controller layered atop a live 3D facility diorama.
+    /// Orchestrates the Player-POV camera & sphere smash-and-descend into an interactive chapter ribbon,
+    /// and a 1/3-to-1/2 screen portal orb zoom transition directly into RECT's arrival camera.
     /// </summary>
+    [RequireComponent(typeof(UIDocument))]
     public sealed class MainMenuController : MonoBehaviour
     {
-        private enum MenuState { Title, Dropping, ShutdownFalling, Falling, LevelMenu, Done }
+        private enum MenuState { Title, FallingSmash, LevelMenu, PortalZoom, Done }
 
-        private const int EnterButton = 0;
-        private const int ShutdownButton = 1;
-        private const int ChapterCount = 4;
-        private const int MaxLevelsPerChapter = 4;
-        private const float ChapterNodeSize = 96f;
-        private const float ScrollResponsiveness = 14f;
+        private sealed class RibbonShard
+        {
+            public VisualElement element;
+            public float x, y, vx, vy, angle, angularVel, life, maxLife;
+        }
 
-        private int currentChapter = 1;
-        private int currentLevel = 1;
+        private const int ChapterCount = 5;
+        private const float ClusterStride = 574f; // 146 card + 12 margin + 416 rail
 
         [SerializeField] private string levelSceneFormat = "Level{0}.{1}";
 
-        [Header("Timing (seconds)")]
-        [SerializeField] private float squareDropDuration = 0.45f;
-        [SerializeField] private float buttonFallDuration = 0.65f;
-        [SerializeField] private float fallDuration = 0.9f;
-        [SerializeField] private float transitionDelay = 0.3f;
-        [SerializeField] private float fadeDuration = 0.5f;
+        [Header("Transitions (seconds)")]
+        [SerializeField] private float fallDuration = 0.92f;
+        [SerializeField] private float portalZoomDuration = 0.58f;
+        [SerializeField] private float sceneFadeDuration = 0.36f;
 
-        private struct BreakPiece
-        {
-            public Rect rect;
-            public Vector2 velocity;
-            public float life;
-            public Texture2D texture;
-        }
+        private UIDocument uiDocument;
+        private VisualElement boundRoot;
+        private MainMenuCameraOrbit cameraOrbit;
 
-        private struct Layout
-        {
-            public float nodeSize;
-            public float dotSize;
-            public float lineHeight;
-            public float segmentLength;
-            public float pitch;
-            public float padding;
-            public float contentWidth;
-            public float originX;
-            public float bandY;
-        }
+        private VisualElement titleView;
+        private Label titleIterLabel;
+        private Button btnEnter;
+        private Button btnTitleShowcase;
+        private Button btnTitleSettings;
+        private Button btnShutdown;
 
-        private Texture2D backgroundTexture;
-        private Texture2D buttonNormalTexture;
-        private Texture2D buttonHoverTexture;
-        private Texture2D borderAccentTexture;
-        private Texture2D borderMutedTexture;
-        private Texture2D squareSharpTexture;
-        private Texture2D chapterDarkTexture;
-        private Texture2D chapterBlueTexture;
-        private Texture2D dotDarkTexture;
-        private Texture2D dotBlueTexture;
-        private Texture2D dotGreenTexture;
-        private Texture2D lineDarkTexture;
-        private Texture2D lineBlueTexture;
+        private VisualElement ribbonView;
+        private VisualElement ribbonViewport;
+        private VisualElement ribbonTrack;
+        private Label ribbonMetaLabel;
+        private Button btnRibbonShowcase;
+        private Button btnDemoToggle;
+        private Button btnRibbonSettings;
+        private Button btnRibbonBack;
 
-        private GUIStyle titleStyle;
-        private GUIStyle subtitleStyle;
-        private GUIStyle buttonStyle;
-        private GUIStyle chapterLabelStyle;
-        private GUIStyle tooltipStyle;
-        private GUIStyle hintStyle;
+        private VisualElement previewAccent;
+        private Label previewChapterLabel;
+        private Label previewTitleLabel;
+        private Label previewStatusLabel;
+        private Button btnPreviewLaunch;
 
-        private readonly string[,] levelTitles = new string[ChapterCount + 1, MaxLevelsPerChapter + 1];
-        private int hoveredChapter;
-        private int hoveredLevel;
-        private Rect hoveredDotRect;
-        private int lastHoveredChapter;
-        private int lastHoveredLevel;
-        private int lastHoveredButton = -1;
-        private bool landingChimePlayed;
+        private VisualElement fxLayer;
+        private VisualElement impactShockwave;
+        private VisualElement fallingNode;
+        private Label fallingNodeLabel;
+        private VisualElement portalZoomOrb;
+        private VisualElement portalZoomRing;
+        private Label portalZoomLabel;
 
-        private readonly List<BreakPiece> pieces = new List<BreakPiece>();
+        private VisualElement settingsOverlay;
+        private Slider sliderVolume;
+        private Label valVolume;
+        private Slider sliderSensitivity;
+        private Label valSensitivity;
+        private Toggle toggleReduceMotion;
+        private Button btnResetSave;
+        private Button btnSettingsClose;
+
+        private readonly List<VisualElement> chapterCards = new List<VisualElement>(ChapterCount + 1);
+        private readonly Dictionary<string, Button> dotButtonsByScene = new Dictionary<string, Button>();
+        private VisualElement currentHalo;
+        private readonly string[,] levelTitles = new string[ChapterCount + 1, 5];
+        private readonly List<RibbonShard> activeShards = new List<RibbonShard>();
+
         private MenuState state = MenuState.Title;
-        private int selectedButton = -1;
-        private float stateStartTime;
-        private float squareSize;
-        private float squareX;
-        private float squareY;
-        private float fallStartY;
-        private Rect fallTargetRect;
-        private bool buttonBroken;
+        private int currentChapter = 1;
+        private int currentLevel = 1;
+        private int selectedChapter = 1;
+        private int selectedLevel = 1;
+        private bool settingsOpen;
+        private float resetConfirmUntil;
+
         private float horizontalScroll;
         private float targetScroll;
-        private float minScroll;
-        private float maxScroll;
-        private bool dragging;
+        private bool draggingRibbon;
         private float dragStartX;
         private float dragStartScroll;
 
+        // Smash state
+        private float smashStartTime;
+        private float smashStartX;
+        private float smashStartY;
+        private float smashTargetX;
+        private float smashTargetY;
+        private float enterSmashThresholdY;
+        private Rect enterWorldRect;
+        private Button hiddenLandingDot;
+        private bool buttonShattered;
+        private bool landingPlayed;
+        private float nextTrailMoteAt;
+        private float shockwaveElapsed = -1f;
+        private Vector2 shockwaveOrigin;
+
+        // Portal zoom state
+        private float portalStartTime;
+        private Vector2 portalStartCenter;
+        private float portalStartSize;
+        private float portalTargetSize;
+        private string portalSceneName;
+        private bool portalSceneDispatched;
+
         private void Awake()
         {
+            SimulationSettings.ApplyAudioVolume();
             SimulationAudio.EnsureInstance();
+            uiDocument = GetComponent<UIDocument>();
+            cameraOrbit = Object.FindFirstObjectByType<MainMenuCameraOrbit>();
+
             RefreshCurrentProgress();
+            selectedChapter = currentChapter;
+            selectedLevel = currentLevel;
+            LoadLevelCatalogTitles();
+        }
 
-            backgroundTexture = SolidTexture(PaletteSettings.Mantle);
-            buttonNormalTexture = SolidTexture(PaletteSettings.BaseSurface);
-            buttonHoverTexture = SolidTexture(PaletteSettings.Surface1);
-            borderAccentTexture = SolidTexture(PaletteSettings.Sapphire);
-            borderMutedTexture = SolidTexture(PaletteSettings.Surface1);
-            squareSharpTexture = SolidTexture(PaletteSettings.Blue);
-            chapterDarkTexture = RoundedTexture(PaletteSettings.BaseSurface, 128, 24f);
-            chapterBlueTexture = RoundedTexture(PaletteSettings.Blue, 128, 24f);
-            dotDarkTexture = RoundedTexture(PaletteSettings.BaseSurface, 32, 16f);
-            dotBlueTexture = RoundedTexture(PaletteSettings.Blue, 32, 16f);
-            dotGreenTexture = RoundedTexture(PaletteSettings.Green, 32, 16f);
-            lineDarkTexture = SolidTexture(PaletteSettings.Surface0);
-            lineBlueTexture = SolidTexture(PaletteSettings.Blue);
+        private void OnEnable()
+        {
+            BindUI();
+            RebuildRibbonNodes();
+            ApplySettingsValuesToUI();
+            UpdateTitleAndMetaLabels();
+            UpdatePreviewCard(selectedChapter, selectedLevel);
+            if (btnEnter != null) btnEnter.Focus();
+        }
 
-            for (int chapter = 1; chapter <= ChapterCount; chapter++)
+        private void BindUI()
+        {
+            if (uiDocument == null || uiDocument.rootVisualElement == null) return;
+            VisualElement root = uiDocument.rootVisualElement;
+            bool firstBind = boundRoot != root;
+            boundRoot = root;
+
+            titleView = root.Q<VisualElement>("title-view");
+            titleIterLabel = root.Q<Label>("title-iter-label");
+            btnEnter = root.Q<Button>("btn-enter");
+            btnTitleShowcase = root.Q<Button>("btn-title-showcase");
+            btnTitleSettings = root.Q<Button>("btn-title-settings");
+            btnShutdown = root.Q<Button>("btn-shutdown");
+
+            ribbonView = root.Q<VisualElement>("ribbon-view");
+            ribbonViewport = root.Q<VisualElement>("ribbon-viewport");
+            ribbonTrack = root.Q<VisualElement>("ribbon-track");
+            ribbonMetaLabel = root.Q<Label>("ribbon-meta-label");
+            btnRibbonShowcase = root.Q<Button>("btn-ribbon-showcase");
+            btnDemoToggle = root.Q<Button>("btn-demo-toggle");
+            btnRibbonSettings = root.Q<Button>("btn-ribbon-settings");
+            btnRibbonBack = root.Q<Button>("btn-ribbon-back");
+
+            previewAccent = root.Q<VisualElement>("preview-accent");
+            previewChapterLabel = root.Q<Label>("preview-chapter-label");
+            previewTitleLabel = root.Q<Label>("preview-title-label");
+            previewStatusLabel = root.Q<Label>("preview-status-label");
+            btnPreviewLaunch = root.Q<Button>("btn-preview-launch");
+
+            fxLayer = root.Q<VisualElement>("fx-layer");
+            impactShockwave = root.Q<VisualElement>("impact-shockwave");
+            fallingNode = root.Q<VisualElement>("falling-node");
+            fallingNodeLabel = root.Q<Label>("falling-node-label");
+            portalZoomOrb = root.Q<VisualElement>("portal-zoom-orb");
+            portalZoomRing = root.Q<VisualElement>("portal-zoom-ring");
+            portalZoomLabel = root.Q<Label>("portal-zoom-label");
+
+            settingsOverlay = root.Q<VisualElement>("settings-overlay");
+            sliderVolume = root.Q<Slider>("slider-volume");
+            valVolume = root.Q<Label>("val-volume");
+            sliderSensitivity = root.Q<Slider>("slider-sensitivity");
+            valSensitivity = root.Q<Label>("val-sensitivity");
+            toggleReduceMotion = root.Q<Toggle>("toggle-reduce-motion");
+            btnResetSave = root.Q<Button>("btn-reset-save");
+            btnSettingsClose = root.Q<Button>("btn-settings-close");
+
+            if (!firstBind) return;
+
+            if (btnEnter != null)
             {
-                int count = SimulationProgress.GetLevelsInChapter(chapter);
-                for (int level = 1; level <= count; level++)
+                btnEnter.clicked += BeginEnterSmash;
+                btnEnter.RegisterCallback<PointerEnterEvent>(_ => SimulationAudio.PlayMenuHover());
+            }
+            if (btnTitleShowcase != null)
+            {
+                btnTitleShowcase.clicked += () => LaunchShowcase(btnTitleShowcase);
+                btnTitleShowcase.RegisterCallback<PointerEnterEvent>(_ => SimulationAudio.PlayMenuHover());
+            }
+            if (btnTitleSettings != null)
+            {
+                btnTitleSettings.clicked += OpenSettings;
+                btnTitleSettings.RegisterCallback<PointerEnterEvent>(_ => SimulationAudio.PlayMenuHover());
+            }
+            if (btnShutdown != null)
+            {
+                btnShutdown.clicked += BeginShutdown;
+                btnShutdown.RegisterCallback<PointerEnterEvent>(_ => SimulationAudio.PlayMenuHover());
+            }
+            if (btnRibbonShowcase != null)
+            {
+                btnRibbonShowcase.clicked += () => LaunchShowcase(btnRibbonShowcase);
+                btnRibbonShowcase.RegisterCallback<PointerEnterEvent>(_ => SimulationAudio.PlayMenuHover());
+            }
+            if (btnDemoToggle != null) btnDemoToggle.clicked += ToggleDemoAccess;
+            if (btnRibbonSettings != null) btnRibbonSettings.clicked += OpenSettings;
+            if (btnRibbonBack != null) btnRibbonBack.clicked += ReturnToTitle;
+            if (btnSettingsClose != null) btnSettingsClose.clicked += CloseSettings;
+            if (btnResetSave != null) btnResetSave.clicked += HandleResetSaveClicked;
+            if (btnPreviewLaunch != null)
+            {
+                btnPreviewLaunch.clicked += LaunchSelectedChamber;
+                btnPreviewLaunch.RegisterCallback<PointerEnterEvent>(_ => SimulationAudio.PlayMenuHover());
+            }
+
+            if (sliderVolume != null) sliderVolume.RegisterValueChangedCallback(evt =>
+            {
+                SimulationSettings.MasterVolume = evt.newValue / 100f;
+                if (valVolume != null) valVolume.text = Mathf.RoundToInt(evt.newValue) + "%";
+            });
+            if (sliderSensitivity != null) sliderSensitivity.RegisterValueChangedCallback(evt =>
+            {
+                SimulationSettings.CameraSensitivity = evt.newValue / 100f;
+                if (valSensitivity != null) valSensitivity.text = (evt.newValue / 100f).ToString("0.0") + "x";
+            });
+            if (toggleReduceMotion != null) toggleReduceMotion.RegisterValueChangedCallback(evt =>
+            {
+                SimulationSettings.ReduceMotion = evt.newValue;
+                SimulationAudio.PlayMenuHover();
+            });
+
+            if (ribbonViewport != null)
+            {
+                ribbonViewport.RegisterCallback<PointerDownEvent>(OnRibbonPointerDown);
+                ribbonViewport.RegisterCallback<PointerMoveEvent>(OnRibbonPointerMove);
+                ribbonViewport.RegisterCallback<PointerUpEvent>(OnRibbonPointerUp);
+                ribbonViewport.RegisterCallback<WheelEvent>(OnRibbonWheel);
+            }
+        }
+
+        private void LoadLevelCatalogTitles()
+        {
+            for (int c = 1; c <= ChapterCount; c++)
+            {
+                int count = SimulationProgress.GetLevelsInChapter(c);
+                for (int l = 1; l <= count; l++)
                 {
-                    string scene = LevelSceneName(chapter, level);
+                    string scene = LevelSceneName(c, l);
                     LevelInfo info = Resources.Load<LevelInfo>("Levels/" + scene);
                     if (info != null && !string.IsNullOrEmpty(info.Title))
                     {
-                        levelTitles[chapter, level] = info.Title;
+                        levelTitles[c, l] = info.Title;
+                        continue;
                     }
-                    else
+                    for (int k = 0; k < SimulationProgress.Catalog.Length; k++)
                     {
-                        for (int k = 0; k < SimulationProgress.Catalog.Length; k++)
+                        if (SimulationProgress.Catalog[k].chapter == c && SimulationProgress.Catalog[k].level == l)
                         {
-                            if (SimulationProgress.Catalog[k].chapter == chapter &&
-                                SimulationProgress.Catalog[k].level == level)
-                            {
-                                levelTitles[chapter, level] = SimulationProgress.Catalog[k].fallbackTitle;
-                                break;
-                            }
+                            levelTitles[c, l] = SimulationProgress.Catalog[k].fallbackTitle;
+                            break;
                         }
                     }
                 }
@@ -157,838 +282,1001 @@ namespace Polymulator
             currentLevel = highest.level;
         }
 
-        private void Update()
+        private void UpdateTitleAndMetaLabels()
         {
-            HandleKeyboardNavigation();
-            float dt = Time.unscaledDeltaTime;
-            for (int i = pieces.Count - 1; i >= 0; i--)
+            if (titleIterLabel != null)
+                titleIterLabel.text = "Kota Tepi  •  Iterasi #" + SimulationProgress.IterationNumber;
+
+            if (btnEnter != null)
             {
-                BreakPiece piece = pieces[i];
-                piece.life -= dt;
-                if (piece.life <= 0f)
+                btnEnter.text = currentChapter > 1 || currentLevel > 1
+                    ? string.Format("Lanjutkan  •  Ruangan {0}.{1}", currentChapter, currentLevel)
+                    : "Mulai Simulasi";
+            }
+
+            int totalLevels = SimulationProgress.Catalog.Length;
+            int totalCleared = 0;
+            for (int c = 1; c <= ChapterCount; c++)
+            {
+                int count = SimulationProgress.GetLevelsInChapter(c);
+                for (int l = 1; l <= count; l++)
                 {
-                    pieces.RemoveAt(i);
-                    continue;
+                    if (SimulationProgress.IsCleared(LevelSceneName(c, l))) totalCleared++;
+                }
+            }
+
+            if (ribbonMetaLabel != null)
+                ribbonMetaLabel.text = string.Format("Iterasi #{0}  •  {1}/{2} Ruangan  •  {3} Memori",
+                    SimulationProgress.IterationNumber, totalCleared, totalLevels, SimulationProgress.GetCollectedFragmentCount());
+
+            if (btnDemoToggle != null)
+            {
+                bool on = SimulationProgress.IsDemoUnlocked;
+                btnDemoToggle.text = on ? "[F2] Buka Semua: Nyala" : "[F2] Buka Semua: Mati";
+                btnDemoToggle.EnableInClassList("top-chip-btn--on", on);
+            }
+        }
+
+        private void RebuildRibbonNodes()
+        {
+            if (ribbonTrack == null) return;
+            ribbonTrack.Clear();
+            chapterCards.Clear();
+            dotButtonsByScene.Clear();
+            currentHalo = null;
+
+            for (int c = 1; c <= ChapterCount; c++)
+            {
+                Color chapColor = ChapterAccentColor(c);
+
+                VisualElement cluster = new VisualElement();
+                cluster.AddToClassList("chapter-cluster");
+
+                bool reached = c <= currentChapter || SimulationProgress.IsDemoUnlocked;
+                VisualElement card = new VisualElement();
+                card.AddToClassList("chapter-node-card");
+                if (reached) card.AddToClassList("chapter-node-card--reached");
+                card.style.borderTopColor = chapColor;
+
+                Label sectorLbl = new Label("CHAPTER 0" + c);
+                sectorLbl.AddToClassList("chapter-sector-pill");
+                if (reached) sectorLbl.style.color = chapColor;
+                card.Add(sectorLbl);
+
+                Label numLbl = new Label(c.ToString());
+                numLbl.AddToClassList("chapter-node-num");
+                if (reached) numLbl.style.color = chapColor;
+                card.Add(numLbl);
+
+                string themeName = c < SimulationProgress.ChapterNames.Length
+                    ? SimulationProgress.ChapterNames[c] : string.Empty;
+                Label themeLbl = new Label(themeName);
+                themeLbl.AddToClassList("chapter-node-theme");
+                card.Add(themeLbl);
+
+                int count = SimulationProgress.GetLevelsInChapter(c);
+                int clearedInChap = 0;
+                for (int k = 1; k <= count; k++)
+                {
+                    if (SimulationProgress.IsCleared(LevelSceneName(c, k))) clearedInChap++;
+                }
+                VisualElement barBg = new VisualElement();
+                barBg.AddToClassList("chapter-node-bar-bg");
+                VisualElement barFill = new VisualElement();
+                barFill.AddToClassList("chapter-node-bar-fill");
+                barFill.style.backgroundColor = chapColor;
+                barFill.style.width = Length.Percent(count > 0 ? (clearedInChap / (float)count) * 100f : 0f);
+                barBg.Add(barFill);
+                card.Add(barBg);
+
+                cluster.Add(card);
+                chapterCards.Add(card);
+
+                VisualElement rail = new VisualElement();
+                rail.AddToClassList("segment-rail");
+
+                VisualElement lineBg = new VisualElement();
+                lineBg.AddToClassList("segment-line-bg");
+                rail.Add(lineBg);
+
+                VisualElement lineFill = new VisualElement();
+                lineFill.AddToClassList("segment-line-fill");
+                lineFill.style.backgroundColor = chapColor;
+                float fillPct = 0f;
+                if (c < currentChapter || SimulationProgress.IsDemoUnlocked) fillPct = 100f;
+                else if (c == currentChapter && count > 0) fillPct = (currentLevel / (float)(count + 1)) * 100f;
+                lineFill.style.width = Length.Percent(fillPct);
+                rail.Add(lineFill);
+
+                for (int l = 1; l <= count; l++)
+                {
+                    int chap = c;
+                    int lvl = l;
+                    string sceneName = LevelSceneName(chap, lvl);
+                    bool unlocked = SimulationProgress.IsUnlocked(chap, lvl);
+                    bool cleared = SimulationProgress.IsCleared(sceneName);
+                    bool isTarget = chap == currentChapter && lvl == currentLevel && !cleared;
+
+                    VisualElement dotWrap = new VisualElement();
+                    dotWrap.AddToClassList("level-dot-wrap");
+
+                    if (isTarget)
+                    {
+                        Label nowBadge = new Label("NOW");
+                        nowBadge.AddToClassList("level-dot-badge");
+                        nowBadge.style.backgroundColor = chapColor;
+                        dotWrap.Add(nowBadge);
+
+                        VisualElement halo = new VisualElement();
+                        halo.AddToClassList("level-dot-halo");
+                        halo.pickingMode = PickingMode.Ignore;
+                        SetBorderColor(halo, chapColor);
+                        dotWrap.Add(halo);
+                        currentHalo = halo;
+                    }
+
+                    Label codeLbl = new Label(chap + "." + lvl);
+                    codeLbl.AddToClassList("level-dot-code");
+                    if (isTarget) codeLbl.style.color = chapColor;
+                    dotWrap.Add(codeLbl);
+
+                    Button dotBtn = new Button();
+                    dotBtn.AddToClassList("level-dot-btn");
+                    if (cleared) dotBtn.AddToClassList("level-dot-btn--cleared");
+                    else if (isTarget) dotBtn.AddToClassList("level-dot-btn--current");
+                    else if (unlocked) dotBtn.AddToClassList("level-dot-btn--unlocked");
+                    if (isTarget) dotBtn.style.backgroundColor = chapColor;
+
+                    dotBtn.RegisterCallback<PointerEnterEvent>(_ =>
+                    {
+                        SimulationAudio.PlayMenuHover();
+                        SelectChamberPreview(chap, lvl);
+                    });
+                    dotBtn.RegisterCallback<FocusInEvent>(_ => SelectChamberPreview(chap, lvl));
+                    dotBtn.clicked += () =>
+                    {
+                        if (!unlocked)
+                        {
+                            SimulationAudio.PlayAnchorReject(Vector3.zero);
+                            return;
+                        }
+                        SelectChamberPreview(chap, lvl);
+                        LaunchChamber(sceneName, dotBtn);
+                    };
+
+                    dotWrap.Add(dotBtn);
+                    dotButtonsByScene[sceneName] = dotBtn;
+
+                    if (cleared)
+                    {
+                        int stars = SimulationProgress.GetStars(sceneName);
+                        Label starLbl = new Label(new string('★', stars));
+                        starLbl.AddToClassList("level-dot-stars");
+                        dotWrap.Add(starLbl);
+                    }
+
+                    rail.Add(dotWrap);
                 }
 
-                piece.velocity += new Vector2(0f, 1500f) * dt;
-                piece.rect.x += piece.velocity.x * dt;
-                piece.rect.y += piece.velocity.y * dt;
-                pieces[i] = piece;
+                cluster.Add(rail);
+                ribbonTrack.Add(cluster);
             }
 
-            if (dragging || Mathf.Approximately(horizontalScroll, targetScroll)) return;
-
-            float blend = 1f - Mathf.Exp(-ScrollResponsiveness * dt);
-            horizontalScroll = Mathf.Lerp(horizontalScroll, targetScroll, blend);
-            if (Mathf.Abs(targetScroll - horizontalScroll) < 0.5f)
-                horizontalScroll = targetScroll;
-        }
-
-        private void OnGUI()
-        {
-            GUI.DrawTexture(new Rect(0f, 0f, Screen.width, Screen.height), backgroundTexture,
-                ScaleMode.StretchToFill);
-
-            switch (state)
+            VisualElement scCard = new VisualElement();
+            scCard.AddToClassList("chapter-node-card");
+            scCard.AddToClassList("chapter-node-card--showcase");
+            Label scSec = new Label("DEMO TERBUKA");
+            scSec.AddToClassList("chapter-sector-pill");
+            scSec.style.color = PaletteSettings.Teal;
+            scCard.Add(scSec);
+            Label scNum = new Label("S");
+            scNum.AddToClassList("chapter-node-num");
+            scNum.style.color = PaletteSettings.Teal;
+            scCard.Add(scNum);
+            Label scTheme = new Label("SHOWCASE");
+            scTheme.AddToClassList("chapter-node-theme");
+            scCard.Add(scTheme);
+            Button scBtn = new Button();
+            scBtn.text = "Buka Demo";
+            scBtn.AddToClassList("showcase-launch-btn");
+            scBtn.clicked += () => LaunchShowcase(scBtn);
+            scBtn.RegisterCallback<PointerEnterEvent>(_ =>
             {
-                case MenuState.Title:
-                    DrawTitleState();
-                    break;
-                case MenuState.Dropping:
-                    DrawDropping();
-                    break;
-                case MenuState.ShutdownFalling:
-                    DrawShutdownFalling();
-                    break;
-                case MenuState.Falling:
-                    DrawFalling();
-                    break;
-                case MenuState.LevelMenu:
-                    DrawLevelMenu();
-                    break;
+                SimulationAudio.PlayMenuHover();
+                UpdateShowcasePreview();
+            });
+            scCard.Add(scBtn);
+            ribbonTrack.Add(scCard);
+            chapterCards.Add(scCard);
+
+            VisualElement epCard = new VisualElement();
+            epCard.AddToClassList("chapter-node-card");
+            epCard.style.borderTopColor = PaletteSettings.Rosewater;
+            Label epSec = new Label("AKHIR");
+            epSec.AddToClassList("chapter-sector-pill");
+            epSec.style.color = PaletteSettings.Rosewater;
+            epCard.Add(epSec);
+            Label epNum = new Label("N");
+            epNum.AddToClassList("chapter-node-num");
+            epCard.Add(epNum);
+            Label epTheme = new Label("ARSIP KOTA");
+            epTheme.AddToClassList("chapter-node-theme");
+            epCard.Add(epTheme);
+            ribbonTrack.Add(epCard);
+            chapterCards.Add(epCard);
+        }
+
+        private void UpdateShowcasePreview()
+        {
+            Color teal = PaletteSettings.Teal;
+            if (previewChapterLabel != null)
+            {
+                previewChapterLabel.text = "RUANG SHOWCASE  •  SEMUA MEKANIK TERBUKA";
+                previewChapterLabel.style.color = teal;
+            }
+            if (previewTitleLabel != null)
+                previewTitleLabel.text = "Demo Lengkap POLYMULATOR";
+            if (previewStatusLabel != null)
+                previewStatusLabel.text = "Partition [1], Fusion [2], Telekinesis [F], Rotasi [R] & Mode Fleksibel langsung aktif";
+            if (previewAccent != null) previewAccent.style.backgroundColor = teal;
+            if (btnPreviewLaunch != null)
+            {
+                btnPreviewLaunch.SetEnabled(true);
+                btnPreviewLaunch.style.backgroundColor = teal;
+                btnPreviewLaunch.text = "Buka Showcase";
+            }
+        }
+
+        private void SelectChamberPreview(int chapter, int level)
+        {
+            selectedChapter = chapter;
+            selectedLevel = level;
+            UpdatePreviewCard(chapter, level);
+        }
+
+        private void UpdatePreviewCard(int chapter, int level)
+        {
+            string sceneName = LevelSceneName(chapter, level);
+            bool unlocked = SimulationProgress.IsUnlocked(chapter, level);
+            bool cleared = SimulationProgress.IsCleared(sceneName);
+            string title = levelTitles[chapter, level];
+            if (string.IsNullOrEmpty(title)) title = "SECTOR " + chapter + "." + level;
+
+            string chapterTheme = chapter < SimulationProgress.ChapterNames.Length
+                ? SimulationProgress.ChapterNames[chapter] : "ARCHIVE";
+            Color chapColor = ChapterAccentColor(chapter);
+
+            if (previewChapterLabel != null)
+            {
+                previewChapterLabel.text = string.Format("Chapter {0}  •  {1}", chapter, chapterTheme);
+                previewChapterLabel.style.color = chapColor;
+            }
+            if (previewTitleLabel != null)
+                previewTitleLabel.text = string.Format("{0}.{1}  •  {2}", chapter, level, title);
+
+            if (btnPreviewLaunch != null)
+            {
+                btnPreviewLaunch.SetEnabled(unlocked);
+                btnPreviewLaunch.style.backgroundColor = unlocked ? chapColor : PaletteSettings.Surface1;
+                btnPreviewLaunch.text = cleared ? "Main Ulang" : (unlocked ? "Mulai" : "Terkunci");
             }
 
-            DrawPieces();
+            if (previewStatusLabel != null)
+            {
+                if (!unlocked)
+                {
+                    previewStatusLabel.text = "Sektor terkunci  •  Selesaikan ruangan sebelumnya terlebih dahulu";
+                    if (previewAccent != null) previewAccent.style.backgroundColor = PaletteSettings.Overlay1;
+                }
+                else if (cleared)
+                {
+                    int stars = SimulationProgress.GetStars(sceneName);
+                    string starStr = new string('★', stars) + new string('☆', 3 - stars);
+                    string mem = SimulationProgress.HasFragment(sceneName) ? "  •  Memori tersimpan" : "";
+                    previewStatusLabel.text = string.Format("Selesai  [{0}]{1}", starStr, mem);
+                    if (previewAccent != null) previewAccent.style.backgroundColor = PaletteSettings.Green;
+                }
+                else
+                {
+                    previewStatusLabel.text = "Siap dimulai  •  Klik titik level atau tekan Enter";
+                    if (previewAccent != null) previewAccent.style.backgroundColor = chapColor;
+                }
+            }
         }
 
-        private void DrawTitleState()
+        private void Update()
         {
-            Rect enterRect, shutdownRect;
-            GetButtonRects(out enterRect, out shutdownRect);
+            HandleKeyboard();
+            float dt = Time.unscaledDeltaTime;
+            UpdateShards(dt);
+            UpdateShockwave();
 
-            GUI.Label(new Rect(0f, enterRect.y - 126f, Screen.width, 64f), "POLYMULATOR", TitleStyle);
-            GUI.Label(new Rect(0f, enterRect.y - 56f, Screen.width, 28f),
-                "SIMULATION SANDBOX  //  ITERATION #" + SimulationProgress.IterationNumber, SubtitleStyle);
+            if (currentHalo != null && state == MenuState.LevelMenu && !SimulationSettings.ReduceMotion)
+            {
+                float s = 1f + 0.14f * Mathf.Sin(Time.unscaledTime * 3.8f);
+                currentHalo.style.scale = new Scale(new Vector3(s, s, 1f));
+                currentHalo.style.opacity = 0.55f + 0.35f * Mathf.Sin(Time.unscaledTime * 3.8f);
+            }
 
-            Vector2 mousePos = Event.current.mousePosition;
-            int hoveredBtn = enterRect.Contains(mousePos) ? EnterButton
-                : (shutdownRect.Contains(mousePos) ? ShutdownButton : -1);
-            if (hoveredBtn != -1 && hoveredBtn != lastHoveredButton)
-                SimulationAudio.PlayMenuHover();
-            lastHoveredButton = hoveredBtn;
+            if (state == MenuState.FallingSmash)
+                UpdateFallingSmash();
+            else if (state == MenuState.LevelMenu && !draggingRibbon)
+                UpdateRibbonScrollSmoothing(dt);
+            else if (state == MenuState.PortalZoom)
+                UpdateStaticPortalLaunch();
 
-            DrawFrameBorder(enterRect, 2f, borderAccentTexture);
-            DrawFrameBorder(shutdownRect, 1.5f, borderMutedTexture);
-
-            string enterText = GetEnterButtonText();
-            if (GUI.Button(enterRect, enterText, ButtonStyle))
-                Select(EnterButton);
-            if (GUI.Button(shutdownRect, "SHUTDOWN", ButtonStyle)) Select(ShutdownButton);
-
-            GUI.Label(new Rect(0f, shutdownRect.yMax + 28f, Screen.width, 24f),
-                "[ ENTER ]  LAUNCH CHAPTER INDEX", HintStyle);
+            if (resetConfirmUntil > 0f && Time.unscaledTime > resetConfirmUntil)
+            {
+                resetConfirmUntil = 0f;
+                if (btnResetSave != null) btnResetSave.text = "Reset Progres";
+            }
         }
 
-        private string GetEnterButtonText()
-        {
-            return currentChapter > 1 || currentLevel > 1
-                ? string.Format("CONTINUE  {0}.{1}", currentChapter, currentLevel)
-                : "ENTER";
-        }
-
-        private void HandleKeyboardNavigation()
+        private void HandleKeyboard()
         {
             Keyboard kb = Keyboard.current;
             if (kb == null) return;
 
+            if (settingsOpen)
+            {
+                if (kb.escapeKey.wasPressedThisFrame) CloseSettings();
+                return;
+            }
+
             if (state == MenuState.Title)
             {
                 if (kb.enterKey.wasPressedThisFrame || kb.numpadEnterKey.wasPressedThisFrame)
-                    Select(EnterButton);
+                    BeginEnterSmash();
                 return;
             }
 
             if (state != MenuState.LevelMenu) return;
 
             if (kb.leftArrowKey.wasPressedThisFrame || kb.aKey.wasPressedThisFrame)
-                targetScroll = Mathf.Clamp(targetScroll - 160f, minScroll, maxScroll);
+                NudgeRibbonScroll(-260f);
             else if (kb.rightArrowKey.wasPressedThisFrame || kb.dKey.wasPressedThisFrame)
-                targetScroll = Mathf.Clamp(targetScroll + 160f, minScroll, maxScroll);
+                NudgeRibbonScroll(260f);
             else if (kb.f2Key.wasPressedThisFrame)
-            {
-                SimulationProgress.IsDemoUnlocked = !SimulationProgress.IsDemoUnlocked;
-                RefreshCurrentProgress();
-                SimulationAudio.PlayMenuClick();
-            }
+                ToggleDemoAccess();
             else if (kb.f9Key.wasPressedThisFrame)
-            {
-                SimulationProgress.ResetAll();
-                RefreshCurrentProgress();
-                SimulationAudio.PlayMenuSmash();
-            }
+                ExecuteResetProgress();
             else if (kb.escapeKey.wasPressedThisFrame)
+                ReturnToTitle();
+            else if (kb.enterKey.wasPressedThisFrame || kb.numpadEnterKey.wasPressedThisFrame)
+                LaunchSelectedChamber();
+        }
+
+        private void LaunchShowcase(Button sourceBtn)
+        {
+            selectedChapter = 5;
+            LaunchChamber(SimulationProgress.ShowcaseSceneName, sourceBtn);
+        }
+
+        private void LaunchSelectedChamber()
+        {
+            if (!SimulationProgress.IsUnlocked(selectedChapter, selectedLevel))
             {
-                state = MenuState.Title;
-                SimulationAudio.PlayMenuHover();
+                SimulationAudio.PlayAnchorReject(Vector3.zero);
+                return;
+            }
+            string sceneName = LevelSceneName(selectedChapter, selectedLevel);
+            dotButtonsByScene.TryGetValue(sceneName, out Button sourceDot);
+            LaunchChamber(sceneName, sourceDot);
+        }
+
+        public void BeginEnterSmash()
+        {
+            if (state != MenuState.Title || settingsOpen) return;
+            SimulationAudio.PlayMenuClick();
+            state = MenuState.FallingSmash;
+            smashStartTime = Time.unscaledTime;
+            buttonShattered = false;
+            landingPlayed = false;
+            nextTrailMoteAt = 0f;
+
+            if (cameraOrbit != null)
+            {
+                cameraOrbit.SetRibbonOpen(true);
+                cameraOrbit.SetSmashDescent(0f);
+            }
+
+            if (titleView != null) titleView.AddToClassList("title-view--up");
+            if (ribbonView != null)
+            {
+                ribbonView.RemoveFromClassList("ribbon-view--hidden");
+                ribbonView.RemoveFromClassList("ribbon-view--fading");
+            }
+
+            Vector2 panelSize = GetPanelSize();
+            enterWorldRect = btnEnter != null
+                ? btnEnter.worldBound
+                : new Rect(panelSize.x * 0.5f - 180f, panelSize.y * 0.5f, 360f, 54f);
+            float viewW = Mathf.Max(400f, panelSize.x - 72f);
+
+            int levelCount = Mathf.Max(1, SimulationProgress.GetLevelsInChapter(currentChapter));
+            float approxDotInRail = 416f * (currentLevel / (float)(levelCount + 1));
+            float approxTargetLocalX = (currentChapter - 1) * ClusterStride + 158f + approxDotInRail;
+            float desiredLeftInViewport = enterWorldRect.center.x - 36f;
+            horizontalScroll = targetScroll = ClampScroll(approxTargetLocalX - desiredLeftInViewport, viewW);
+
+            if (ribbonTrack != null) ribbonTrack.style.left = -horizontalScroll;
+            UpdateCameraScrollParallax(viewW);
+
+            smashStartX = enterWorldRect.center.x - 48f;
+            smashStartY = -128f;
+            smashTargetX = (approxTargetLocalX - horizontalScroll) + 36f - 48f;
+            smashTargetY = panelSize.y * 0.5f - 48f;
+            enterSmashThresholdY = enterWorldRect.yMin;
+
+            string curScene = LevelSceneName(currentChapter, currentLevel);
+            dotButtonsByScene.TryGetValue(curScene, out hiddenLandingDot);
+            if (hiddenLandingDot != null)
+                hiddenLandingDot.style.visibility = Visibility.Hidden;
+
+            Color chapColor = ChapterAccentColor(currentChapter);
+            if (fallingNodeLabel != null)
+                fallingNodeLabel.text = currentChapter + "." + currentLevel;
+            if (fallingNode != null)
+            {
+                fallingNode.style.backgroundColor = chapColor;
+                fallingNode.style.left = smashStartX;
+                fallingNode.style.top = smashStartY;
+                fallingNode.RemoveFromClassList("falling-node--hidden");
             }
         }
 
-        private void DrawFrameBorder(Rect rect, float thickness, Texture2D tex)
+        private void UpdateFallingSmash()
         {
-            if (tex == null) return;
-            GUI.DrawTexture(new Rect(rect.x - thickness, rect.y - thickness, rect.width + thickness * 2f, thickness), tex);
-            GUI.DrawTexture(new Rect(rect.x - thickness, rect.yMax, rect.width + thickness * 2f, thickness), tex);
-            GUI.DrawTexture(new Rect(rect.x - thickness, rect.y, thickness, rect.height), tex);
-            GUI.DrawTexture(new Rect(rect.xMax, rect.y, thickness, rect.height), tex);
-        }
-
-        // Shutdown path: square drops onto the button and stops, then falls away.
-        private void DrawDropping()
-        {
-            Rect enterRect, shutdownRect;
-            GetButtonRects(out enterRect, out shutdownRect);
-
-            GUI.Label(new Rect(0f, enterRect.y - 104f, Screen.width, 64f), "POLYMULATOR", TitleStyle);
-            GUI.Label(enterRect, "ENTER", ButtonStyle);
-            GUI.Label(shutdownRect, "SHUTDOWN", ButtonStyle);
-
-            Rect target = selectedButton == EnterButton ? enterRect : shutdownRect;
-            float t = Mathf.Clamp01((Time.unscaledTime - stateStartTime) /
-                Mathf.Max(0.05f, squareDropDuration));
-            float eased = t * t;
-
-            squareX = target.center.x - squareSize * 0.5f;
-            squareY = Mathf.Lerp(-squareSize, target.y - squareSize, eased);
-            GUI.DrawTexture(new Rect(squareX, squareY, squareSize, squareSize), squareSharpTexture,
-                ScaleMode.StretchToFill);
-
-            if (t < 1f) return;
-
-            stateStartTime = Time.unscaledTime;
-            state = MenuState.ShutdownFalling;
-        }
-
-        private void DrawShutdownFalling()
-        {
-            Rect enterRect, shutdownRect;
-            GetButtonRects(out enterRect, out shutdownRect);
-            Rect target = selectedButton == EnterButton ? enterRect : shutdownRect;
-
-            float t = Mathf.Clamp01((Time.unscaledTime - stateStartTime) /
-                Mathf.Max(0.05f, buttonFallDuration));
-            float offset = t * t * t * (Screen.height - target.y + target.height + squareSize);
-
-            GUI.Label(new Rect(0f, enterRect.y - 104f, Screen.width, 64f), "POLYMULATOR", TitleStyle);
-            GUI.Label(enterRect, "ENTER", ButtonStyle);
-
-            Rect moved = shutdownRect;
-            moved.y += offset;
-            GUI.Label(moved, "SHUTDOWN", ButtonStyle);
-
-            GUI.DrawTexture(new Rect(target.center.x - squareSize * 0.5f,
-                target.y - squareSize + offset, squareSize, squareSize), squareSharpTexture,
-                ScaleMode.StretchToFill);
-
-            if (target.y + offset <= Screen.height) return;
-
-            state = MenuState.Done;
-            SceneTransition.Quit(transitionDelay, fadeDuration);
-        }
-
-        // Enter path: one continuous fall that eases into a slow stop. The square is
-        // the current chapter node, so its final rect is exactly the node's rect;
-        // no morph or fade. The rest of the ribbon is already in place during the fall.
-        private void DrawFalling()
-        {
-            Rect enterRect, shutdownRect;
-            GetButtonRects(out enterRect, out shutdownRect);
-
-            float t = Mathf.Clamp01((Time.unscaledTime - stateStartTime) /
-                Mathf.Max(0.05f, fallDuration));
-            float eased = 1f - Mathf.Pow(1f - t, 3f);
-
-            DrawRibbon(GetLayout(), true);
-
-            float panDistance = enterRect.y + enterRect.height + 60f;
-            float panOffset = eased * panDistance;
-
-            GUI.Label(new Rect(0f, enterRect.y - 104f - panOffset, Screen.width, 64f),
-                "POLYMULATOR", TitleStyle);
-
-            Rect shutdownMoved = shutdownRect;
-            shutdownMoved.y -= panOffset;
-            GUI.Label(shutdownMoved, "SHUTDOWN", ButtonStyle);
-
-            Rect enterMoved = enterRect;
-            enterMoved.y -= panOffset;
-
-            squareY = Mathf.Lerp(fallStartY, fallTargetRect.y, eased);
-
-            if (!buttonBroken && squareY + squareSize >= enterMoved.y)
+            if (hiddenLandingDot != null && hiddenLandingDot.worldBound.width > 1f)
             {
-                SpawnButtonBreak(enterMoved);
-                SimulationAudio.PlayMenuSmash();
-                buttonBroken = true;
+                Vector2 dotCenter = hiddenLandingDot.worldBound.center;
+                smashTargetX = dotCenter.x - 48f;
+                smashTargetY = dotCenter.y - 48f;
+            }
+            else if (ribbonViewport != null && ribbonViewport.worldBound.height > 10f)
+            {
+                smashTargetY = ribbonViewport.worldBound.center.y - 48f;
             }
 
-            if (!buttonBroken)
-                GUI.Label(enterMoved, GetEnterButtonText(), ButtonStyle);
+            float t = Mathf.Clamp01((Time.unscaledTime - smashStartTime) / Mathf.Max(0.15f, fallDuration));
+            if (SimulationSettings.ReduceMotion) t = 1f;
 
-            Rect fallingRect = new Rect(squareX, squareY, squareSize, squareSize);
-            GUI.DrawTexture(fallingRect, chapterBlueTexture, ScaleMode.StretchToFill);
-            ChapterLabelStyle.normal.textColor = PaletteSettings.Mantle;
-            GUI.Label(fallingRect, currentChapter.ToString(), ChapterLabelStyle);
-
-            if (t < 1f) return;
-
-            if (!landingChimePlayed)
+            // Phase 1 (0..0.28): fast plunge into ENTER block; Phase 2 (0.28..1): tracking descent to Ribbon orb slot
+            float y;
+            float x;
+            if (t < 0.28f)
             {
-                SimulationAudio.PlayMenuNodeLand();
-                landingChimePlayed = true;
-            }
-            state = MenuState.LevelMenu;
-        }
-
-        private void DrawLevelMenu()
-        {
-            HandleLevelMenuInput();
-            DrawRibbon(GetLayout());
-
-            string headerLeft = string.Format("ITERATION #{0}   •   MEMORIES {1} / 5",
-                SimulationProgress.IterationNumber, SimulationProgress.GetCollectedFragmentCount());
-            GUI.Label(new Rect(28f, 22f, 440f, 26f), headerLeft, LeftMetaStyle);
-
-            string demoLabel = SimulationProgress.IsDemoUnlocked ? "[ F2 ]  DEMO ACCESS: ALL ON" : "[ F2 ]  DEMO ACCESS: OFF";
-            GUI.Label(new Rect(Screen.width - 300f, 22f, 272f, 26f), demoLabel, RightMetaStyle);
-
-            GUI.Label(new Rect(0f, Screen.height - 54f, Screen.width, 28f),
-                string.Format("DRAG OR SCROLL / A-D  BROWSE   •   CLICK {0}.{1} TO CALIBRATE   •   [ ESC ] BACK",
-                    currentChapter, currentLevel), HintStyle);
-        }
-
-        private void DrawRibbon(Layout layout, bool skipCurrentNode = false)
-        {
-            hoveredChapter = 0;
-            hoveredLevel = 0;
-
-            for (int chapter = 1; chapter <= ChapterCount; chapter++)
-            {
-                int count = SimulationProgress.GetLevelsInChapter(chapter);
-                Rect node = GetChapterNodeRect(chapter, layout);
-                float segmentX = node.xMax;
-                float segmentY = node.center.y - layout.lineHeight * 0.5f;
-
-                if (chapter < currentChapter)
-                {
-                    GUI.DrawTexture(new Rect(segmentX, segmentY, layout.segmentLength,
-                        layout.lineHeight), lineBlueTexture, ScaleMode.StretchToFill);
-                }
-                else if (chapter == currentChapter)
-                {
-                    Rect currentDot = GetLevelDotRect(chapter, currentLevel, layout);
-                    float blueWidth = Mathf.Max(0f, currentDot.center.x - segmentX);
-                    GUI.DrawTexture(new Rect(segmentX, segmentY, blueWidth,
-                        layout.lineHeight), lineBlueTexture, ScaleMode.StretchToFill);
-                    GUI.DrawTexture(new Rect(segmentX + blueWidth, segmentY,
-                        layout.segmentLength - blueWidth, layout.lineHeight), lineDarkTexture,
-                        ScaleMode.StretchToFill);
-                }
-                else
-                {
-                    GUI.DrawTexture(new Rect(segmentX, segmentY, layout.segmentLength,
-                        layout.lineHeight), lineDarkTexture, ScaleMode.StretchToFill);
-                }
-
-                for (int level = 1; level <= count; level++)
-                {
-                    Rect dot = GetLevelDotRect(chapter, level, layout);
-                    string sceneName = LevelSceneName(chapter, level);
-                    bool unlocked = SimulationProgress.IsUnlocked(chapter, level);
-                    bool cleared = SimulationProgress.IsCleared(sceneName);
-                    bool isCurrentTarget = chapter == currentChapter && level == currentLevel && !cleared;
-
-                    Rect drawDot = dot;
-                    if (isCurrentTarget)
-                    {
-                        float pulse = 2.5f * Mathf.Sin(Time.unscaledTime * 4.2f);
-                        drawDot = new Rect(dot.x - pulse, dot.y - pulse, dot.width + pulse * 2f, dot.height + pulse * 2f);
-                    }
-
-                    Texture2D dotTexture = cleared ? dotGreenTexture : (unlocked ? dotBlueTexture : dotDarkTexture);
-                    GUI.DrawTexture(drawDot, dotTexture, ScaleMode.StretchToFill);
-
-                    if (cleared)
-                    {
-                        int stars = SimulationProgress.GetStars(sceneName);
-                        string starStr = new string('★', stars);
-                        GUI.Label(new Rect(dot.center.x - 32f, dot.yMax + 4f, 64f, 18f), starStr, HintStyle);
-                    }
-                    else
-                    {
-                        GUI.Label(new Rect(dot.center.x - 24f, dot.y - 22f, 48f, 18f),
-                            chapter + "." + level, HintStyle);
-                    }
-
-                    Event current = Event.current;
-                    if (state == MenuState.LevelMenu && dot.Contains(current.mousePosition))
-                    {
-                        hoveredChapter = chapter;
-                        hoveredLevel = level;
-                        hoveredDotRect = dot;
-                    }
-
-                    if (state != MenuState.LevelMenu || !unlocked) continue;
-                    if (current.type != EventType.MouseDown || current.button != 0 ||
-                        !dot.Contains(current.mousePosition)) continue;
-
-                    current.Use();
-                    dragging = false;
-                    SimulationAudio.PlayMenuClick();
-                    state = MenuState.Done;
-                    SceneTransition.Begin(sceneName, transitionDelay, fadeDuration);
-                }
-            }
-
-            for (int chapter = 1; chapter <= ChapterCount; chapter++)
-            {
-                Rect node = GetChapterNodeRect(chapter, layout);
-                string chapterSub = chapter < SimulationProgress.ChapterNames.Length
-                    ? SimulationProgress.ChapterNames[chapter] : string.Empty;
-                if (!string.IsNullOrEmpty(chapterSub))
-                    GUI.Label(new Rect(node.center.x - 80f, node.y - 26f, 160f, 20f), chapterSub, HintStyle);
-
-                if (skipCurrentNode && chapter == currentChapter) continue;
-
-                bool reached = chapter <= currentChapter || SimulationProgress.IsDemoUnlocked;
-                Texture2D nodeTexture = reached ? chapterBlueTexture : chapterDarkTexture;
-                GUI.DrawTexture(node, nodeTexture, ScaleMode.StretchToFill);
-
-                ChapterLabelStyle.normal.textColor = reached
-                    ? PaletteSettings.Mantle
-                    : PaletteSettings.TextPrimary;
-                GUI.Label(node, chapter.ToString(), ChapterLabelStyle);
-            }
-
-            Rect endNode = GetChapterNodeRect(ChapterCount + 1, layout);
-            GUI.Label(new Rect(endNode.center.x - 70f, endNode.y - 26f, 140f, 20f), "EPILOG", HintStyle);
-            GUI.DrawTexture(endNode, chapterDarkTexture, ScaleMode.StretchToFill);
-            ChapterLabelStyle.normal.textColor = PaletteSettings.TextPrimary;
-            GUI.Label(endNode, "N", ChapterLabelStyle);
-
-            if (hoveredChapter > 0)
-            {
-                if (hoveredChapter != lastHoveredChapter || hoveredLevel != lastHoveredLevel)
-                {
-                    SimulationAudio.PlayMenuHover();
-                    lastHoveredChapter = hoveredChapter;
-                    lastHoveredLevel = hoveredLevel;
-                }
-                string sceneName = LevelSceneName(hoveredChapter, hoveredLevel);
-                bool unlocked = SimulationProgress.IsUnlocked(hoveredChapter, hoveredLevel);
-                string labelTitle = levelTitles[hoveredChapter, hoveredLevel];
-                string formatted;
-                if (!unlocked)
-                {
-                    formatted = string.Format("{0}.{1}  //  LOCKED ({2})", hoveredChapter, hoveredLevel,
-                        string.IsNullOrEmpty(labelTitle) ? "SECTOR" : labelTitle.ToUpperInvariant());
-                }
-                else
-                {
-                    int stars = SimulationProgress.GetStars(sceneName);
-                    string rankSuffix = stars > 0 ? "  [" + new string('★', stars) + new string('☆', 3 - stars) + "]" : "";
-                    string fragSuffix = SimulationProgress.HasFragment(sceneName) ? "  •  MEMORY" : "";
-                    formatted = string.Format("{0}.{1}  //  {2}{3}{4}", hoveredChapter, hoveredLevel,
-                        (labelTitle ?? "SECTOR").ToUpperInvariant(), rankSuffix, fragSuffix);
-                }
-                DrawTooltip(hoveredDotRect, formatted, unlocked);
+                float k = t / 0.28f;
+                float easeIn = k * k;
+                y = Mathf.Lerp(smashStartY, enterSmashThresholdY - 48f, easeIn);
+                x = Mathf.Lerp(smashStartX, enterWorldRect.center.x - 48f, easeIn);
             }
             else
             {
-                lastHoveredChapter = 0;
-                lastHoveredLevel = 0;
+                float k = (t - 0.28f) / 0.72f;
+                float easeOut = 1f - Mathf.Pow(1f - k, 3f);
+                y = Mathf.Lerp(enterSmashThresholdY - 48f, smashTargetY, easeOut);
+                x = Mathf.Lerp(enterWorldRect.center.x - 48f, smashTargetX, easeOut);
+                if (cameraOrbit != null) cameraOrbit.SetSmashDescent(k);
+            }
+
+            if (!buttonShattered && t >= 0.27f)
+            {
+                SpawnEnterShards(enterWorldRect, ChapterAccentColor(currentChapter));
+                TriggerImpactShockwave(enterWorldRect.center, ChapterAccentColor(currentChapter));
+                SimulationAudio.PlayMenuSmash();
+                SimulationVFX.Burst(new Vector3(-0.4f, 0.9f, 0.3f), ChapterAccentColor(currentChapter), 26, 3.4f);
+                SimulationVisualBridge.TriggerFloorRipple(new Vector3(-0.4f, 0f, 0.3f), ChapterAccentColor(currentChapter), 7.5f, 1.35f, 0.78f);
+                if (cameraOrbit != null) cameraOrbit.TriggerImpactPunch(0.28f);
+                buttonShattered = true;
+            }
+
+            if (fallingNode != null)
+            {
+                fallingNode.style.left = x;
+                fallingNode.style.top = y;
+                float spinScale = t < 0.28f ? 1.08f : Mathf.Lerp(1.12f, 0.65f, (t - 0.28f) / 0.72f);
+                fallingNode.style.scale = new Scale(new Vector3(spinScale, spinScale, 1f));
+            }
+
+            if (Time.unscaledTime >= nextTrailMoteAt && fxLayer != null && t < 0.96f)
+            {
+                nextTrailMoteAt = Time.unscaledTime + 0.028f;
+                SpawnTrailMote(new Vector2(x + 48f, y + 48f), ChapterAccentColor(currentChapter));
+            }
+
+            if (t < 1f) return;
+
+            if (!landingPlayed)
+            {
+                SimulationAudio.PlayMenuNodeLand();
+                SimulationVFX.Ring(new Vector3(-0.7f, 0.08f, -0.5f), ChapterAccentColor(currentChapter), 2.8f, 0.48f);
+                TriggerImpactShockwave(new Vector2(smashTargetX + 48f, smashTargetY + 48f), ChapterAccentColor(currentChapter));
+                landingPlayed = true;
+            }
+
+            if (cameraOrbit != null) cameraOrbit.ClearSmashDescent();
+            if (fallingNode != null)
+            {
+                fallingNode.AddToClassList("falling-node--hidden");
+                fallingNode.style.scale = new Scale(Vector3.one);
+            }
+            if (hiddenLandingDot != null)
+            {
+                hiddenLandingDot.style.visibility = Visibility.Visible;
+                hiddenLandingDot = null;
+            }
+
+            if (titleView != null) titleView.style.display = DisplayStyle.None;
+            state = MenuState.LevelMenu;
+        }
+
+        private void TriggerImpactShockwave(Vector2 center, Color color)
+        {
+            if (impactShockwave == null) return;
+            shockwaveOrigin = center;
+            shockwaveElapsed = 0f;
+            impactShockwave.style.left = center.x - 60f;
+            impactShockwave.style.top = center.y - 60f;
+            SetBorderColor(impactShockwave, color);
+            impactShockwave.style.scale = new Scale(new Vector3(0.45f, 0.45f, 1f));
+            impactShockwave.style.opacity = 1f;
+            impactShockwave.RemoveFromClassList("impact-shockwave--hidden");
+        }
+
+        private void UpdateShockwave()
+        {
+            if (shockwaveElapsed < 0f || impactShockwave == null) return;
+            shockwaveElapsed += Time.unscaledDeltaTime;
+            float u = Mathf.Clamp01(shockwaveElapsed / 0.28f);
+            float s = Mathf.Lerp(0.45f, 2.75f, 1f - Mathf.Pow(1f - u, 3f));
+            impactShockwave.style.left = shockwaveOrigin.x - 60f;
+            impactShockwave.style.top = shockwaveOrigin.y - 60f;
+            impactShockwave.style.scale = new Scale(new Vector3(s, s, 1f));
+            impactShockwave.style.opacity = (1f - u) * (1f - u);
+            if (u >= 1f)
+            {
+                shockwaveElapsed = -1f;
+                impactShockwave.AddToClassList("impact-shockwave--hidden");
             }
         }
 
-        private void DrawTooltip(Rect anchor, string title, bool unlocked)
+        private void SpawnTrailMote(Vector2 center, Color color)
         {
-            if (string.IsNullOrEmpty(title)) return;
+            if (fxLayer == null) return;
+            VisualElement mote = new VisualElement();
+            mote.AddToClassList("orb-trail-mote");
+            mote.pickingMode = PickingMode.Ignore;
+            float sz = Random.Range(10f, 18f);
+            float sx = center.x - sz * 0.5f + Random.Range(-10f, 10f);
+            float sy = center.y - sz * 0.5f + Random.Range(-10f, 10f);
+            mote.style.width = sz;
+            mote.style.height = sz;
+            mote.style.left = sx;
+            mote.style.top = sy;
+            mote.style.backgroundColor = Color.Lerp(color, PaletteSettings.Text, 0.35f);
+            fxLayer.Add(mote);
 
-            Vector2 size = TooltipStyle.CalcSize(new GUIContent(title));
-            size.x += 14f;
-            size.y += 6f;
-            Rect rect = new Rect(anchor.center.x - size.x * 0.5f, anchor.yMax + 14f,
-                size.x, size.y);
-
-            DrawFrameBorder(rect, 1.5f, unlocked ? borderAccentTexture : borderMutedTexture);
-            GUI.DrawTexture(rect, buttonNormalTexture, ScaleMode.StretchToFill);
-            GUI.Label(rect, title, TooltipStyle);
+            activeShards.Add(new RibbonShard
+            {
+                element = mote,
+                x = sx,
+                y = sy,
+                vx = Random.Range(-38f, 38f),
+                vy = Random.Range(-90f, -20f),
+                angle = 0f,
+                angularVel = 0f,
+                life = 0.34f,
+                maxLife = 0.34f
+            });
         }
 
-        private void SpawnButtonBreak(Rect buttonRect)
+        private void SpawnEnterShards(Rect rect, Color accentColor)
         {
-            pieces.Clear();
-
-            const int columns = 4;
+            if (fxLayer == null) return;
+            const int cols = 6;
             const int rows = 2;
-            float pieceWidth = buttonRect.width / columns;
-            float pieceHeight = buttonRect.height / rows;
-            Vector2 centre = buttonRect.center;
+            float w = Mathf.Max(22f, rect.width / cols);
+            float h = Mathf.Max(14f, rect.height / rows);
 
-            for (int y = 0; y < rows; y++)
+            for (int r = 0; r < rows; r++)
             {
-                for (int x = 0; x < columns; x++)
+                for (int c = 0; c < cols; c++)
                 {
-                    Rect rect = new Rect(buttonRect.x + x * pieceWidth,
-                        buttonRect.y + y * pieceHeight, pieceWidth, pieceHeight);
-                    Vector2 outward = (rect.center - centre).normalized;
+                    VisualElement shard = new VisualElement();
+                    shard.AddToClassList("break-shard");
+                    shard.pickingMode = PickingMode.Ignore;
+                    SetBorderColor(shard, accentColor);
+                    float sx = rect.x + c * w;
+                    float sy = rect.y + r * h;
+                    shard.style.left = sx;
+                    shard.style.top = sy;
+                    shard.style.width = w - 2f;
+                    shard.style.height = h - 2f;
+                    fxLayer.Add(shard);
 
-                    pieces.Add(new BreakPiece
+                    Vector2 outDir = new Vector2((c - 2.5f) * 0.85f, r - 0.5f).normalized;
+                    float maxLife = Random.Range(0.50f, 0.80f);
+                    activeShards.Add(new RibbonShard
                     {
-                        rect = rect,
-                        velocity = outward * Random.Range(140f, 300f) +
-                            new Vector2(Random.Range(-60f, 60f), -Random.Range(80f, 220f)),
-                        life = Random.Range(0.45f, 0.7f),
-                        texture = (x + y) % 2 == 0 ? buttonNormalTexture : buttonHoverTexture
+                        element = shard,
+                        x = sx,
+                        y = sy,
+                        vx = outDir.x * Random.Range(220f, 440f) + Random.Range(-65f, 65f),
+                        vy = outDir.y * Random.Range(90f, 220f) - Random.Range(90f, 240f),
+                        angle = Random.Range(-15f, 15f),
+                        angularVel = Random.Range(-420f, 420f),
+                        life = maxLife,
+                        maxLife = maxLife
                     });
                 }
             }
         }
 
-        private void DrawPieces()
+        private void UpdateShards(float dt)
         {
-            Color previous = GUI.color;
-            for (int i = 0; i < pieces.Count; i++)
+            for (int i = activeShards.Count - 1; i >= 0; i--)
             {
-                BreakPiece piece = pieces[i];
-                GUI.color = new Color(1f, 1f, 1f, Mathf.Clamp01(piece.life / 0.7f));
-                GUI.DrawTexture(piece.rect, piece.texture, ScaleMode.StretchToFill);
+                RibbonShard s = activeShards[i];
+                s.life -= dt;
+                if (s.life <= 0f)
+                {
+                    s.element.RemoveFromHierarchy();
+                    activeShards.RemoveAt(i);
+                    continue;
+                }
+                bool hasGravity = Mathf.Abs(s.angularVel) > 0.01f;
+                if (hasGravity) s.vy += 1480f * dt;
+                s.x += s.vx * dt;
+                s.y += s.vy * dt;
+                s.angle += s.angularVel * dt;
+                s.element.style.left = s.x;
+                s.element.style.top = s.y;
+                if (hasGravity) s.element.style.rotate = new Rotate(s.angle);
+                s.element.style.opacity = Mathf.Clamp01(s.life / Mathf.Max(0.1f, s.maxLife));
             }
-            GUI.color = previous;
         }
 
-        private void Select(int index)
+        private void LaunchChamber(string sceneName, Button sourceDot)
         {
+            if (state == MenuState.PortalZoom || state == MenuState.Done) return;
+            state = MenuState.PortalZoom;
+            portalSceneName = sceneName;
+            portalStartTime = Time.unscaledTime;
+            portalSceneDispatched = false;
+
+            SimulationAudio.PlayModeSwitch(true);
+            SimulationVFX.PlaySpawnAperture(new Vector3(-0.7f, 0.3f, -0.5f), ChapterAccentColor(selectedChapter));
+            SimulationVisualBridge.TriggerFloorRipple(new Vector3(-0.7f, 0f, -0.5f), ChapterAccentColor(selectedChapter), 9.0f, 1.4f, 0.72f);
+
+            if (titleView != null) titleView.AddToClassList("title-view--up");
+            if (ribbonView != null) ribbonView.AddToClassList("ribbon-view--fading");
+
+            Vector2 panelSize = GetPanelSize();
+            portalStartCenter = sourceDot != null && sourceDot.worldBound.width > 1f
+                ? sourceDot.worldBound.center
+                : panelSize * 0.5f;
+            portalStartSize = sourceDot != null && sourceDot.worldBound.width > 1f
+                ? sourceDot.worldBound.width
+                : 40f;
+            Color chapColor = ChapterAccentColor(selectedChapter);
+            if (portalZoomLabel != null)
+                portalZoomLabel.text = string.IsNullOrEmpty(portalSceneName) || SimulationProgress.IsSpecialShowcase(portalSceneName)
+                    ? "DEMO"
+                    : selectedChapter + "." + selectedLevel;
+            if (portalZoomRing != null)
+                SetBorderColor(portalZoomRing, chapColor);
+
+            if (portalZoomOrb != null)
+            {
+                portalZoomOrb.RemoveFromClassList("portal-zoom-orb--hidden");
+                portalZoomOrb.style.backgroundColor = chapColor;
+                portalZoomOrb.style.left = portalStartCenter.x - portalStartSize * 0.5f;
+                portalZoomOrb.style.top = portalStartCenter.y - portalStartSize * 0.5f;
+                portalZoomOrb.style.width = portalStartSize;
+                portalZoomOrb.style.height = portalStartSize;
+                portalZoomOrb.style.borderTopLeftRadius = portalStartSize * 0.5f;
+                portalZoomOrb.style.borderTopRightRadius = portalStartSize * 0.5f;
+                portalZoomOrb.style.borderBottomLeftRadius = portalStartSize * 0.5f;
+                portalZoomOrb.style.borderBottomRightRadius = portalStartSize * 0.5f;
+                portalZoomOrb.style.scale = new Scale(Vector3.one);
+                portalZoomOrb.style.opacity = 1f;
+            }
+        }
+
+        private void UpdatePortalLaunch()
+        {
+            float duration = SimulationSettings.ReduceMotion ? 0.16f : Mathf.Max(0.25f, portalZoomDuration);
+            float t = Mathf.Clamp01((Time.unscaledTime - portalStartTime) / duration);
+            float eased = 1f - Mathf.Pow(1f - t, 3f);
+
+            Vector2 panelSize = GetPanelSize();
+            Vector2 centerNow = Vector2.Lerp(portalStartCenter, panelSize * 0.5f, eased);
+            float sizeNow = Mathf.Lerp(portalStartSize, portalTargetSize, eased);
+
+            if (cameraOrbit != null) cameraOrbit.SetPortalDive(eased);
+
+            if (portalZoomOrb != null)
+            {
+                portalZoomOrb.style.width = sizeNow;
+                portalZoomOrb.style.height = sizeNow;
+                portalZoomOrb.style.left = centerNow.x - sizeNow * 0.5f;
+                portalZoomOrb.style.top = centerNow.y - sizeNow * 0.5f;
+                if (portalZoomRing != null) portalZoomRing.style.rotate = new Rotate(eased * 140f);
+                if (portalZoomLabel != null) portalZoomLabel.style.fontSize = Mathf.Lerp(14f, 64f, eased);
+            }
+
+            if (!portalSceneDispatched && t >= 0.72f)
+            {
+                portalSceneDispatched = true;
+                state = MenuState.Done;
+                SceneTransition.Begin(portalSceneName, 0f, sceneFadeDuration, PaletteSettings.Crust);
+            }
+        }
+
+        private Vector2 GetPanelSize()
+        {
+            Vector2 panelSize = uiDocument != null && uiDocument.rootVisualElement != null
+                ? uiDocument.rootVisualElement.worldBound.size : new Vector2(1920f, 1080f);
+            return panelSize.x < 100f ? new Vector2(1920f, 1080f) : panelSize;
+        }
+
+        private void OnRibbonPointerDown(PointerDownEvent evt)
+        {
+            if (state != MenuState.LevelMenu || evt.button != 0) return;
+            if (evt.target is Button) return;
+            draggingRibbon = true;
+            dragStartX = evt.position.x;
+            dragStartScroll = horizontalScroll;
+            targetScroll = horizontalScroll;
+            ribbonViewport.CapturePointer(evt.pointerId);
+        }
+
+        private void OnRibbonPointerMove(PointerMoveEvent evt)
+        {
+            if (!draggingRibbon) return;
+            float viewW = ribbonViewport != null ? ribbonViewport.resolvedStyle.width : 1848f;
+            float next = dragStartScroll - (evt.position.x - dragStartX);
+            horizontalScroll = targetScroll = ClampScroll(next, viewW);
+            if (ribbonTrack != null) ribbonTrack.style.left = -horizontalScroll;
+            UpdateCameraScrollParallax(viewW);
+        }
+
+        private void OnRibbonPointerUp(PointerUpEvent evt)
+        {
+            if (!draggingRibbon) return;
+            draggingRibbon = false;
+            if (ribbonViewport.HasPointerCapture(evt.pointerId))
+                ribbonViewport.ReleasePointer(evt.pointerId);
+        }
+
+        private void OnRibbonWheel(WheelEvent evt)
+        {
+            if (state != MenuState.LevelMenu) return;
+            float delta = Mathf.Abs(evt.delta.y) >= Mathf.Abs(evt.delta.x) ? evt.delta.y : evt.delta.x;
+            NudgeRibbonScroll(delta * 65f);
+            evt.StopPropagation();
+        }
+
+        private void NudgeRibbonScroll(float delta)
+        {
+            float viewW = ribbonViewport != null ? ribbonViewport.resolvedStyle.width : 1848f;
+            targetScroll = ClampScroll(targetScroll + delta, viewW);
+        }
+
+        private void UpdateRibbonScrollSmoothing(float dt)
+        {
+            if (ribbonTrack == null || Mathf.Approximately(horizontalScroll, targetScroll)) return;
+            float blend = 1f - Mathf.Exp(-14f * dt);
+            horizontalScroll = Mathf.Lerp(horizontalScroll, targetScroll, blend);
+            if (Mathf.Abs(targetScroll - horizontalScroll) < 0.5f) horizontalScroll = targetScroll;
+            ribbonTrack.style.left = -horizontalScroll;
+            float viewW = ribbonViewport != null ? ribbonViewport.resolvedStyle.width : 1848f;
+            UpdateCameraScrollParallax(viewW);
+        }
+
+        private void UpdateCameraScrollParallax(float viewportWidth)
+        {
+            if (cameraOrbit == null) return;
+            float max = MaxScroll(viewportWidth);
+            cameraOrbit.SetScrollFraction(Mathf.InverseLerp(-120f, max, horizontalScroll));
+        }
+
+        private static float MaxScroll(float viewportWidth)
+        {
+            float contentW = (ChapterCount + 1) * ClusterStride + 220f;
+            return Mathf.Max(120f, contentW - Mathf.Max(400f, viewportWidth) + 120f);
+        }
+
+        private static float ClampScroll(float value, float viewportWidth)
+            => Mathf.Clamp(value, -120f, MaxScroll(viewportWidth));
+
+        private void UpdateStaticPortalLaunch()
+        {
+            const float cameraSettleDuration = 0.50f;
+            const float shrinkDuration = 0.38f;
+            float elapsed = Time.unscaledTime - portalStartTime;
+
+            float camProgress = SimulationSettings.ReduceMotion ? 1f : Mathf.Clamp01(elapsed / cameraSettleDuration);
+            float easedCam = 1f - Mathf.Pow(1f - camProgress, 3f);
+            if (cameraOrbit != null)
+                cameraOrbit.SetPortalDive(easedCam);
+
+            // Smoothly shrink the clicked level circle instead of expanding/popping abruptly
+            if (portalZoomOrb != null)
+            {
+                float shrinkT = SimulationSettings.ReduceMotion ? 1f : Mathf.Clamp01(elapsed / shrinkDuration);
+                float shrinkEase = shrinkT * shrinkT * (3f - 2f * shrinkT);
+                float curSize = Mathf.Lerp(portalStartSize, 2f, shrinkEase);
+                portalZoomOrb.style.left = portalStartCenter.x - curSize * 0.5f;
+                portalZoomOrb.style.top = portalStartCenter.y - curSize * 0.5f;
+                portalZoomOrb.style.width = curSize;
+                portalZoomOrb.style.height = curSize;
+                portalZoomOrb.style.borderTopLeftRadius = curSize * 0.5f;
+                portalZoomOrb.style.borderTopRightRadius = curSize * 0.5f;
+                portalZoomOrb.style.borderBottomLeftRadius = curSize * 0.5f;
+                portalZoomOrb.style.borderBottomRightRadius = curSize * 0.5f;
+                portalZoomOrb.style.opacity = Mathf.Clamp01(1f - shrinkT * 0.85f);
+                if (portalZoomLabel != null)
+                    portalZoomLabel.style.opacity = Mathf.Clamp01(1f - shrinkT * 2.2f);
+                if (shrinkT >= 1f)
+                    portalZoomOrb.AddToClassList("portal-zoom-orb--hidden");
+            }
+
+            if (!portalSceneDispatched && elapsed >= cameraSettleDuration + 0.04f)
+            {
+                portalSceneDispatched = true;
+                state = MenuState.Done;
+                Texture2D staticSnapshot = CaptureRearRectCameraSnapshot();
+                StaticPortalTransition.Begin(portalSceneName, staticSnapshot, 0.06f, 0.28f);
+            }
+        }
+
+        private static Texture2D CaptureRearRectCameraSnapshot()
+        {
+            Camera cam = Camera.main;
+            if (cam == null) cam = Object.FindFirstObjectByType<Camera>();
+            if (cam == null) return null;
+
+            int width = Mathf.Clamp(Screen.width, 640, 1920);
+            int height = Mathf.Clamp(Screen.height, 360, 1080);
+
+            RenderTexture rt = RenderTexture.GetTemporary(width, height, 24, RenderTextureFormat.Default);
+            RenderTexture prevTarget = cam.targetTexture;
+            RenderTexture prevActive = RenderTexture.active;
+
+            Texture2D capture = null;
+            try
+            {
+                cam.targetTexture = rt;
+                cam.Render();
+                RenderTexture.active = rt;
+
+                capture = new Texture2D(width, height, TextureFormat.RGB24, false);
+                capture.ReadPixels(new Rect(0, 0, width, height), 0, 0);
+                capture.Apply(false, false);
+            }
+            finally
+            {
+                cam.targetTexture = prevTarget;
+                RenderTexture.active = prevActive;
+                RenderTexture.ReleaseTemporary(rt);
+            }
+            return capture;
+        }
+
+        private static void SetBorderColor(VisualElement el, Color c)
+        {
+            if (el == null) return;
+            el.style.borderTopColor = c;
+            el.style.borderRightColor = c;
+            el.style.borderBottomColor = c;
+            el.style.borderLeftColor = c;
+        }
+
+        private static Color ChapterAccentColor(int chapter)
+        {
+            switch (chapter)
+            {
+                case 1: return PaletteSettings.Sapphire;
+                case 2: return PaletteSettings.Lavender;
+                case 3: return PaletteSettings.Peach;
+                case 4: return PaletteSettings.Teal;
+                default: return PaletteSettings.Rosewater;
+            }
+        }
+
+        private void ToggleDemoAccess()
+        {
+            SimulationProgress.IsDemoUnlocked = !SimulationProgress.IsDemoUnlocked;
+            RefreshCurrentProgress();
+            UpdateTitleAndMetaLabels();
+            RebuildRibbonNodes();
+            UpdatePreviewCard(selectedChapter, selectedLevel);
             SimulationAudio.PlayMenuClick();
-            selectedButton = index;
-            stateStartTime = Time.unscaledTime;
-            horizontalScroll = 0f;
-            targetScroll = 0f;
-            dragging = false;
-            buttonBroken = false;
-            landingChimePlayed = false;
+        }
 
-            if (index == EnterButton)
+        private void ExecuteResetProgress()
+        {
+            SimulationProgress.ResetAll();
+            RefreshCurrentProgress();
+            selectedChapter = currentChapter;
+            selectedLevel = currentLevel;
+            UpdateTitleAndMetaLabels();
+            RebuildRibbonNodes();
+            UpdatePreviewCard(selectedChapter, selectedLevel);
+            SimulationAudio.PlayMenuSmash();
+        }
+
+        private void HandleResetSaveClicked()
+        {
+            if (resetConfirmUntil <= Time.unscaledTime)
             {
-                Rect enterRect, shutdownRect;
-                GetButtonRects(out enterRect, out shutdownRect);
-
-                squareSize = ChapterNodeSize;
-                squareX = enterRect.center.x - squareSize * 0.5f;
-                fallStartY = -squareSize;
-
-                // Align the ribbon so the current chapter node sits exactly where
-                // the falling node will land (the Enter button's x-centre).
-                Layout raw = BuildLayout();
-                float baseX = Mathf.Max(16f, (Screen.width - raw.contentWidth) * 0.5f);
-                float alignScroll = baseX + raw.padding +
-                    (currentChapter - 1) * raw.pitch + raw.nodeSize * 0.5f - enterRect.center.x;
-                horizontalScroll = targetScroll = alignScroll;
-
-                fallTargetRect = GetChapterNodeRect(currentChapter, GetLayout());
-                state = MenuState.Falling;
+                resetConfirmUntil = Time.unscaledTime + 3.0f;
+                if (btnResetSave != null) btnResetSave.text = "Konfirmasi Hapus?";
+                SimulationAudio.PlayMenuHover();
+                return;
             }
-            else
+            resetConfirmUntil = 0f;
+            if (btnResetSave != null) btnResetSave.text = "RESET PROGRESS DATA";
+            ExecuteResetProgress();
+        }
+
+        private void OpenSettings()
+        {
+            settingsOpen = true;
+            ApplySettingsValuesToUI();
+            if (settingsOverlay != null) settingsOverlay.RemoveFromClassList("settings-overlay--hidden");
+            SimulationAudio.PlayMenuClick();
+            if (btnSettingsClose != null) btnSettingsClose.Focus();
+        }
+
+        private void CloseSettings()
+        {
+            settingsOpen = false;
+            resetConfirmUntil = 0f;
+            if (btnResetSave != null) btnResetSave.text = "RESET PROGRESS DATA";
+            if (settingsOverlay != null) settingsOverlay.AddToClassList("settings-overlay--hidden");
+            SimulationAudio.PlayMenuHover();
+            if (state == MenuState.Title && btnEnter != null) btnEnter.Focus();
+        }
+
+        private void ApplySettingsValuesToUI()
+        {
+            float vol = SimulationSettings.MasterVolume * 100f;
+            if (sliderVolume != null) sliderVolume.SetValueWithoutNotify(vol);
+            if (valVolume != null) valVolume.text = Mathf.RoundToInt(vol) + "%";
+
+            float sens = SimulationSettings.CameraSensitivity * 100f;
+            if (sliderSensitivity != null) sliderSensitivity.SetValueWithoutNotify(sens);
+            if (valSensitivity != null) valSensitivity.text = SimulationSettings.CameraSensitivity.ToString("0.0") + "x";
+
+            if (toggleReduceMotion != null) toggleReduceMotion.SetValueWithoutNotify(SimulationSettings.ReduceMotion);
+        }
+
+        private void ReturnToTitle()
+        {
+            if (state != MenuState.LevelMenu) return;
+            state = MenuState.Title;
+            if (cameraOrbit != null) cameraOrbit.SetRibbonOpen(false);
+            if (ribbonView != null) ribbonView.AddToClassList("ribbon-view--hidden");
+            if (titleView != null)
             {
-                squareSize = Mathf.Min(72f, Screen.width * 0.14f);
-                state = MenuState.Dropping;
+                titleView.style.display = DisplayStyle.Flex;
+                titleView.RemoveFromClassList("title-view--up");
             }
+            SimulationAudio.PlayMenuHover();
+            if (btnEnter != null) btnEnter.Focus();
         }
 
-        private void HandleLevelMenuInput()
+        private void BeginShutdown()
         {
-            Event current = Event.current;
-            Layout layout = GetLayout();
-
-            switch (current.type)
-            {
-                case EventType.MouseDown:
-                    if (current.button != 0 || IsPointerOverLevelDot(current.mousePosition, layout))
-                        break;
-                    dragging = true;
-                    dragStartX = current.mousePosition.x;
-                    dragStartScroll = horizontalScroll;
-                    targetScroll = horizontalScroll;
-                    break;
-
-                case EventType.MouseDrag:
-                    if (!dragging) break;
-                    horizontalScroll = dragStartScroll - (current.mousePosition.x - dragStartX);
-                    targetScroll = horizontalScroll;
-                    current.Use();
-                    break;
-
-                case EventType.MouseUp:
-                    if (current.button == 0) dragging = false;
-                    break;
-
-                case EventType.ScrollWheel:
-                    float delta = Mathf.Abs(current.delta.y) >= Mathf.Abs(current.delta.x)
-                        ? current.delta.y : current.delta.x;
-                    if (!Mathf.Approximately(delta, 0f))
-                    {
-                        float step = Mathf.Max(120f, Mathf.Abs(delta) * 60f);
-                        targetScroll = Mathf.Clamp(targetScroll + (delta < 0f ? step : -step),
-                            minScroll, maxScroll);
-                    }
-                    current.Use();
-                    break;
-            }
+            if (state != MenuState.Title || settingsOpen) return;
+            state = MenuState.Done;
+            SimulationAudio.PlayMenuSmash();
+            SceneTransition.Quit(0.25f, 0.45f);
         }
 
-        private static bool IsPointerOverLevelDot(Vector2 point, Layout layout)
-        {
-            for (int chapter = 1; chapter <= ChapterCount; chapter++)
-            {
-                int count = SimulationProgress.GetLevelsInChapter(chapter);
-                for (int level = 1; level <= count; level++)
-                {
-                    if (GetLevelDotRect(chapter, level, layout).Contains(point)) return true;
-                }
-            }
-            return false;
-        }
-
-        private static Layout BuildLayout()
-        {
-            Layout layout;
-            layout.nodeSize = ChapterNodeSize;
-            layout.dotSize = 24f;
-            layout.lineHeight = 6f;
-            layout.segmentLength = 400f;
-            layout.pitch = layout.nodeSize + layout.segmentLength;
-            layout.padding = 80f;
-            layout.contentWidth = layout.padding * 2f +
-                (ChapterCount + 1) * layout.nodeSize + ChapterCount * layout.segmentLength;
-            layout.bandY = (Screen.height - layout.nodeSize) * 0.5f;
-            layout.originX = 0f;
-            return layout;
-        }
-
-        private Layout GetLayout()
-        {
-            Layout layout = BuildLayout();
-            float baseX = Mathf.Max(16f, (Screen.width - layout.contentWidth) * 0.5f);
-
-            // The scroll range has to include the landing scroll so the LevelMenu
-            // doesn't jump the moment the user starts scrolling after the fall.
-            float alignCurrent = baseX + layout.padding +
-                (currentChapter - 1) * layout.pitch + layout.nodeSize * 0.5f - EnterCenterX;
-            float normalMax = Mathf.Max(0f, layout.contentWidth - Screen.width + layout.padding);
-            minScroll = Mathf.Min(0f, alignCurrent);
-            maxScroll = Mathf.Max(normalMax, alignCurrent);
-
-            horizontalScroll = Mathf.Clamp(horizontalScroll, minScroll, maxScroll);
-            targetScroll = Mathf.Clamp(targetScroll, minScroll, maxScroll);
-
-            layout.originX = baseX - horizontalScroll;
-            return layout;
-        }
-
-        private static Rect GetChapterNodeRect(int chapter, Layout layout)
-        {
-            float x = layout.originX + layout.padding + (chapter - 1) * layout.pitch;
-            return new Rect(x, layout.bandY, layout.nodeSize, layout.nodeSize);
-        }
-
-        private static Rect GetLevelDotRect(int chapter, int level, Layout layout)
-        {
-            Rect node = GetChapterNodeRect(chapter, layout);
-            int count = Mathf.Max(1, SimulationProgress.GetLevelsInChapter(chapter));
-            float spacing = layout.segmentLength / (count + 1);
-            float centreX = node.xMax + spacing * level;
-            return new Rect(centreX - layout.dotSize * 0.5f,
-                node.center.y - layout.dotSize * 0.5f, layout.dotSize, layout.dotSize);
-        }
-
-        private string LevelSceneName(int chapter, int level)
-        {
-            return string.Format(levelSceneFormat, chapter, level);
-        }
-
-        private static float EnterCenterX
-        {
-            get
-            {
-                Rect enter, shutdown;
-                GetButtonRects(out enter, out shutdown);
-                return enter.center.x;
-            }
-        }
-
-        private static void GetButtonRects(out Rect enterRect, out Rect shutdownRect)
-        {
-            float gap = 20f;
-            float buttonWidth = Mathf.Min(260f, (Screen.width - 64f - gap) * 0.5f);
-            float buttonHeight = 58f;
-            float left = (Screen.width - (buttonWidth * 2f + gap)) * 0.5f;
-            float buttonY = Screen.height * 0.5f + 20f;
-
-            enterRect = new Rect(left, buttonY, buttonWidth, buttonHeight);
-            shutdownRect = new Rect(left + buttonWidth + gap, buttonY, buttonWidth, buttonHeight);
-        }
-
-        private GUIStyle TitleStyle
-        {
-            get
-            {
-                if (titleStyle != null) return titleStyle;
-
-                titleStyle = new GUIStyle
-                {
-                    alignment = TextAnchor.MiddleCenter,
-                    fontSize = Mathf.Max(24, Mathf.RoundToInt(Screen.height * 0.06f)),
-                    fontStyle = FontStyle.Bold
-                };
-                titleStyle.font = GUI.skin.font;
-                titleStyle.normal.textColor = PaletteSettings.TextPrimary;
-                return titleStyle;
-            }
-        }
-
-        private GUIStyle SubtitleStyle
-        {
-            get
-            {
-                if (subtitleStyle != null) return subtitleStyle;
-                subtitleStyle = new GUIStyle(GUI.skin.label)
-                {
-                    alignment = TextAnchor.MiddleCenter,
-                    fontSize = 13,
-                    fontStyle = FontStyle.Bold
-                };
-                subtitleStyle.font = GUI.skin.font;
-                subtitleStyle.normal.textColor = PaletteSettings.TextSecondary;
-                return subtitleStyle;
-            }
-        }
-
-        private GUIStyle leftMetaStyle;
-        private GUIStyle rightMetaStyle;
-
-        private GUIStyle LeftMetaStyle
-        {
-            get
-            {
-                if (leftMetaStyle == null)
-                {
-                    leftMetaStyle = new GUIStyle(HintStyle) { alignment = TextAnchor.MiddleLeft };
-                    leftMetaStyle.normal.textColor = PaletteSettings.Teal;
-                }
-                return leftMetaStyle;
-            }
-        }
-
-        private GUIStyle RightMetaStyle
-        {
-            get
-            {
-                if (rightMetaStyle == null)
-                    rightMetaStyle = new GUIStyle(HintStyle) { alignment = TextAnchor.MiddleRight };
-                rightMetaStyle.normal.textColor = SimulationProgress.IsDemoUnlocked
-                    ? PaletteSettings.Green
-                    : PaletteSettings.Overlay2;
-                return rightMetaStyle;
-            }
-        }
-
-        private GUIStyle HintStyle
-        {
-            get
-            {
-                if (hintStyle != null) return hintStyle;
-                hintStyle = new GUIStyle(GUI.skin.label)
-                {
-                    alignment = TextAnchor.MiddleCenter,
-                    fontSize = 12,
-                    fontStyle = FontStyle.Bold
-                };
-                hintStyle.font = GUI.skin.font;
-                hintStyle.normal.textColor = PaletteSettings.Overlay2;
-                return hintStyle;
-            }
-        }
-
-        private GUIStyle ButtonStyle
-        {
-            get
-            {
-                if (buttonStyle != null) return buttonStyle;
-
-                buttonStyle = new GUIStyle
-                {
-                    alignment = TextAnchor.MiddleCenter,
-                    fontSize = 20,
-                    fontStyle = FontStyle.Bold,
-                    border = new RectOffset(0, 0, 0, 0),
-                    padding = new RectOffset(12, 12, 8, 8)
-                };
-                buttonStyle.font = GUI.skin.font;
-
-                buttonStyle.normal.background = buttonNormalTexture;
-                buttonStyle.normal.textColor = PaletteSettings.TextPrimary;
-                buttonStyle.hover.background = buttonHoverTexture;
-                buttonStyle.hover.textColor = PaletteSettings.TextPrimary;
-                buttonStyle.active.background = buttonNormalTexture;
-                buttonStyle.active.textColor = PaletteSettings.TextPrimary;
-                buttonStyle.focused.background = buttonNormalTexture;
-                buttonStyle.focused.textColor = PaletteSettings.TextPrimary;
-                buttonStyle.onNormal.background = buttonNormalTexture;
-                buttonStyle.onNormal.textColor = PaletteSettings.TextPrimary;
-                buttonStyle.onHover.background = buttonHoverTexture;
-                buttonStyle.onHover.textColor = PaletteSettings.TextPrimary;
-                buttonStyle.onActive.background = buttonNormalTexture;
-                buttonStyle.onActive.textColor = PaletteSettings.TextPrimary;
-                buttonStyle.onFocused.background = buttonNormalTexture;
-                buttonStyle.onFocused.textColor = PaletteSettings.TextPrimary;
-                return buttonStyle;
-            }
-        }
-
-        private GUIStyle ChapterLabelStyle
-        {
-            get
-            {
-                if (chapterLabelStyle != null) return chapterLabelStyle;
-
-                chapterLabelStyle = new GUIStyle(GUI.skin.label)
-                {
-                    alignment = TextAnchor.MiddleCenter,
-                    fontSize = 34,
-                    fontStyle = FontStyle.Bold
-                };
-                chapterLabelStyle.font = GUI.skin.font;
-                return chapterLabelStyle;
-            }
-        }
-
-        private GUIStyle TooltipStyle
-        {
-            get
-            {
-                if (tooltipStyle != null) return tooltipStyle;
-
-                tooltipStyle = new GUIStyle(GUI.skin.label)
-                {
-                    alignment = TextAnchor.MiddleCenter,
-                    fontSize = 16,
-                    fontStyle = FontStyle.Bold,
-                    padding = new RectOffset(12, 12, 6, 6)
-                };
-                tooltipStyle.font = GUI.skin.font;
-                tooltipStyle.normal.textColor = PaletteSettings.TextPrimary;
-                return tooltipStyle;
-            }
-        }
-
-        private static Texture2D SolidTexture(Color color)
-        {
-            Texture2D texture = new Texture2D(1, 1, TextureFormat.RGBA32, false);
-            texture.SetPixel(0, 0, color);
-            texture.Apply();
-            texture.hideFlags = HideFlags.HideAndDontSave;
-            return texture;
-        }
-
-        private static Texture2D RoundedTexture(Color color, int size, float radius)
-        {
-            Texture2D texture = new Texture2D(size, size, TextureFormat.RGBA32, false);
-            texture.filterMode = FilterMode.Bilinear;
-            Color transparent = new Color(color.r, color.g, color.b, 0f);
-            float corner = Mathf.Clamp(radius, 0f, size * 0.5f);
-
-            for (int y = 0; y < size; y++)
-            {
-                for (int x = 0; x < size; x++)
-                {
-                    float nearestX = Mathf.Clamp(x + 0.5f, corner, size - corner);
-                    float nearestY = Mathf.Clamp(y + 0.5f, corner, size - corner);
-                    float dx = x + 0.5f - nearestX;
-                    float dy = y + 0.5f - nearestY;
-                    texture.SetPixel(x, y, dx * dx + dy * dy <= corner * corner ? color : transparent);
-                }
-            }
-
-            texture.Apply();
-            texture.hideFlags = HideFlags.HideAndDontSave;
-            return texture;
-        }
-
-        private void OnDestroy()
-        {
-            Destroy(backgroundTexture);
-            Destroy(buttonNormalTexture);
-            Destroy(buttonHoverTexture);
-            Destroy(borderAccentTexture);
-            Destroy(borderMutedTexture);
-            Destroy(squareSharpTexture);
-            Destroy(chapterDarkTexture);
-            Destroy(chapterBlueTexture);
-            Destroy(dotDarkTexture);
-            Destroy(dotBlueTexture);
-            Destroy(dotGreenTexture);
-            Destroy(lineDarkTexture);
-            Destroy(lineBlueTexture);
-        }
+        private string LevelSceneName(int chapter, int level) => string.Format(levelSceneFormat, chapter, level);
     }
 }

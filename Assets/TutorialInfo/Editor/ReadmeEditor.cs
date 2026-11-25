@@ -10,7 +10,11 @@ sealed partial class ReadmeEditor : Editor
     const string k_ShowedReadmeSessionStateName = "ReadmeEditor.showedReadme";
     const string k_ReadmeSourceDirectory = "Assets/TutorialInfo";
 
+#if UNITY_6000_6_OR_NEWER
     [OnCodeLoaded]
+#else
+    [InitializeOnLoadMethod]
+#endif
     static void OnCodeLoaded()
         => EditorApplication.delayCall += SelectReadmeAutomatically;
 

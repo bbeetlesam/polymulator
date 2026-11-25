@@ -25,17 +25,23 @@ namespace Polymulator
         public ObjectCarryController carryController;
         public TelekinesisController telekinesisController;
         public ObjectInteractor interactor;
+        public PartitionFusionController partitionFusionController;
+
+        private bool levelAllowsPartition;
+        private bool levelAllowsFusion;
 
         public SimulationMode CurrentMode => currentMode;
         public bool IsLimited => currentMode == SimulationMode.Limited;
         public bool IsFlexible => currentMode == SimulationMode.Flexible;
+        public bool CanUsePartition => levelAllowsPartition || SimulationProgress.IsDemoUnlocked;
+        public bool CanUseFusion => levelAllowsFusion || SimulationProgress.IsDemoUnlocked;
 
         public Color ModeColor => IsLimited ? PaletteSettings.ModeLimited : PaletteSettings.ModeFlexible;
 
         public string ModeLabel => IsLimited ? "LIMITED" : "FLEXIBLE";
         public string ModeSummary => IsLimited
-            ? "Carry  /  90° Rotate  /  Forward Throw"
-            : "Free-Aim Telekinesis  /  Free Elevate & Spin";
+            ? "Gerak Terarah  /  Putar 90°  /  Lempar"
+            : "Gerak Bebas  /  Telekinesis";
 
         public event Action<SimulationMode> OnModeChanged;
         public event Action<string, Color> OnStatusBanner;
@@ -52,6 +58,25 @@ namespace Polymulator
             if (carryController == null) carryController = GetComponent<ObjectCarryController>();
             if (telekinesisController == null) telekinesisController = GetComponent<TelekinesisController>();
             if (interactor == null) interactor = GetComponent<ObjectInteractor>();
+            if (partitionFusionController == null)
+            {
+                partitionFusionController = GetComponent<PartitionFusionController>();
+                if (partitionFusionController == null)
+                    partitionFusionController = gameObject.AddComponent<PartitionFusionController>();
+            }
+
+            string sceneName = UnityEngine.SceneManagement.SceneManager.GetActiveScene().name;
+            LevelInfo info = Resources.Load<LevelInfo>("Levels/" + sceneName);
+            if (info != null)
+            {
+                levelAllowsPartition = info.AllowPartition;
+                levelAllowsFusion = info.AllowFusion;
+            }
+            else if (sceneName == "LevelShowcase")
+            {
+                levelAllowsPartition = true;
+                levelAllowsFusion = true;
+            }
         }
 
         private void OnDestroy()
@@ -63,6 +88,7 @@ namespace Polymulator
 
         private void Update()
         {
+            if (Time.timeScale <= 0f) return;
             Keyboard keyboard = Keyboard.current;
             if (keyboard == null) return;
 
@@ -71,11 +97,13 @@ namespace Polymulator
                 ToggleMode();
             prevTabPressed = tabDown;
 
-            // Milestone hooks: Partition & Fusion
+            // Milestone hooks: Partition [1], Fusion [2], Cut-Axis [3]
             if (keyboard.digit1Key.wasPressedThisFrame)
                 TriggerPartitionHook();
             if (keyboard.digit2Key.wasPressedThisFrame)
                 TriggerFusionHook();
+            if (keyboard.digit3Key.wasPressedThisFrame)
+                TriggerCycleCutAxisHook();
         }
 
         public void ToggleMode()
@@ -111,43 +139,37 @@ namespace Polymulator
             OnStatusBanner?.Invoke(message, color);
         }
 
-        /// <summary>Extension hook for Mahdi's Partition mechanic.</summary>
+        /// <summary>Executes Partition [1] when unlocked in this chamber or Showcase/Demo mode.</summary>
         public void TriggerPartitionHook()
         {
-            InteractableObject target = ActiveOrHighlightedTarget();
-            if (target != null && target.canPartition)
+            if (!CanUsePartition)
             {
-                SimulationVFX.Ring(target.transform.position, PaletteSettings.Peach, 1.4f, 0.35f);
-                OnStatusBanner?.Invoke("PARTITION [1] // MODULE LOCKED", PaletteSettings.Peach);
+                OnStatusBanner?.Invoke("PARTITION [1] belum aktif di chapter ini", PaletteSettings.Peach);
+                return;
             }
-            else
-            {
-                OnStatusBanner?.Invoke("PARTITION [1] // LOCKED", PaletteSettings.Peach);
-            }
+            partitionFusionController?.TryPartition();
         }
 
-        /// <summary>Extension hook for Farah's Fusion mechanic.</summary>
+        /// <summary>Executes Fusion [2] when unlocked in this chamber or Showcase/Demo mode.</summary>
         public void TriggerFusionHook()
         {
-            InteractableObject target = ActiveOrHighlightedTarget();
-            if (target != null && target.canFuse)
+            if (!CanUseFusion)
             {
-                SimulationVFX.Ring(target.transform.position, PaletteSettings.Green, 1.4f, 0.35f);
-                OnStatusBanner?.Invoke("FUSION [2] // MODULE LOCKED", PaletteSettings.Green);
+                OnStatusBanner?.Invoke("FUSION [2] belum aktif di chapter ini", PaletteSettings.Green);
+                return;
             }
-            else
-            {
-                OnStatusBanner?.Invoke("FUSION [2] // LOCKED", PaletteSettings.Green);
-            }
+            partitionFusionController?.TryFusion();
         }
 
-        private InteractableObject ActiveOrHighlightedTarget()
+        /// <summary>Cycles Partition [1] cut-plane orientation ([3]) when unlocked.</summary>
+        public void TriggerCycleCutAxisHook()
         {
-            if (carryController != null && carryController.IsCarrying)
-                return carryController.CarriedObject;
-            if (telekinesisController != null && telekinesisController.HasTether)
-                return telekinesisController.TetheredObject;
-            return interactor != null ? interactor.CurrentTarget : null;
+            if (!CanUsePartition)
+            {
+                OnStatusBanner?.Invoke("PARTITION [1] belum aktif di chapter ini", PaletteSettings.Peach);
+                return;
+            }
+            partitionFusionController?.CycleCutAxis();
         }
     }
 }

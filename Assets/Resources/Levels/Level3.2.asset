@@ -12,24 +12,26 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 2763873eddf04f878f13270a059f332a, type: 3}
   m_Name: Level3.2
   m_EditorClassIdentifier: Assembly-CSharp::Polymulator.LevelInfo
-  levelTitle: Bias
-  chapterSubtitle: ROTASI
+  levelTitle: Ruang Cermin Arsip
+  chapterSubtitle: "CHAPTER 3  \u2022  ROTASI"
   districtLabel: RUANG CERMIN ARSIP
-  parActions: 9
+  parActions: 10
   requireFacingAngle: 1
-  requiredFacingYaw: 270
-  fragmentTitle: Foto Adi Muda
+  requiredFacingYaw: 180
+  fragmentTitle: 
   triggerGlitchOnClear: 0
   playPianoOnClear: 0
+  allowPartition: 0
+  allowFusion: 0
   openingDialogue:
-  - speaker: SIM
-    text: Dua pelat cermin menuntut kesetimbangan sebelum jembatan terbuka. Kunci
-      menuntut sudut 270 deg (Barat).
+  - speaker: VELA
+    text: "Soket kali ini membalik ke arah SELATAN \u2014 berlawanan dari arah kedatanganmu."
+  - speaker: TEPI
+    text: Putar CORE-01 dua kali sebelum memasangnya.
   clearDialogue:
-  - speaker: SIM
-    text: Rekonstruksi Cermin selesai. Terdeteksi ruang tersembunyi tanpa indeks
-      pada Sektor 3.3.
+  - speaker: DANU
+    text: Rekaman arsip kota tersembunyi di unit yang tidak pernah dicatat peta resmi...
   hints:
-  - Kedua Pad (Barat >= 1.4t, Timur >= 1.8t) harus aktif bersamaan.
-  - CORE-01 awalnya menghadap 180 deg (Selatan). Tekan [R] satu kali (+90 deg ->
-    270 deg Barat) atau gunakan [V] Blueprint.
+  - Bawa PRISMA-BERAT ke PAD-CERMIN di kiri untuk menyalakan tangga naik.
+  - "Ambil CORE-01 dan tekan [R] DUA KALI sampai arah hadapnya menjadi 180\xB0 (Selatan)."
+  - Bawa CORE-01 naik jembatan ke ANCHOR-01.

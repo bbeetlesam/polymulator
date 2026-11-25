@@ -54,11 +54,14 @@ namespace Polymulator
 
         private void Update()
         {
+            if (Time.timeScale <= 0f) return;
+
             Keyboard keyboard = Keyboard.current;
             Mouse mouse = Mouse.current;
 
+            bool pointerOverHud = SimulationHUDController.IsPointerOverInteractiveUI;
             bool interactPressed = keyboard != null && keyboard.eKey.wasPressedThisFrame;
-            bool leftClickPressed = mouse != null && mouse.leftButton.wasPressedThisFrame;
+            bool leftClickPressed = !pointerOverHud && mouse != null && mouse.leftButton.wasPressedThisFrame;
 
             if (IsFlexible)
             {

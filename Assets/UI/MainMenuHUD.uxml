@@ -1,0 +1,104 @@
+<ui:UXML xmlns:ui="UnityEngine.UIElements" editor-extension-mode="False">
+    <Style src="MainMenuHUD.uss" />
+    <ui:VisualElement name="menu-root" class="menu-root">
+        <ui:VisualElement class="menu-vignette" picking-mode="Ignore" />
+
+        <!-- Title View -->
+        <ui:VisualElement name="title-view" class="title-view">
+            <ui:VisualElement class="title-pill" picking-mode="Ignore">
+                <ui:VisualElement class="title-pill-dot" picking-mode="Ignore" />
+                <ui:Label name="title-iter-label" text="Kota Tepi  •  Iterasi #127" class="title-pill-text" picking-mode="Ignore" />
+            </ui:VisualElement>
+
+            <ui:Label text="POLYMULATOR" class="hero-title" picking-mode="Ignore" />
+            <ui:Label text="Kota Tepi  •  Simulasi Rekonstruksi Spasial" class="hero-tagline" picking-mode="Ignore" />
+
+            <ui:VisualElement name="title-buttons" class="title-buttons">
+                <ui:Button name="btn-enter" text="Mulai Simulasi" class="menu-action-btn menu-action-btn--primary" />
+                <ui:Button name="btn-title-showcase" text="Ruang Showcase  •  Semua Mekanik" class="menu-action-btn menu-action-btn--showcase" />
+                <ui:Button name="btn-title-settings" text="Pengaturan" class="menu-action-btn" />
+                <ui:Button name="btn-shutdown" text="Keluar" class="menu-action-btn menu-action-btn--danger" />
+            </ui:VisualElement>
+
+            <ui:Label text="[Enter] Buka Pilihan Sektor  •  [Panah] Pilih" class="footer-hint" picking-mode="Ignore" />
+        </ui:VisualElement>
+
+        <!-- Chapter Ribbon View -->
+        <ui:VisualElement name="ribbon-view" class="ribbon-view ribbon-view--hidden">
+            <ui:VisualElement class="ribbon-topbar">
+                <ui:VisualElement class="meta-badge" picking-mode="Ignore">
+                    <ui:Label name="ribbon-meta-label" text="Iterasi #127  •  0/14 Ruangan  •  0 Memori" class="meta-badge-text" picking-mode="Ignore" />
+                </ui:VisualElement>
+                <ui:VisualElement class="topbar-actions">
+                    <ui:Button name="btn-ribbon-showcase" text="Ruang Showcase" class="top-chip-btn top-chip-btn--showcase" />
+                    <ui:Button name="btn-demo-toggle" text="[F2] Buka Semua: Mati" class="top-chip-btn" />
+                    <ui:Button name="btn-ribbon-settings" text="Pengaturan" class="top-chip-btn" />
+                    <ui:Button name="btn-ribbon-back" text="[Esc] Beranda" class="top-chip-btn" />
+                </ui:VisualElement>
+            </ui:VisualElement>
+
+            <ui:VisualElement name="ribbon-viewport" class="ribbon-viewport">
+                <ui:VisualElement name="ribbon-track" class="ribbon-track" />
+            </ui:VisualElement>
+
+            <ui:VisualElement class="ribbon-footer">
+                <ui:VisualElement name="chamber-preview-card" class="chamber-preview-card">
+                    <ui:VisualElement name="preview-accent" class="preview-accent" picking-mode="Ignore" />
+                    <ui:VisualElement class="preview-content" picking-mode="Ignore">
+                        <ui:Label name="preview-chapter-label" text="Chapter 1  •  Translasi" class="preview-chapter" picking-mode="Ignore" />
+                        <ui:Label name="preview-title-label" text="1.1  •  Bangun di Ruangan Kosong" class="preview-title" picking-mode="Ignore" />
+                        <ui:Label name="preview-status-label" text="Siap dimulai  •  Klik titik level atau tekan Enter" class="preview-status" picking-mode="Ignore" />
+                    </ui:VisualElement>
+                    <ui:Button name="btn-preview-launch" text="Mulai" class="preview-launch-btn" />
+                </ui:VisualElement>
+                <ui:Label text="Geser / Scroll / A-D untuk telusuri chapter  •  Klik titik level untuk masuk" class="footer-hint" picking-mode="Ignore" />
+            </ui:VisualElement>
+        </ui:VisualElement>
+
+        <!-- Smash + Falling Orb + Portal Zoom FX Layer -->
+        <ui:VisualElement name="fx-layer" class="fx-layer" picking-mode="Ignore">
+            <ui:VisualElement name="impact-shockwave" class="impact-shockwave impact-shockwave--hidden" picking-mode="Ignore" />
+            <ui:VisualElement name="falling-node" class="falling-node falling-node--hidden" picking-mode="Ignore">
+                <ui:VisualElement class="falling-node-ring" picking-mode="Ignore" />
+                <ui:VisualElement class="falling-node-highlight" picking-mode="Ignore" />
+                <ui:Label name="falling-node-label" text="1.1" class="falling-node-label" picking-mode="Ignore" />
+            </ui:VisualElement>
+            <ui:VisualElement name="portal-zoom-orb" class="portal-zoom-orb portal-zoom-orb--hidden" picking-mode="Ignore">
+                <ui:VisualElement name="portal-zoom-ring" class="portal-zoom-ring" picking-mode="Ignore" />
+                <ui:VisualElement class="portal-zoom-core" picking-mode="Ignore" />
+                <ui:Label name="portal-zoom-label" text="1.1" class="portal-zoom-label" picking-mode="Ignore" />
+            </ui:VisualElement>
+        </ui:VisualElement>
+
+        <!-- Settings Modal -->
+        <ui:VisualElement name="settings-overlay" class="settings-overlay settings-overlay--hidden">
+            <ui:VisualElement name="settings-card" class="settings-card">
+                <ui:VisualElement class="settings-topbar" picking-mode="Ignore" />
+                <ui:Label text="SYSTEM SETTINGS" class="settings-title" picking-mode="Ignore" />
+                <ui:Label text="AUDIO, CAMERA &amp; ACCESSIBILITY PREFERENCES" class="settings-subtitle" picking-mode="Ignore" />
+
+                <ui:VisualElement class="setting-row">
+                    <ui:Label text="MASTER VOLUME" class="setting-label" picking-mode="Ignore" />
+                    <ui:Slider name="slider-volume" low-value="0" high-value="100" value="85" class="setting-slider" />
+                    <ui:Label name="val-volume" text="85%" class="setting-value" picking-mode="Ignore" />
+                </ui:VisualElement>
+
+                <ui:VisualElement class="setting-row">
+                    <ui:Label text="CAMERA PEEK SENSITIVITY" class="setting-label" picking-mode="Ignore" />
+                    <ui:Slider name="slider-sensitivity" low-value="40" high-value="220" value="100" class="setting-slider" />
+                    <ui:Label name="val-sensitivity" text="1.0x" class="setting-value" picking-mode="Ignore" />
+                </ui:VisualElement>
+
+                <ui:VisualElement class="setting-row">
+                    <ui:Label text="REDUCE CAMERA MOTION" class="setting-label" picking-mode="Ignore" />
+                    <ui:Toggle name="toggle-reduce-motion" class="setting-toggle" />
+                </ui:VisualElement>
+
+                <ui:VisualElement class="settings-actions">
+                    <ui:Button name="btn-reset-save" text="Reset Progres" class="menu-action-btn menu-action-btn--danger" />
+                    <ui:Button name="btn-settings-close" text="Selesai  [Esc]" class="menu-action-btn menu-action-btn--primary" />
+                </ui:VisualElement>
+            </ui:VisualElement>
+        </ui:VisualElement>
+    </ui:VisualElement>
+</ui:UXML>

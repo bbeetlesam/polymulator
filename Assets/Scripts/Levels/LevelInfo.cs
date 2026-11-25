@@ -22,12 +22,14 @@ namespace Polymulator
         [SerializeField] private string districtLabel = "RUANG UJI";
         [SerializeField, Min(1)] private int parActions = 8;
 
-        [Header("Objective Rules")]
+        [Header("Objective Rules & Unlocks")]
         [SerializeField] private bool requireFacingAngle;
         [SerializeField] private float requiredFacingYaw;
         [SerializeField] private string fragmentTitle = string.Empty;
         [SerializeField] private bool triggerGlitchOnClear;
         [SerializeField] private bool playPianoOnClear;
+        [SerializeField] private bool allowPartition;
+        [SerializeField] private bool allowFusion;
 
         [Header("Diegetic Narrative & Hints")]
         [SerializeField] private StoryLine[] openingDialogue = System.Array.Empty<StoryLine>();
@@ -43,13 +45,16 @@ namespace Polymulator
         public string FragmentTitle => fragmentTitle;
         public bool TriggerGlitchOnClear => triggerGlitchOnClear;
         public bool PlayPianoOnClear => playPianoOnClear;
+        public bool AllowPartition => allowPartition;
+        public bool AllowFusion => allowFusion;
         public StoryLine[] OpeningDialogue => openingDialogue;
         public StoryLine[] ClearDialogue => clearDialogue;
         public string[] Hints => hints;
 
         public void Configure(string title, string chapterSub, string district, int par,
             bool requireAngle, float targetYaw, string fragment, bool glitchClear, bool pianoClear,
-            StoryLine[] opening, StoryLine[] clear, string[] simHints)
+            StoryLine[] opening, StoryLine[] clear, string[] simHints,
+            bool canUsePartition = false, bool canUseFusion = false)
         {
             levelTitle = title;
             chapterSubtitle = chapterSub;
@@ -60,6 +65,8 @@ namespace Polymulator
             fragmentTitle = fragment;
             triggerGlitchOnClear = glitchClear;
             playPianoOnClear = pianoClear;
+            allowPartition = canUsePartition;
+            allowFusion = canUseFusion;
             openingDialogue = opening ?? System.Array.Empty<StoryLine>();
             clearDialogue = clear ?? System.Array.Empty<StoryLine>();
             hints = simHints ?? System.Array.Empty<string>();

@@ -102,6 +102,7 @@ Material:
     - _GlossMapScale: 0
     - _Glossiness: 0
     - _GlossyReflections: 0
+    - _GrainStrength: 0.24
     - _GridUnitSize: 1
     - _MajorStep: 5
     - _MajorWidth: 0.065

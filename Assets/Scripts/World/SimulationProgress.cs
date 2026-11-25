@@ -1,12 +1,11 @@
-using System.Collections.Generic;
+using System;
 using UnityEngine;
 
 namespace Polymulator
 {
     /// <summary>
     /// Persistent campaign progression backed by PlayerPrefs tracking cleared levels,
-    /// efficiency star ratings (1-3), collected Memory Fragments, Iteration #127 counter,
-    /// and a presenter Demo-Unlock toggle.
+    /// best star ratings, collected memory fragments, showcase access, and chosen ending.
     /// </summary>
     public static class SimulationProgress
     {
@@ -26,36 +25,43 @@ namespace Polymulator
             }
         }
 
+        public const string ShowcaseSceneName = "LevelShowcase";
+        public const string EndingSceneName = "Level5.2";
+
         public static readonly string[] ChapterNames =
         {
             "",
             "TRANSLASI",
             "ELEVASI",
             "ROTASI",
-            "REKONSTRUKSI"
+            "FUSION & PARTITION",
+            "BADAI & PILIHAN AKHIR"
         };
 
         public static readonly CampaignEntry[] Catalog =
         {
-            new CampaignEntry(1, 1, "Warming Up"),
-            new CampaignEntry(1, 2, "Pasar"),
-            new CampaignEntry(1, 3, "Tag AD-I"),
-            new CampaignEntry(1, 4, "Ujian Pasar"),
-            new CampaignEntry(2, 1, "Angkat"),
-            new CampaignEntry(2, 2, "Susun"),
-            new CampaignEntry(2, 3, "Kotak Musik"),
-            new CampaignEntry(3, 1, "Kunci Orientasi"),
-            new CampaignEntry(3, 2, "Bias"),
-            new CampaignEntry(3, 3, "Ruang Piano"),
-            new CampaignEntry(4, 1, "Dua Sisi"),
-            new CampaignEntry(4, 2, "Ambang Badai")
+            new CampaignEntry(1, 1, "Bangun di Ruangan Kosong"),
+            new CampaignEntry(1, 2, "Jalan Pasar"),
+            new CampaignEntry(1, 3, "Gerbang Arsip Timur"),
+            new CampaignEntry(2, 1, "Tangga Rusun Matahari"),
+            new CampaignEntry(2, 2, "Teras Atas Rusun"),
+            new CampaignEntry(2, 3, "Puncak Menara Rusun"),
+            new CampaignEntry(3, 1, "Kunci Arah Arsip"),
+            new CampaignEntry(3, 2, "Ruang Cermin Arsip"),
+            new CampaignEntry(3, 3, "Apartemen Tak Terindeks"),
+            new CampaignEntry(4, 1, "Dua Beban Jadi Satu"),
+            new CampaignEntry(4, 2, "Satu Dibelah Dua"),
+            new CampaignEntry(4, 3, "Harmoni Dua Arah"),
+            new CampaignEntry(5, 1, "Ambang Badai"),
+            new CampaignEntry(5, 2, "Pilihan Akhir Kota Tepi")
         };
 
-        private const string KeyClearedPrefix = "POLY_CLR_";
-        private const string KeyStarsPrefix = "POLY_STAR_";
-        private const string KeyFragPrefix = "POLY_FRAG_";
-        private const string KeyDemoUnlock = "POLY_DEMO_ALL";
-        private const string KeyIteration = "POLY_ITERATION";
+        private const string KeyClearedPrefix = "SIM_CLEARED_";
+        private const string KeyStarsPrefix = "SIM_STARS_";
+        private const string KeyFragPrefix = "SIM_FRAG_";
+        private const string KeyDemoUnlock = "SIM_DEMO_UNLOCKED";
+        private const string KeyIteration = "SIM_ITERATION";
+        private const string KeyEnding = "SIM_ENDING_CHOICE";
 
         public static bool IsDemoUnlocked
         {
@@ -76,6 +82,16 @@ namespace Polymulator
             PlayerPrefs.Save();
         }
 
+        public static bool IsSpecialShowcase(string sceneName)
+        {
+            return string.Equals(sceneName, ShowcaseSceneName, StringComparison.OrdinalIgnoreCase);
+        }
+
+        public static bool IsEndingScene(string sceneName)
+        {
+            return string.Equals(sceneName, EndingSceneName, StringComparison.OrdinalIgnoreCase);
+        }
+
         public static int GetLevelsInChapter(int chapter)
         {
             int count = 0;
@@ -94,48 +110,61 @@ namespace Polymulator
 
         public static int GetCollectedFragmentCount()
         {
-            int count = 0;
+            int total = 0;
             for (int i = 0; i < Catalog.Length; i++)
             {
-                if (HasFragment(Catalog[i].sceneName)) count++;
+                if (HasFragment(Catalog[i].sceneName)) total++;
             }
-            return count;
+            if (HasFragment(ShowcaseSceneName)) total++;
+            return total;
+        }
+
+        public static bool IsUnlocked(string sceneName)
+        {
+            if (IsSpecialShowcase(sceneName)) return true;
+            for (int i = 0; i < Catalog.Length; i++)
+            {
+                if (Catalog[i].sceneName == sceneName) return IsUnlocked(Catalog[i].chapter, Catalog[i].level);
+            }
+            return IsDemoUnlocked;
         }
 
         public static bool IsUnlocked(int chapter, int level)
         {
             if (IsDemoUnlocked) return true;
             if (chapter == 1 && level == 1) return true;
-
-            int idx = IndexOf(chapter, level);
-            if (idx <= 0) return idx == 0;
-            return IsCleared(Catalog[idx - 1].sceneName);
+            for (int i = 1; i < Catalog.Length; i++)
+            {
+                if (Catalog[i].chapter == chapter && Catalog[i].level == level)
+                    return IsCleared(Catalog[i - 1].sceneName);
+            }
+            return false;
         }
 
         public static CampaignEntry GetHighestUnlocked()
         {
-            CampaignEntry highest = Catalog[0];
-            for (int i = 0; i < Catalog.Length; i++)
+            for (int i = Catalog.Length - 1; i >= 0; i--)
             {
-                if (IsUnlocked(Catalog[i].chapter, Catalog[i].level))
-                    highest = Catalog[i];
+                if (IsUnlocked(Catalog[i].chapter, Catalog[i].level)) return Catalog[i];
             }
-            return highest;
+            return Catalog[0];
         }
 
         public static string GetNextSceneName(string currentScene)
         {
-            int idx = IndexOf(currentScene);
-            if (idx >= 0 && idx + 1 < Catalog.Length)
-                return Catalog[idx + 1].sceneName;
+            if (IsSpecialShowcase(currentScene)) return string.Empty;
+            for (int i = 0; i < Catalog.Length - 1; i++)
+            {
+                if (Catalog[i].sceneName == currentScene) return Catalog[i + 1].sceneName;
+            }
             return string.Empty;
         }
 
         public static int ComputeStars(int totalActions, int parActions)
         {
-            int par = Mathf.Max(1, parActions);
-            if (totalActions <= par) return 3;
-            if (totalActions <= par + 4) return 2;
+            if (parActions <= 0) return 3;
+            if (totalActions <= parActions) return 3;
+            if (totalActions <= parActions + 3) return 2;
             return 1;
         }
 
@@ -143,8 +172,8 @@ namespace Polymulator
         {
             int stars = ComputeStars(totalActions, parActions);
             PlayerPrefs.SetInt(KeyClearedPrefix + sceneName, 1);
-            int prevStars = GetStars(sceneName);
-            if (stars > prevStars)
+            int prev = GetStars(sceneName);
+            if (stars > prev)
                 PlayerPrefs.SetInt(KeyStarsPrefix + sceneName, stars);
             PlayerPrefs.Save();
             return stars;
@@ -156,6 +185,21 @@ namespace Polymulator
             PlayerPrefs.Save();
         }
 
+        public static void RecordEnding(string endingId)
+        {
+            if (!string.IsNullOrEmpty(endingId))
+                PlayerPrefs.SetString(KeyEnding, endingId);
+            PlayerPrefs.SetInt(KeyClearedPrefix + EndingSceneName, 1);
+            if (GetStars(EndingSceneName) < 3)
+                PlayerPrefs.SetInt(KeyStarsPrefix + EndingSceneName, 3);
+            PlayerPrefs.Save();
+        }
+
+        public static string GetLastEnding()
+        {
+            return PlayerPrefs.GetString(KeyEnding, string.Empty);
+        }
+
         public static void ResetAll()
         {
             for (int i = 0; i < Catalog.Length; i++)
@@ -165,27 +209,13 @@ namespace Polymulator
                 PlayerPrefs.DeleteKey(KeyStarsPrefix + id);
                 PlayerPrefs.DeleteKey(KeyFragPrefix + id);
             }
+            PlayerPrefs.DeleteKey(KeyClearedPrefix + ShowcaseSceneName);
+            PlayerPrefs.DeleteKey(KeyStarsPrefix + ShowcaseSceneName);
+            PlayerPrefs.DeleteKey(KeyFragPrefix + ShowcaseSceneName);
             PlayerPrefs.DeleteKey(KeyDemoUnlock);
+            PlayerPrefs.DeleteKey(KeyEnding);
             PlayerPrefs.SetInt(KeyIteration, 127);
             PlayerPrefs.Save();
-        }
-
-        private static int IndexOf(int chapter, int level)
-        {
-            for (int i = 0; i < Catalog.Length; i++)
-            {
-                if (Catalog[i].chapter == chapter && Catalog[i].level == level) return i;
-            }
-            return -1;
-        }
-
-        private static int IndexOf(string sceneName)
-        {
-            for (int i = 0; i < Catalog.Length; i++)
-            {
-                if (Catalog[i].sceneName == sceneName) return i;
-            }
-            return -1;
         }
     }
 }

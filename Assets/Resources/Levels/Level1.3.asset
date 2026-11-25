@@ -12,25 +12,27 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 2763873eddf04f878f13270a059f332a, type: 3}
   m_Name: Level1.3
   m_EditorClassIdentifier: Assembly-CSharp::Polymulator.LevelInfo
-  levelTitle: Tag AD-I
-  chapterSubtitle: TRANSLASI
-  districtLabel: LENGKUNGAN PASAR
-  parActions: 7
+  levelTitle: Gerbang Arsip Timur
+  chapterSubtitle: "CHAPTER 1  \u2022  TRANSLASI"
+  districtLabel: GERBANG ARSIP
+  parActions: 10
   requireFacingAngle: 0
   requiredFacingYaw: 0
-  fragmentTitle: Tag Logam AD-I
+  fragmentTitle: Surat Penutup Shift
   triggerGlitchOnClear: 0
   playPianoOnClear: 0
+  allowPartition: 0
+  allowFusion: 0
   openingDialogue:
-  - speaker: SIM
-    text: Pad berada di atas Balkon Barat. Lemparan parabola [F] atau tangga barat
-      dapat menjangkaunya.
+  - speaker: VELA
+    text: Tangga menuju dek arsip terputus di tengah.
+  - speaker: MIRA
+    text: Aktifkan kedua pelat lantai agar jembatan energinya tersambung penuh.
   clearDialogue:
-  - speaker: RECT
-    text: Kenapa Mira melarangku menyentuh nama di tag logam itu?
   - speaker: SIM
-    text: 'Tag AD-I ditandai: tidak terindeks.'
+    text: Sektor Translasi selesai. Akses ke tingkat elevasi rusun dibuka.
   hints:
-  - Bawa CUBE-01 (2.0t) melewati tangga di sisi barat Balkon Barat, atau lempar dengan
-    Throw Arc [F] melewati parapet.
-  - Periksa sudut barat laut untuk menemukan Tag Logam AD-I.
+  - Letakkan BEBAN-BARAT di PAD-BARAT dan BEBAN-TIMUR di PAD-TIMUR.
+  - Jika kedua pelat sudah hijau, tangga jembatan di tengah akan memanjang hingga
+    menyentuh dek atas.
+  - Bawa CORE-01 naik menyusuri tangga jembatan ke ANCHOR-01.
