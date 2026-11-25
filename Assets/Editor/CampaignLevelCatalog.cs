@@ -896,9 +896,12 @@ namespace Polymulator.EditorTools
             {
                 // Partition [1] Demo — Left Side
                 new PropSpec { name = "DEMO-PARTITION", shape = PrimitiveType.Cube, posGrid = new Vector3(-4.8f, 0.54f, -4.2f), sizeGrid = new Vector3(1.35f, 1.05f, 1.05f), mass = 2.4f },
-                // Fusion [2] Demo — Right Side (Heterogeneous Cube + Octagon Prism)
+                // Fusion Preset Sandbox — Right Side (Balok, Tabung x2, Bola x2 for all 6 shape-pair presets!)
                 new PropSpec { name = "DEMO-FUSE-A", shape = PrimitiveType.Cube, posGrid = new Vector3(3.8f, 0.48f, -4.6f), sizeGrid = new Vector3(0.88f, 0.88f, 0.88f), mass = 1.2f },
-                new PropSpec { name = "DEMO-FUSE-B", shape = PrimitiveType.Cylinder, posGrid = new Vector3(6.0f, 0.44f, -4.6f), sizeGrid = new Vector3(0.88f, 0.88f, 0.88f), mass = 1.2f }
+                new PropSpec { name = "DEMO-FUSE-B", shape = PrimitiveType.Cylinder, posGrid = new Vector3(6.0f, 0.44f, -4.6f), sizeGrid = new Vector3(0.88f, 0.88f, 0.88f), mass = 1.2f },
+                new PropSpec { name = "DEMO-TABUNG-2", shape = PrimitiveType.Cylinder, posGrid = new Vector3(8.0f, 0.44f, -4.6f), sizeGrid = new Vector3(0.88f, 0.88f, 0.88f), mass = 1.2f },
+                new PropSpec { name = "DEMO-BOLA-A", shape = PrimitiveType.Sphere, posGrid = new Vector3(4.4f, 0.46f, -6.8f), sizeGrid = new Vector3(0.86f, 0.86f, 0.86f), mass = 1.0f },
+                new PropSpec { name = "DEMO-BOLA-B", shape = PrimitiveType.Sphere, posGrid = new Vector3(6.8f, 0.46f, -6.8f), sizeGrid = new Vector3(0.86f, 0.86f, 0.86f), mass = 1.0f }
             },
             plates = new[]
             {

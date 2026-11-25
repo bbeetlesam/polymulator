@@ -22,7 +22,6 @@ namespace Polymulator
 
         private const int CircleSegments = 32;
         private bool blueprintActive;
-        private float yawRingFlashUntil;
 
         private readonly System.Collections.Generic.List<Material> ownedMaterials = new System.Collections.Generic.List<Material>(8);
         private LineRenderer[] worldAxes = new LineRenderer[3];
@@ -40,12 +39,6 @@ namespace Polymulator
         private void OnEnable()
         {
             ResolveReferences();
-            if (carryController != null) carryController.OnRotated += HandleRotated;
-        }
-
-        private void OnDisable()
-        {
-            if (carryController != null) carryController.OnRotated -= HandleRotated;
         }
 
         private void ResolveReferences()
@@ -59,11 +52,6 @@ namespace Polymulator
                 AnchorVisualRig rig = Object.FindFirstObjectByType<AnchorVisualRig>();
                 if (rig != null) anchorTransform = rig.transform;
             }
-        }
-
-        private void HandleRotated(InteractableObject obj, float yawDeg)
-        {
-            yawRingFlashUntil = Time.time + 0.75f;
         }
 
         public void ToggleBlueprint()
@@ -112,9 +100,7 @@ namespace Polymulator
                 anchorVectorLine.SetPosition(1, anchorTransform.position + Vector3.up * GridSettings.ToWorld(0.28f));
             }
 
-            bool showYawRing = activeObj != null &&
-                               (blueprintActive || Time.time <= yawRingFlashUntil ||
-                                (telekinesisController != null && telekinesisController.HasTether));
+            bool showYawRing = blueprintActive && activeObj != null;
             yawGimbalRing.enabled = showYawRing;
             if (showYawRing)
             {

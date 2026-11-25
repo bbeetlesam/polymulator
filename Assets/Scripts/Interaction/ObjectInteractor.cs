@@ -19,6 +19,7 @@ namespace Polymulator
         public ObjectCarryController carryController;
         public TelekinesisController telekinesisController;
         public SimulationModeController modeController;
+        public PartitionFusionController partitionFusionController;
 
         private readonly Collider[] overlapBuffer = new Collider[64];
         private readonly List<InteractableObject> seenCandidates = new List<InteractableObject>(16);
@@ -47,6 +48,7 @@ namespace Polymulator
             if (carryController == null) carryController = GetComponent<ObjectCarryController>();
             if (telekinesisController == null) telekinesisController = GetComponent<TelekinesisController>();
             if (modeController == null) modeController = GetComponent<SimulationModeController>();
+            if (partitionFusionController == null) partitionFusionController = GetComponent<PartitionFusionController>();
             if (interactionOrigin == null) interactionOrigin = transform;
             worldInteractionRange = GridSettings.ToWorld(interactionRange);
             worldFlexibleRange = GridSettings.ToWorld(flexibleRange);
@@ -55,6 +57,12 @@ namespace Polymulator
         private void Update()
         {
             if (Time.timeScale <= 0f) return;
+            if (partitionFusionController != null &&
+                (partitionFusionController.IsFusionStaging || partitionFusionController.ConsumedCancelOrConfirmThisFrame))
+            {
+                SetTarget(null);
+                return;
+            }
 
             Keyboard keyboard = Keyboard.current;
             Mouse mouse = Mouse.current;

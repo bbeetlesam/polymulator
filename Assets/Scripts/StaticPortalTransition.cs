@@ -14,6 +14,12 @@ namespace Polymulator
     {
         private static StaticPortalTransition activeInstance;
 
+        [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.SubsystemRegistration)]
+        private static void ResetStaticState()
+        {
+            activeInstance = null;
+        }
+
         private Texture2D snapshotTexture;
         private RawImage overlayImage;
         private float holdDuration;
@@ -41,8 +47,9 @@ namespace Polymulator
 
             StaticPortalTransition controller = host.AddComponent<StaticPortalTransition>();
             controller.snapshotTexture = capturedFrame;
-            controller.holdDuration = Mathf.Max(0f, holdSeconds);
-            controller.dissolveDuration = Mathf.Max(0.08f, dissolveSeconds);
+            bool reduce = SimulationSettings.ReduceMotion;
+            controller.holdDuration = reduce ? 0f : Mathf.Max(0f, holdSeconds);
+            controller.dissolveDuration = reduce ? 0.08f : Mathf.Max(0.08f, dissolveSeconds);
             activeInstance = controller;
 
             controller.BuildOverlayCanvas(host);

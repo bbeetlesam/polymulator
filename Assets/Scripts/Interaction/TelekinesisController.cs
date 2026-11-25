@@ -40,6 +40,7 @@ namespace Polymulator
         private float prevAngularDamping;
 
         private Vector3 targetWorldXZ;
+        private float aimSurfaceY;
         private float targetHeightAboveSurface;
         private Quaternion desiredRotation = Quaternion.identity;
         private Vector2 lockMousePosition;
@@ -177,8 +178,11 @@ namespace Polymulator
             cursorAimEngaged = false;
             lockMousePosition = Mouse.current != null ? Mouse.current.position.ReadValue() : Vector2.zero;
 
-            float groundY = SampleSurfaceY(target.transform.position, target);
-            float halfY = target.TryGetHalfExtents(out Vector3 ext) ? ext.y : GridSettings.ToWorld(0.5f);
+            float groundY = SampleSurfaceY(target.transform.position, target.transform.position.y + GridSettings.ToWorld(1.2f), target);
+            aimSurfaceY = groundY;
+            float halfY = target.TryGetLocalFootprint(out Vector3 localSize)
+                ? localSize.y * 0.5f
+                : (target.TryGetHalfExtents(out Vector3 ext) ? ext.y : GridSettings.ToWorld(0.5f));
             float currentClearance = target.transform.position.y - (groundY + halfY);
             targetHeightAboveSurface = Mathf.Clamp(
                 Mathf.Max(GridSettings.ToWorld(0.95f), currentClearance),
@@ -193,15 +197,16 @@ namespace Polymulator
 
             if (placementGhost != null)
             {
+                placementGhost.ClearOverrides();
+                placementGhost.SetFollowMode(PlacementFollowMode.DirectlyUnderTarget);
                 placementGhost.SetTargetRotation(desiredRotation);
                 placementGhost.SetAccentOverride(PaletteSettings.BeamTelekinesis);
                 placementGhost.Show(target);
-                placementGhost.SetOverrideXZ(targetWorldXZ);
             }
 
-            UpdateVisualLines(groundY + halfY, target.transform.position);
+            UpdateVisualLines(target.transform.position);
             beamLine.enabled = true;
-            plumbLine.enabled = true;
+            if (plumbLine != null) plumbLine.enabled = false;
             SimulationAudio.PlayTelekinesisLock(target.transform.position);
             OnTetherStarted?.Invoke(target);
             return true;
@@ -292,11 +297,19 @@ namespace Polymulator
                 if (cursorAimEngaged)
                 {
                     Ray ray = Camera.main.ScreenPointToRay(mousePos);
-                    Plane plane = new Plane(Vector3.up, tetheredBody.position);
-                    if (plane.Raycast(ray, out float enter) && enter > 0f && enter < 250f)
+                    if (TryRaycastFloorAim(ray, tethered, out Vector3 floorHit))
                     {
-                        Vector3 hit = ray.GetPoint(enter);
-                        targetWorldXZ = new Vector3(hit.x, 0f, hit.z);
+                        targetWorldXZ = new Vector3(floorHit.x, 0f, floorHit.z);
+                        aimSurfaceY = floorHit.y;
+                    }
+                    else
+                    {
+                        Plane plane = new Plane(Vector3.up, new Vector3(0f, aimSurfaceY, 0f));
+                        if (plane.Raycast(ray, out float enter) && enter > 0f && enter < 250f)
+                        {
+                            Vector3 hit = ray.GetPoint(enter);
+                            targetWorldXZ = new Vector3(hit.x, 0f, hit.z);
+                        }
                     }
                 }
             }
@@ -348,25 +361,26 @@ namespace Polymulator
                 Release(true);
                 return;
             }
+        }
 
-            float surfaceY = SampleSurfaceY(targetWorldXZ, tethered);
-            float halfY = tethered.TryGetHalfExtents(out Vector3 ext) ? ext.y : GridSettings.ToWorld(0.5f);
+        private void LateUpdate()
+        {
+            if (tethered == null || tetheredBody == null) return;
 
-            if (placementGhost != null)
-            {
-                placementGhost.SetOverrideXZ(targetWorldXZ);
-                placementGhost.SetTargetRotation(desiredRotation);
-            }
-
-            UpdateVisualLines(surfaceY, tethered.transform.position);
+            UpdateVisualLines(tethered.transform.position);
+            if (placementGhost != null && placementGhost.Visible)
+                placementGhost.SyncNow();
         }
 
         private void FixedUpdate()
         {
             if (tethered == null || tetheredBody == null) return;
 
-            float surfaceY = SampleSurfaceY(targetWorldXZ, tethered);
-            float halfY = tethered.TryGetHalfExtents(out Vector3 ext) ? ext.y : GridSettings.ToWorld(0.5f);
+            float probeTopY = Mathf.Max(Mathf.Max(tetheredBody.position.y, aimSurfaceY), transform.position.y) + GridSettings.ToWorld(1.4f);
+            float surfaceY = SampleSurfaceY(targetWorldXZ, probeTopY, tethered);
+            float halfY = tethered.TryGetLocalFootprint(out Vector3 localSize)
+                ? localSize.y * 0.5f
+                : (tethered.TryGetHalfExtents(out Vector3 ext) ? ext.y : GridSettings.ToWorld(0.5f));
             Vector3 desiredPos = new Vector3(targetWorldXZ.x, surfaceY + halfY + targetHeightAboveSurface, targetWorldXZ.z);
             if (tethered.TryGetPlanarHalfExtents(out float hx, out float hz))
                 desiredPos = WorldBounds.ClampInside(desiredPos, hx, hz);
@@ -377,9 +391,9 @@ namespace Polymulator
             tetheredBody.MoveRotation(Quaternion.Slerp(tetheredBody.rotation, desiredRotation, Time.fixedDeltaTime * 14f));
         }
 
-        private void UpdateVisualLines(float surfaceY, Vector3 objPos)
+        private void UpdateVisualLines(Vector3 objPos)
         {
-            if (beamLine == null || plumbLine == null) return;
+            if (beamLine == null) return;
 
             Vector3 start = beamEmitter != null
                 ? beamEmitter.position
@@ -408,16 +422,39 @@ namespace Polymulator
                 SimulationVFX.EmitMote(mPt, PaletteSettings.BeamTelekinesis, 0.11f, 0.28f, Vector3.up * 0.25f);
             }
 
-            float plumbWidth = GridSettings.ToWorld(0.032f);
-            plumbLine.startWidth = plumbWidth;
-            plumbLine.endWidth = plumbWidth;
-            plumbLine.SetPosition(0, objPos);
-            plumbLine.SetPosition(1, new Vector3(objPos.x, surfaceY + GridSettings.ToWorld(0.02f), objPos.z));
+            if (plumbLine != null && plumbLine.enabled)
+                plumbLine.enabled = false;
         }
 
-        private static float SampleSurfaceY(Vector3 xzPos, InteractableObject ignoreTarget)
+        private bool TryRaycastFloorAim(Ray ray, InteractableObject ignoreTarget, out Vector3 hitPoint)
         {
-            Vector3 probe = new Vector3(xzPos.x, GridSettings.ToWorld(12f), xzPos.z);
+            hitPoint = Vector3.zero;
+            int hitCount = Physics.RaycastNonAlloc(ray, SurfaceProbeBuffer, 250f, ~0, QueryTriggerInteraction.Ignore);
+            float bestDist = float.MaxValue;
+            float maxDeckY = transform.position.y + GridSettings.ToWorld(2.2f);
+            bool found = false;
+
+            for (int i = 0; i < hitCount; i++)
+            {
+                RaycastHit hit = SurfaceProbeBuffer[i];
+                if (hit.collider == null || hit.distance >= bestDist) continue;
+                if (hit.normal.y < 0.55f) continue;
+                if (hit.point.y > maxDeckY) continue;
+                if (hit.collider.transform == transform || hit.collider.transform.IsChildOf(transform)) continue;
+
+                InteractableObject hitObj = hit.collider.GetComponentInParent<InteractableObject>();
+                if (hitObj != null && (hitObj == ignoreTarget || hitObj.canBePickedUp)) continue;
+
+                bestDist = hit.distance;
+                hitPoint = hit.point;
+                found = true;
+            }
+            return found;
+        }
+
+        private float SampleSurfaceY(Vector3 xzPos, float startY, InteractableObject ignoreTarget)
+        {
+            Vector3 probe = new Vector3(xzPos.x, startY, xzPos.z);
             int hitCount = Physics.RaycastNonAlloc(probe, Vector3.down, SurfaceProbeBuffer, GridSettings.ToWorld(25f), ~0, QueryTriggerInteraction.Ignore);
             float bestDist = float.MaxValue;
             float bestY = 0f;
@@ -425,6 +462,7 @@ namespace Polymulator
             {
                 RaycastHit hit = SurfaceProbeBuffer[i];
                 if (hit.collider == null || hit.distance >= bestDist) continue;
+                if (hit.collider.transform == transform || hit.collider.transform.IsChildOf(transform)) continue;
                 InteractableObject hitObj = hit.collider.GetComponentInParent<InteractableObject>();
                 if (hitObj != null && (hitObj == ignoreTarget || hitObj.canBePickedUp)) continue;
                 bestDist = hit.distance;

@@ -93,32 +93,9 @@ namespace Polymulator
             Vector3 cameraRight = Vector3.Cross(Vector3.up, cameraForward);
 
             Vector3 desiredDirection = cameraForward * input.y + cameraRight * input.x;
-            bool isLimited = SimulationModeController.Instance == null || SimulationModeController.Instance.IsLimited;
+            if (desiredDirection.sqrMagnitude > 1f) desiredDirection.Normalize();
 
-            Vector3 laneAssist = Vector3.zero;
-            if (isLimited && desiredDirection.sqrMagnitude > 0.001f)
-            {
-                // Limited mode constrains traversal cleanly along orthogonal chamber grid axes (+/-X or +/-Z)
-                float unit = GridSettings.Unit;
-                if (Mathf.Abs(desiredDirection.x) >= Mathf.Abs(desiredDirection.z))
-                {
-                    desiredDirection = new Vector3(Mathf.Sign(desiredDirection.x), 0f, 0f);
-                    float targetCenterZ = (Mathf.Floor(transform.position.z / unit) + 0.5f) * unit;
-                    float diffZ = targetCenterZ - transform.position.z;
-                    if (Mathf.Abs(diffZ) > 0.03f)
-                        laneAssist = new Vector3(0f, 0f, Mathf.Clamp(diffZ * 4.0f, -worldMoveSpeed * 0.35f, worldMoveSpeed * 0.35f));
-                }
-                else
-                {
-                    desiredDirection = new Vector3(0f, 0f, Mathf.Sign(desiredDirection.z));
-                    float targetCenterX = (Mathf.Floor(transform.position.x / unit) + 0.5f) * unit;
-                    float diffX = targetCenterX - transform.position.x;
-                    if (Mathf.Abs(diffX) > 0.03f)
-                        laneAssist = new Vector3(Mathf.Clamp(diffX * 4.0f, -worldMoveSpeed * 0.35f, worldMoveSpeed * 0.35f), 0f, 0f);
-                }
-            }
-
-            Vector3 targetVelocity = desiredDirection * worldMoveSpeed + laneAssist;
+            Vector3 targetVelocity = desiredDirection * worldMoveSpeed;
             float rate = input.sqrMagnitude > 0.01f ? worldAcceleration : worldDeceleration;
             planarVelocity = Vector3.MoveTowards(planarVelocity, targetVelocity, rate * Time.deltaTime);
 

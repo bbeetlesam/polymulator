@@ -26,6 +26,12 @@ namespace Polymulator
 
         private static SceneTransition activeTransition;
 
+        [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.SubsystemRegistration)]
+        private static void ResetStaticState()
+        {
+            activeTransition = null;
+        }
+
         public static void Begin(string targetScene, float waitSeconds, float duration)
             => Begin(targetScene, waitSeconds, duration, PaletteSettings.Mantle);
 
@@ -81,8 +87,9 @@ namespace Polymulator
             transition.fadeImage = img;
             transition.fadeColor = color;
             activeTransition = transition;
-            transition.delay = Mathf.Max(0f, waitSeconds);
-            transition.fadeDuration = Mathf.Max(0.05f, duration);
+            bool reduce = SimulationSettings.ReduceMotion;
+            transition.delay = reduce ? 0f : Mathf.Max(0f, waitSeconds);
+            transition.fadeDuration = reduce ? Mathf.Min(0.10f, Mathf.Max(0.05f, duration)) : Mathf.Max(0.05f, duration);
             transition.startTime = Time.unscaledTime;
             transition.phase = Phase.Waiting;
             return transition;

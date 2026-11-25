@@ -135,6 +135,7 @@ namespace Polymulator
             if (placementGhost != null)
             {
                 placementGhost.ClearOverrides();
+                placementGhost.SetFollowMode(PlacementFollowMode.DropInFrontOfRect);
                 placementGhost.forwardDistance = defaultDropDistance;
                 placementGhost.SetTargetRotation(Quaternion.Euler(0f, heldYawDegrees, 0f));
                 placementGhost.SetAccentOverride(PaletteSettings.Green);
@@ -394,9 +395,14 @@ namespace Polymulator
                 carried.transform.position = WorldBounds.ClampInside(
                     carried.transform.position, halfExtentX, halfExtentZ);
 
-            bool showThrowArc = carried.canThrow && (modeController == null || !modeController.IsFlexible);
-            if (showThrowArc) UpdateThrowPreview();
-            else HideThrowPreview();
+            if (placementGhost != null && placementGhost.Visible)
+            {
+                placementGhost.SetTargetRotation(Quaternion.Euler(0f, visualYawDegrees, 0f));
+                placementGhost.SyncNow();
+            }
+
+            // Focus on a single clean 2D floor footprint indicator while carrying (Throw [F]/LMB stays active).
+            HideThrowPreview();
         }
 
         private void EnsureThrowPreviewVisuals()

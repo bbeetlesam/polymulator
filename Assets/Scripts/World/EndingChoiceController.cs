@@ -58,7 +58,7 @@ namespace Polymulator
 
         public string GetPromptHint()
         {
-            return "PILIHAN AKHIR: Bawa CORE-01 ke Timur (Tanggul), Utara (Pemancar + Partition [1]), atau Barat (Brankas)";
+            return "Pilihan Akhir: Bawa CORE-01 ke Timur (Tanggul), Utara (Pemancar + Partition [1]), atau Barat (Brankas)";
         }
 
         public bool TryAcceptObject(EndingPath path, Collider other, Vector3 lockWorldPos, Transform socketTransform)
@@ -151,7 +151,7 @@ namespace Polymulator
                     return new EndingOutcome
                     {
                         path = path,
-                        badge = "AKHIR CERITA C  •  ARSIP TERBUKA",
+                        badge = "Akhir Cerita C  •  Arsip Terbuka",
                         title = "Suara Kota Tepi Mengudara",
                         summary = "Dengan Partition [1], inti energi terbagi: setengah menutup pintu air darurat, setengah lagi menyalakan Menara Pemancar warga.",
                         epilogueLines = new[]
@@ -167,13 +167,13 @@ namespace Polymulator
                     return new EndingOutcome
                     {
                         path = path,
-                        badge = "AKHIR CERITA A  •  TANGGUL TERTUTUP",
+                        badge = "Akhir Cerita A  •  Tanggul Tertutup",
                         title = "Kota Selamat, Ingatan Terkubur",
                         summary = "Seluruh daya inti dialirkan penuh ke Tanggul Utara. Gelombang badai tertahan di luar dinding, tetapi seluruh bank memori bawah tanah ikut terendam.",
                         epilogueLines = new[]
                         {
                             "Air laut surut meninggalkan dermaga yang kering dan jalan pasar yang utuh. Mira membantu warga kembali menyalakan lampu rumah susun.",
-                            "Di gedung arsip yang membeku sepi, layar SIM menampilkan status HIJAU. Tidak ada nama yang tersisa di daftar sejarah—hanya koordinat bangunan yang rapi.",
+                            "Di gedung arsip yang membeku sepi, layar SIM menampilkan status hijau. Tidak ada nama yang tersisa di daftar sejarah, hanya koordinat bangunan yang rapi.",
                             "Rect menatap laut dari balik tanggul, menyimpan satu nada piano yang entah milik siapa."
                         },
                         fragmentCount = fragCount
@@ -183,7 +183,7 @@ namespace Polymulator
                     return new EndingOutcome
                     {
                         path = path,
-                        badge = "AKHIR CERITA B  •  BRANKAS ABADI",
+                        badge = "Akhir Cerita B  •  Brankas Abadi",
                         title = "Ingatan Dijaga di Balik Kaca",
                         summary = "Inti energi dimasukkan ke Brankas Arsip Barat. Seluruh foto, surat, dan rekaman Kota Tepi terlindungi sempurna dari korosi badai.",
                         epilogueLines = new[]

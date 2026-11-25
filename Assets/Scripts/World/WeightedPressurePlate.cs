@@ -24,8 +24,9 @@ namespace Polymulator
         private float baseDeckY;
         private bool isActivated;
         private float currentMass;
-        private readonly HashSet<Rigidbody> bodiesOnPlate = new HashSet<Rigidbody>();
-        private readonly List<Rigidbody> staleBodies = new List<Rigidbody>(8);
+        private readonly HashSet<Collider> collidersOnPlate = new HashSet<Collider>();
+        private readonly List<Collider> staleColliders = new List<Collider>(8);
+        private readonly HashSet<Rigidbody> uniqueBodies = new HashSet<Rigidbody>();
 
         public bool IsActivated => isActivated;
         public float CurrentMass => currentMass;
@@ -41,19 +42,31 @@ namespace Polymulator
 
         private void FixedUpdate()
         {
-            staleBodies.Clear();
+            staleColliders.Clear();
+            uniqueBodies.Clear();
             float total = 0f;
-            foreach (Rigidbody rb in bodiesOnPlate)
+
+            foreach (Collider col in collidersOnPlate)
             {
-                if (rb == null || !rb.gameObject.activeInHierarchy || rb.isKinematic)
+                if (col == null || !col.enabled || !col.gameObject.activeInHierarchy)
                 {
-                    staleBodies.Add(rb);
+                    staleColliders.Add(col);
                     continue;
                 }
-                total += rb.mass;
+
+                Rigidbody rb = col.attachedRigidbody;
+                if (rb == null || !rb.gameObject.activeInHierarchy || rb.isKinematic)
+                {
+                    staleColliders.Add(col);
+                    continue;
+                }
+
+                if (uniqueBodies.Add(rb))
+                    total += rb.mass;
             }
-            for (int i = 0; i < staleBodies.Count; i++)
-                bodiesOnPlate.Remove(staleBodies[i]);
+
+            for (int i = 0; i < staleColliders.Count; i++)
+                collidersOnPlate.Remove(staleColliders[i]);
 
             currentMass = total;
             UpdateWeightPips();
@@ -94,19 +107,27 @@ namespace Polymulator
 
         public void UnregisterBody(Rigidbody rb)
         {
-            if (rb != null) bodiesOnPlate.Remove(rb);
+            if (rb == null) return;
+            staleColliders.Clear();
+            foreach (Collider col in collidersOnPlate)
+            {
+                if (col == null || col.attachedRigidbody == rb)
+                    staleColliders.Add(col);
+            }
+            for (int i = 0; i < staleColliders.Count; i++)
+                collidersOnPlate.Remove(staleColliders[i]);
         }
 
         private void OnTriggerEnter(Collider other)
         {
-            Rigidbody rb = other.attachedRigidbody;
-            if (rb != null) bodiesOnPlate.Add(rb);
+            if (other != null && other.attachedRigidbody != null)
+                collidersOnPlate.Add(other);
         }
 
         private void OnTriggerExit(Collider other)
         {
-            Rigidbody rb = other.attachedRigidbody;
-            if (rb != null) bodiesOnPlate.Remove(rb);
+            if (other != null)
+                collidersOnPlate.Remove(other);
         }
 
         private void ApplyStateVisuals(bool active, bool silent)

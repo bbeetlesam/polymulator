@@ -11,10 +11,11 @@ Shader "POLYMULATOR/Placement Ghost Fill"
 
         Pass
         {
-            Name "Volume"
-            Cull Back
+            Name "FloorFootprint"
+            Cull Off
             ZWrite Off
             ZTest LEqual
+            Offset -1, -1
             Blend SrcAlpha OneMinusSrcAlpha
 
             HLSLPROGRAM

@@ -18,6 +18,12 @@ namespace Polymulator
     {
         public static SimulationModeController Instance { get; private set; }
 
+        [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.SubsystemRegistration)]
+        private static void ResetStaticState()
+        {
+            Instance = null;
+        }
+
         [Header("Mode")]
         [SerializeField] private SimulationMode currentMode = SimulationMode.Limited;
 
@@ -40,7 +46,7 @@ namespace Polymulator
 
         public string ModeLabel => IsLimited ? "LIMITED" : "FLEXIBLE";
         public string ModeSummary => IsLimited
-            ? "Gerak Terarah  /  Putar 90°  /  Lempar"
+            ? "Angkat  /  Putar 90°  /  Lempar"
             : "Gerak Bebas  /  Telekinesis";
 
         public event Action<SimulationMode> OnModeChanged;
@@ -115,6 +121,9 @@ namespace Polymulator
         {
             if (currentMode == nextMode) return;
 
+            if (partitionFusionController != null && partitionFusionController.IsFusionStaging)
+                partitionFusionController.CancelFusionStage(silent: true);
+
             if (carryController != null && carryController.IsCarrying)
                 carryController.Release();
 
@@ -142,6 +151,8 @@ namespace Polymulator
         /// <summary>Executes Partition [1] when unlocked in this chamber or Showcase/Demo mode.</summary>
         public void TriggerPartitionHook()
         {
+            if (partitionFusionController != null && partitionFusionController.IsFusionStaging)
+                return;
             if (!CanUsePartition)
             {
                 OnStatusBanner?.Invoke("PARTITION [1] belum aktif di chapter ini", PaletteSettings.Peach);
@@ -150,9 +161,11 @@ namespace Polymulator
             partitionFusionController?.TryPartition();
         }
 
-        /// <summary>Executes Fusion [2] when unlocked in this chamber or Showcase/Demo mode.</summary>
+        /// <summary>Executes Fusion [2] (enters/confirms interactive Fusing Stage) when unlocked.</summary>
         public void TriggerFusionHook()
         {
+            if (partitionFusionController != null && partitionFusionController.ConsumedCancelOrConfirmThisFrame)
+                return;
             if (!CanUseFusion)
             {
                 OnStatusBanner?.Invoke("FUSION [2] belum aktif di chapter ini", PaletteSettings.Green);
@@ -161,9 +174,14 @@ namespace Polymulator
             partitionFusionController?.TryFusion();
         }
 
-        /// <summary>Cycles Partition [1] cut-plane orientation ([3]) when unlocked.</summary>
+        /// <summary>Cycles Partition cut-plane orientation ([3]), or Fusion attachment side while staging.</summary>
         public void TriggerCycleCutAxisHook()
         {
+            if (partitionFusionController != null && partitionFusionController.IsFusionStaging)
+            {
+                partitionFusionController.CycleFusionSide(1);
+                return;
+            }
             if (!CanUsePartition)
             {
                 OnStatusBanner?.Invoke("PARTITION [1] belum aktif di chapter ini", PaletteSettings.Peach);
