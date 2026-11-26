@@ -232,10 +232,6 @@
     -unity-text-align: middle-left;
 }
 
-.footer-hint--center {
-    -unity-text-align: middle-center;
-}
-
 /* Chapter & Chamber Index View */
 .ribbon-view {
     position: absolute;
@@ -245,10 +241,11 @@
     bottom: 0;
     flex-direction: column;
     justify-content: space-between;
-    background-color: rgba(17, 17, 27, 0.78);
+    background-color: #11111B;
     padding: 32px 44px 32px 44px;
     transition-property: opacity;
-    transition-duration: 0.20s;
+    transition-duration: 0.24s;
+    transition-timing-function: ease-out-cubic;
 }
 
 .ribbon-view--hidden {
@@ -262,25 +259,25 @@
 
 .ribbon-topbar {
     flex-direction: row;
-    justify-content: space-between;
-    align-items: center;
+    justify-content: flex-end;
+    align-items: flex-start;
 }
 
-.topbar-left {
+.topbar-actions {
+    align-items: flex-end;
+}
+
+.topbar-buttons {
     flex-direction: row;
     align-items: center;
 }
 
 .topbar-progress {
     -unity-font-definition: url("/Assets/UI/Fonts/Font_AktMedium.asset");
-    font-size: 16px;
+    font-size: 14px;
     color: #BAC2DE;
-    margin-left: 18px;
-}
-
-.topbar-actions {
-    flex-direction: row;
-    align-items: center;
+    margin-top: 6px;
+    -unity-text-align: middle-right;
 }
 
 .top-action-btn {
@@ -298,7 +295,7 @@
     transition-duration: 0.14s;
 }
 
-.topbar-left .top-action-btn {
+.topbar-buttons .top-action-btn:first-child {
     margin-left: 0;
 }
 
@@ -313,279 +310,146 @@
     border-width: 2px;
 }
 
-.top-action-btn--on {
-    border-color: #A6E3A1;
-    color: #A6E3A1;
+.top-action-btn--icon {
+    width: 44px;
+    min-width: 44px;
+    padding: 0;
+    font-size: 21px;
+    -unity-text-align: middle-center;
 }
 
 .ribbon-viewport {
-    flex-grow: 1;
-    justify-content: center;
-    overflow: hidden;
-    position: relative;
-}
-
-.ribbon-track {
-    flex-direction: row;
-    align-items: center;
-    position: absolute;
-    top: 50%;
-    margin-top: -108px;
-    height: 216px;
-}
-
-.chapter-cluster {
-    flex-direction: row;
-    align-items: center;
-    height: 216px;
-}
-
-.chapter-node-card {
-    width: 166px;
-    height: 178px;
-    background-color: #181825;
-    border-color: #6C7086;
-    border-width: 1px;
-    border-top-width: 4px;
-    border-radius: 3px;
-    align-items: center;
-    justify-content: center;
-    padding: 14px 12px;
-    margin-right: 16px;
-}
-
-.chapter-node-card--reached {
-    background-color: #1E1E2E;
-    border-color: #7F849C;
-}
-
-.chapter-sector-pill {
-    -unity-font-definition: url("/Assets/UI/Fonts/Font_AktMedium.asset");
-    font-size: 12px;
-    color: #BAC2DE;
-    letter-spacing: 1px;
-    margin-bottom: 4px;
-}
-
-.chapter-node-num {
-    -unity-font-definition: url("/Assets/UI/Fonts/Font_AktBold.asset");
-    font-size: 42px;
-    color: #CDD6F4;
-    margin-bottom: 2px;
-}
-
-.chapter-node-theme {
-    -unity-font-definition: url("/Assets/UI/Fonts/Font_AktMedium.asset");
-    font-size: 14px;
-    color: #BAC2DE;
-    margin-bottom: 10px;
-}
-
-.chapter-node-bar-bg {
-    width: 106px;
-    height: 6px;
-    border-radius: 3px;
-    background-color: #313244;
-    position: relative;
-}
-
-.chapter-node-bar-fill {
-    height: 6px;
-    border-radius: 3px;
-    background-color: #74C7EC;
-}
-
-.segment-rail {
-    width: 420px;
-    height: 160px;
-    padding-left: 14px;
-    padding-right: 14px;
-    flex-direction: row;
-    align-items: center;
-    justify-content: space-evenly;
-    position: relative;
-}
-
-.segment-line-bg {
     position: absolute;
     left: 0;
     right: 0;
-    height: 4px;
-    border-radius: 2px;
-    background-color: #45475A;
+    top: 0;
+    bottom: 0;
+    overflow: hidden;
 }
 
-.segment-line-fill {
+.campaign-radial {
+    position: absolute;
+    left: 50%;
+    top: 50%;
+    translate: -50% -50%;
+    width: 100%;
+    height: 100%;
+}
+
+.radial-center-number {
     position: absolute;
     left: 0;
-    height: 4px;
-    border-radius: 2px;
-    background-color: #74C7EC;
-}
-
-.level-dot-wrap {
-    width: 88px;
-    height: 152px;
-    align-items: center;
-    justify-content: center;
-    position: relative;
-}
-
-.level-dot-badge {
-    position: absolute;
-    top: 2px;
-    -unity-font-definition: url("/Assets/UI/Fonts/Font_AktBold.asset");
-    font-size: 11px;
-    color: #11111B;
-    background-color: #74C7EC;
-    border-radius: 2px;
-    padding: 2px 7px;
-}
-
-.level-dot-code {
-    position: absolute;
-    top: 26px;
-    -unity-font-definition: url("/Assets/UI/Fonts/Font_AktMedium.asset");
-    font-size: 16px;
+    -unity-font: url("/Assets/UI/Fonts/Sora-SemiBold.ttf");
+    -unity-font-definition: url("/Assets/UI/Fonts/Font_SoraSemiBold.asset");
     color: #CDD6F4;
+    -unity-text-align: middle-center;
 }
 
-.level-dot-stars {
+.radial-level-label {
     position: absolute;
-    bottom: 12px;
-    font-size: 16px;
-    color: #F9E2AF;
-    letter-spacing: 2px;
-}
-
-.level-dot-btn {
-    width: 44px;
-    height: 44px;
-    border-radius: 22px;
-    background-color: #313244;
-    border-color: #7F849C;
-    border-width: 2px;
-    padding: 0;
-    margin: 0;
-    transition-property: scale, background-color, border-color;
-    transition-duration: 0.14s;
-}
-
-.level-dot-btn--unlocked {
-    background-color: #89B4FA;
-    border-color: #CDD6F4;
-}
-
-.level-dot-btn--cleared {
-    background-color: #A6E3A1;
-    border-color: #CDD6F4;
-}
-
-.level-dot-btn--current {
-    width: 48px;
-    height: 48px;
-    border-radius: 24px;
-    background-color: #74C7EC;
-    border-color: #F9E2AF;
-    border-width: 3px;
-}
-
-.level-dot-btn--unlocked:hover,
-.level-dot-btn--cleared:hover,
-.level-dot-btn--current:hover {
-    scale: 1.12 1.12;
-    border-color: #F9E2AF;
-}
-
-.level-dot-btn:focus {
-    scale: 1.14 1.14;
-    border-color: #F9E2AF;
-    border-width: 3px;
-}
-
-.level-dot-btn:active {
-    scale: 0.96 0.96;
-}
-
-.chapter-node-card--showcase {
-    background-color: #1E1E2E;
-    border-color: #94E2D5;
-    border-top-width: 4px;
-    border-top-color: #94E2D5;
-}
-
-.showcase-launch-btn {
+    width: 40px;
+    height: 28px;
     -unity-font-definition: url("/Assets/UI/Fonts/Font_AktBold.asset");
-    height: 38px;
-    font-size: 14px;
-    color: #11111B;
-    background-color: #94E2D5;
-    border-width: 2px;
-    border-color: #94E2D5;
-    border-radius: 3px;
-    padding: 0 14px;
-    margin-top: 6px;
+    font-size: 20px;
+    color: #CDD6F4;
+    -unity-text-align: middle-center;
 }
 
-.showcase-launch-btn:hover {
-    background-color: #89DCEB;
-    border-color: #89DCEB;
+.preview-dock {
+    position: absolute;
+    left: 44px;
+    top: 34px;
+    width: 540px;
 }
 
-.showcase-launch-btn:focus {
-    background-color: #89DCEB;
-    border-color: #F9E2AF;
-}
-
-.ribbon-footer {
-    align-items: center;
-}
-
-.chamber-preview-card {
-    min-width: 720px;
-    max-width: 880px;
-    flex-direction: row;
-    align-items: center;
+.preview-card {
+    display: none;
     background-color: #181825;
     border-color: #6C7086;
     border-width: 1px;
     border-radius: 3px;
-    margin-bottom: 14px;
-    padding: 16px 22px;
+    padding: 16px 20px;
 }
 
-.preview-content {
-    flex-grow: 1;
+.chapter-preview-card {
     flex-direction: column;
-    padding-right: 20px;
 }
 
-.preview-chapter {
-    -unity-font-definition: url("/Assets/UI/Fonts/Font_AktMedium.asset");
-    font-size: 14px;
-    color: #94E2D5;
-    margin-bottom: 4px;
-}
-
-.preview-title {
+.chapter-preview-title {
     -unity-font-definition: url("/Assets/UI/Fonts/Font_AktBold.asset");
-    font-size: 24px;
+    font-size: 22px;
     color: #CDD6F4;
     margin-bottom: 4px;
 }
 
-.preview-status {
+.chapter-preview-progress {
     -unity-font-definition: url("/Assets/UI/Fonts/Font_AktRegular.asset");
     font-size: 15px;
     color: #BAC2DE;
 }
 
+.chamber-preview-card {
+    flex-direction: column;
+}
+
+.preview-heading {
+    flex-direction: row;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 12px;
+}
+
+.preview-title {
+    -unity-font-definition: url("/Assets/UI/Fonts/Font_AktBold.asset");
+    font-size: 21px;
+    color: #CDD6F4;
+    flex-grow: 1;
+}
+
+.preview-stars {
+    flex-direction: row;
+    align-items: center;
+}
+
+.preview-star {
+    -unity-font-definition: url("/Assets/UI/Fonts/Font_AktBold.asset");
+    font-size: 20px;
+    margin-left: 4px;
+}
+
+.preview-footer {
+    flex-direction: row;
+    align-items: center;
+    justify-content: space-between;
+}
+
+.preview-memory {
+    flex-grow: 1;
+    -unity-font-definition: url("/Assets/UI/Fonts/Font_AktRegular.asset");
+    font-size: 14px;
+    color: #BAC2DE;
+    -unity-text-align: middle-left;
+}
+
+.preview-empty {
+    display: none;
+    background-color: #181825;
+    border-color: #6C7086;
+    border-width: 1px;
+    border-radius: 3px;
+    padding: 16px 20px;
+    -unity-font-definition: url("/Assets/UI/Fonts/Font_AktRegular.asset");
+    font-size: 16px;
+    color: #CDD6F4;
+    -unity-text-align: middle-left;
+}
+
 .preview-launch-btn {
     -unity-font-definition: url("/Assets/UI/Fonts/Font_AktBold.asset");
-    height: 48px;
-    min-width: 144px;
-    padding: 0 24px;
-    font-size: 17px;
+    height: 42px;
+    min-width: 120px;
+    padding: 0 20px;
+    font-size: 15px;
     color: #11111B;
     background-color: #74C7EC;
     border-width: 2px;
@@ -812,7 +676,6 @@
 .menu-root--reduce-motion .primary-cta-btn,
 .menu-root--reduce-motion .nav-row-btn,
 .menu-root--reduce-motion .top-action-btn,
-.menu-root--reduce-motion .level-dot-btn,
 .menu-root--reduce-motion .preview-launch-btn,
 .menu-root--reduce-motion .modal-btn {
     transition-duration: 0s;

@@ -17,7 +17,6 @@ namespace Polymulator
         private enum MenuState { Title, LevelMenu, PortalLaunch, Done }
 
         private const int ChapterCount = 5;
-        private const float ClusterStride = 602f;
 
         [SerializeField] private string levelSceneFormat = "Level{0}.{1}";
         [SerializeField] private float portalLaunchDuration = 0.44f;
@@ -38,18 +37,23 @@ namespace Polymulator
         private int focusedTitleIndex;
 
         private VisualElement ribbonView;
-        private VisualElement ribbonViewport;
-        private VisualElement ribbonTrack;
+        private IVisualElementScheduledItem ribbonFadeSchedule;
         private Label ribbonMetaLabel;
-        private Button btnRibbonShowcase;
-        private Button btnDemoToggle;
+        private CampaignRadialSelector campaignRadial;
         private Button btnRibbonSettings;
         private Button btnRibbonBack;
 
-        private Label previewChapterLabel;
+        private VisualElement chamberPreviewCard;
+        private VisualElement chapterPreviewCard;
+        private Label chapterPreviewTitle;
+        private Label chapterPreviewProgress;
         private Label previewTitleLabel;
-        private Label previewStatusLabel;
+        private readonly Label[] previewStars = new Label[3];
+        private Label previewMemoryLabel;
+        private Label previewEmptyLabel;
         private Button btnPreviewLaunch;
+        private int previewChapter = 1;
+        private int previewLevel = 1;
 
         private VisualElement settingsOverlay;
         private Slider sliderVolume;
@@ -62,8 +66,8 @@ namespace Polymulator
         private Button btnSettingsClose;
         private Button settingsReturnFocus;
 
-        private readonly Dictionary<string, Button> dotButtonsByScene = new Dictionary<string, Button>();
         private readonly string[,] levelTitles = new string[ChapterCount + 1, 5];
+        private readonly List<Vector2Int> keyboardLevels = new List<Vector2Int>();
 
         private MenuState state = MenuState.Title;
         private int currentChapter = 1;
@@ -72,12 +76,6 @@ namespace Polymulator
         private int selectedLevel = 1;
         private bool settingsOpen;
         private float resetConfirmUntil;
-
-        private float horizontalScroll;
-        private float targetScroll;
-        private bool draggingRibbon;
-        private float dragStartX;
-        private float dragStartScroll;
 
         private float portalStartTime;
         private string portalSceneName;
@@ -140,10 +138,10 @@ namespace Polymulator
             if (boundRoot == uiDocument.rootVisualElement) return;
 
             BindUI();
-            RebuildRibbonNodes();
+            RebuildRadialCampaign();
             ApplySettingsValuesToUI();
             UpdateTitleAndMetaLabels();
-            UpdatePreviewCard(selectedChapter, selectedLevel);
+            ShowEmptyPreview();
             FocusTitleButton(0);
         }
 
@@ -164,18 +162,23 @@ namespace Polymulator
             titleNavButtons = new[] { btnEnter, btnChapters, btnTitleShowcase, btnTitleSettings, btnShutdown };
 
             ribbonView = root.Q<VisualElement>("ribbon-view");
-            ribbonViewport = root.Q<VisualElement>("ribbon-viewport");
-            ribbonTrack = root.Q<VisualElement>("ribbon-track");
             ribbonMetaLabel = root.Q<Label>("ribbon-meta-label");
-            btnRibbonShowcase = root.Q<Button>("btn-ribbon-showcase");
-            btnDemoToggle = root.Q<Button>("btn-demo-toggle");
+            campaignRadial = root.Q<CampaignRadialSelector>("campaign-radial");
             btnRibbonSettings = root.Q<Button>("btn-ribbon-settings");
             btnRibbonBack = root.Q<Button>("btn-ribbon-back");
+            if (btnRibbonSettings != null) btnRibbonSettings.focusable = false;
+            if (btnRibbonBack != null) btnRibbonBack.focusable = false;
 
-            previewChapterLabel = root.Q<Label>("preview-chapter-label");
+            chamberPreviewCard = root.Q<VisualElement>("chamber-preview-card");
+            chapterPreviewCard = root.Q<VisualElement>("chapter-preview-card");
+            chapterPreviewTitle = root.Q<Label>("chapter-preview-title");
+            chapterPreviewProgress = root.Q<Label>("chapter-preview-progress");
             previewTitleLabel = root.Q<Label>("preview-title-label");
-            previewStatusLabel = root.Q<Label>("preview-status-label");
+            for (int i = 0; i < previewStars.Length; i++) previewStars[i] = root.Q<Label>("preview-star-" + i);
+            previewMemoryLabel = root.Q<Label>("preview-memory-label");
+            previewEmptyLabel = root.Q<Label>("preview-empty-label");
             btnPreviewLaunch = root.Q<Button>("btn-preview-launch");
+            if (btnPreviewLaunch != null) btnPreviewLaunch.focusable = false;
 
             settingsOverlay = root.Q<VisualElement>("settings-overlay");
             sliderVolume = root.Q<Slider>("slider-volume");
@@ -206,14 +209,20 @@ namespace Polymulator
             if (btnTitleSettings != null) btnTitleSettings.clicked += () => OpenSettings(btnTitleSettings);
             if (btnShutdown != null) btnShutdown.clicked += BeginShutdown;
 
-            if (btnRibbonShowcase != null) btnRibbonShowcase.clicked += LaunchShowcase;
-            if (btnDemoToggle != null) btnDemoToggle.clicked += ToggleDemoAccess;
             if (btnRibbonSettings != null) btnRibbonSettings.clicked += () => OpenSettings(btnRibbonSettings);
             if (btnRibbonBack != null) btnRibbonBack.clicked += ReturnToTitle;
             if (btnSettingsClose != null) btnSettingsClose.clicked += CloseSettings;
             if (btnLanguage != null) btnLanguage.clicked += ToggleLanguage;
             if (btnResetSave != null) btnResetSave.clicked += HandleResetSaveClicked;
             if (btnPreviewLaunch != null) btnPreviewLaunch.clicked += LaunchSelectedChamber;
+
+            if (campaignRadial != null)
+            {
+                campaignRadial.PreviewChanged += OnRadialPreviewChanged;
+                campaignRadial.LevelLaunched += LaunchLevel;
+                campaignRadial.LevelRejected += RejectLevelSelection;
+                campaignRadial.HighlightCleared += ShowEmptyPreview;
+            }
 
             if (sliderVolume != null) sliderVolume.RegisterValueChangedCallback(evt =>
             {
@@ -231,14 +240,6 @@ namespace Polymulator
                 ApplyReduceMotionClass();
                 SimulationAudio.PlayMenuHover();
             });
-
-            if (ribbonViewport != null)
-            {
-                ribbonViewport.RegisterCallback<PointerDownEvent>(OnRibbonPointerDown);
-                ribbonViewport.RegisterCallback<PointerMoveEvent>(OnRibbonPointerMove);
-                ribbonViewport.RegisterCallback<PointerUpEvent>(OnRibbonPointerUp);
-                ribbonViewport.RegisterCallback<WheelEvent>(OnRibbonWheel);
-            }
         }
 
         private void FocusTitleButton(int index)
@@ -290,6 +291,24 @@ namespace Polymulator
             var highest = SimulationProgress.GetHighestUnlocked();
             currentChapter = highest.chapter;
             currentLevel = highest.level;
+            RebuildKeyboardLevels();
+        }
+
+        private void RebuildKeyboardLevels()
+        {
+            keyboardLevels.Clear();
+            SimulationProgress.CampaignEntry[] catalog = SimulationProgress.Catalog;
+            for (int i = 0; i < catalog.Length; i++)
+                keyboardLevels.Add(new Vector2Int(catalog[i].chapter, catalog[i].level));
+        }
+
+        private Vector2Int KeyboardLevelForChapter(int chapter)
+        {
+            for (int i = 0; i < keyboardLevels.Count; i++)
+            {
+                if (keyboardLevels[i].x == chapter) return keyboardLevels[i];
+            }
+            return new Vector2Int(chapter, 1);
         }
 
         private void UpdateTitleAndMetaLabels()
@@ -317,173 +336,41 @@ namespace Polymulator
                 titleProgressLabel.text = L.T("ui.menu.progress.title", totalCleared, totalLevels, fragments);
             if (ribbonMetaLabel != null)
                 ribbonMetaLabel.text = L.T("ui.menu.progress.ribbon", totalCleared, totalLevels, fragments);
-
-            if (btnDemoToggle != null)
-            {
-                bool on = SimulationProgress.IsDemoUnlocked;
-                btnDemoToggle.text = on ? L.T("ui.menu.demo.on") : L.T("ui.menu.demo.off");
-                btnDemoToggle.EnableInClassList("top-action-btn--on", on);
-            }
         }
 
-        private void RebuildRibbonNodes()
+        private void RebuildRadialCampaign()
         {
-            if (ribbonTrack == null) return;
-            ribbonTrack.Clear();
-            dotButtonsByScene.Clear();
+            if (campaignRadial == null) return;
 
+            var chapters = new List<CampaignRadialChapter>();
             for (int c = 1; c <= ChapterCount; c++)
             {
-                Color chapColor = ChapterAccentColor(c);
-
-                VisualElement cluster = new VisualElement();
-                cluster.AddToClassList("chapter-cluster");
-
-                bool reached = c <= currentChapter || SimulationProgress.IsDemoUnlocked;
-                VisualElement card = new VisualElement();
-                card.AddToClassList("chapter-node-card");
-                if (reached) card.AddToClassList("chapter-node-card--reached");
-                card.style.borderTopColor = chapColor;
-
-                Label sectorLbl = new Label(L.T("ui.menu.chapter_pill", c));
-                sectorLbl.AddToClassList("chapter-sector-pill");
-                if (reached) sectorLbl.style.color = chapColor;
-                card.Add(sectorLbl);
-
-                Label numLbl = new Label(c.ToString());
-                numLbl.AddToClassList("chapter-node-num");
-                if (reached) numLbl.style.color = chapColor;
-                card.Add(numLbl);
-
-                string themeName = SimulationProgress.ChapterName(c);
-                Label themeLbl = new Label(themeName);
-                themeLbl.AddToClassList("chapter-node-theme");
-                card.Add(themeLbl);
+                var chapter = new CampaignRadialChapter { Index = c };
 
                 int count = SimulationProgress.GetLevelsInChapter(c);
-                int clearedInChap = 0;
-                for (int k = 1; k <= count; k++)
-                {
-                    if (SimulationProgress.IsCleared(LevelSceneName(c, k))) clearedInChap++;
-                }
-
-                VisualElement barBg = new VisualElement();
-                barBg.AddToClassList("chapter-node-bar-bg");
-                VisualElement barFill = new VisualElement();
-                barFill.AddToClassList("chapter-node-bar-fill");
-                barFill.style.backgroundColor = chapColor;
-                barFill.style.width = Length.Percent(count > 0 ? (clearedInChap / (float)count) * 100f : 0f);
-                barBg.Add(barFill);
-                card.Add(barBg);
-
-                cluster.Add(card);
-
-                VisualElement rail = new VisualElement();
-                rail.AddToClassList("segment-rail");
-
-                VisualElement lineBg = new VisualElement();
-                lineBg.AddToClassList("segment-line-bg");
-                rail.Add(lineBg);
-
-                VisualElement lineFill = new VisualElement();
-                lineFill.AddToClassList("segment-line-fill");
-                lineFill.style.backgroundColor = chapColor;
-                float fillPct = 0f;
-                if (c < currentChapter || SimulationProgress.IsDemoUnlocked) fillPct = 100f;
-                else if (c == currentChapter && count > 0) fillPct = (currentLevel / (float)(count + 1)) * 100f;
-                lineFill.style.width = Length.Percent(fillPct);
-                rail.Add(lineFill);
-
                 for (int l = 1; l <= count; l++)
                 {
-                    int chap = c;
-                    int lvl = l;
-                    string sceneName = LevelSceneName(chap, lvl);
-                    bool unlocked = SimulationProgress.IsUnlocked(chap, lvl);
+                    string sceneName = LevelSceneName(c, l);
+                    bool unlocked = SimulationProgress.IsUnlocked(c, l);
                     bool cleared = SimulationProgress.IsCleared(sceneName);
-                    bool isTarget = chap == currentChapter && lvl == currentLevel && !cleared;
+                    if (cleared) chapter.ClearedCount++;
 
-                    VisualElement dotWrap = new VisualElement();
-                    dotWrap.AddToClassList("level-dot-wrap");
-
-                    if (isTarget)
+                    chapter.Levels.Add(new CampaignRadialLevel
                     {
-                        Label nowBadge = new Label(L.T("ui.menu.active_badge"));
-                        nowBadge.AddToClassList("level-dot-badge");
-                        nowBadge.style.backgroundColor = chapColor;
-                        dotWrap.Add(nowBadge);
-                    }
-
-                    Label codeLbl = new Label(chap + "." + lvl);
-                    codeLbl.AddToClassList("level-dot-code");
-                    if (isTarget) codeLbl.style.color = chapColor;
-                    dotWrap.Add(codeLbl);
-
-                    Button dotBtn = new Button();
-                    dotBtn.AddToClassList("level-dot-btn");
-                    if (cleared) dotBtn.AddToClassList("level-dot-btn--cleared");
-                    else if (isTarget) dotBtn.AddToClassList("level-dot-btn--current");
-                    else if (unlocked) dotBtn.AddToClassList("level-dot-btn--unlocked");
-                    if (isTarget) dotBtn.style.backgroundColor = chapColor;
-
-                    dotBtn.RegisterCallback<PointerEnterEvent>(_ =>
-                    {
-                        SimulationAudio.PlayMenuHover();
-                        SelectChamberPreview(chap, lvl);
+                        Chapter = c,
+                        Level = l,
+                        Code = c + "." + l,
+                        Unlocked = unlocked,
+                        Cleared = cleared,
+                        Current = c == currentChapter && l == currentLevel && !cleared
                     });
-                    dotBtn.RegisterCallback<FocusInEvent>(_ => SelectChamberPreview(chap, lvl));
-                    dotBtn.clicked += () =>
-                    {
-                        if (!unlocked)
-                        {
-                            SimulationAudio.PlayAnchorReject(Vector3.zero);
-                            return;
-                        }
-                        SelectChamberPreview(chap, lvl);
-                        LaunchChamber(sceneName);
-                    };
-
-                    dotWrap.Add(dotBtn);
-                    dotButtonsByScene[sceneName] = dotBtn;
-
-                    if (cleared)
-                    {
-                        int stars = SimulationProgress.GetStars(sceneName);
-                        Label starLbl = new Label(new string('★', stars));
-                        starLbl.AddToClassList("level-dot-stars");
-                        dotWrap.Add(starLbl);
-                    }
-
-                    rail.Add(dotWrap);
                 }
 
-                cluster.Add(rail);
-                ribbonTrack.Add(cluster);
+                chapters.Add(chapter);
             }
 
-            VisualElement scCard = new VisualElement();
-            scCard.AddToClassList("chapter-node-card");
-            scCard.AddToClassList("chapter-node-card--showcase");
-            Label scSec = new Label(L.T("ui.menu.sandbox"));
-            scSec.AddToClassList("chapter-sector-pill");
-            scSec.style.color = PaletteSettings.Teal;
-            scCard.Add(scSec);
-            Label scNum = new Label("S");
-            scNum.AddToClassList("chapter-node-num");
-            scNum.style.color = PaletteSettings.Teal;
-            scCard.Add(scNum);
-            Label scTheme = new Label(L.T("ui.menu.showcase"));
-            scTheme.AddToClassList("chapter-node-theme");
-            scCard.Add(scTheme);
-            Button scBtn = new Button(LaunchShowcase) { text = L.T("ui.menu.buttons.open_demo") };
-            scBtn.AddToClassList("showcase-launch-btn");
-            scBtn.RegisterCallback<PointerEnterEvent>(_ =>
-            {
-                SimulationAudio.PlayMenuHover();
-                UpdateShowcasePreview();
-            });
-            scCard.Add(scBtn);
-            ribbonTrack.Add(scCard);
+            campaignRadial.SetCampaign(chapters, currentChapter, currentLevel);
+            campaignRadial.SetSelection(selectedChapter, selectedLevel);
         }
 
         private void ApplyReduceMotionClass()
@@ -492,56 +379,99 @@ namespace Polymulator
                 menuRoot.EnableInClassList("menu-root--reduce-motion", SimulationSettings.ReduceMotion);
         }
 
-        private void UpdateShowcasePreview()
+        private void OnRadialPreviewChanged(int chapter, int level, RadialPreviewSource source, int cleared, int total)
         {
-            Color teal = PaletteSettings.Teal;
-            if (previewChapterLabel != null)
-            {
-                previewChapterLabel.text = L.T("ui.menu.preview.showcase.chapter");
-                previewChapterLabel.style.color = teal;
-            }
-            if (previewTitleLabel != null)
-                previewTitleLabel.text = L.T("ui.menu.preview.showcase.title");
-            if (previewStatusLabel != null)
-                previewStatusLabel.text = L.T("ui.menu.preview.showcase.status");
-            if (btnPreviewLaunch != null)
-            {
-                btnPreviewLaunch.SetEnabled(true);
-                btnPreviewLaunch.style.backgroundColor = teal;
-                btnPreviewLaunch.style.color = PaletteSettings.Crust;
-                btnPreviewLaunch.text = L.T("ui.menu.preview.showcase.launch");
-            }
+            previewChapter = chapter;
+            previewLevel = level;
+            if (source == RadialPreviewSource.ChapterArc)
+                ShowChapterPreview(chapter, cleared, total);
+            else
+                UpdatePreviewCard(chapter, level);
+            UpdateRadialCenter(chapter);
+            SimulationAudio.PlayMenuHover();
         }
 
-        private void SelectChamberPreview(int chapter, int level)
+        private void ShowChapterPreview(int chapter, int cleared, int total)
         {
+            if (chapterPreviewCard != null) chapterPreviewCard.style.display = DisplayStyle.Flex;
+            if (chamberPreviewCard != null) chamberPreviewCard.style.display = DisplayStyle.None;
+            if (previewEmptyLabel != null) previewEmptyLabel.style.display = DisplayStyle.None;
+
+            string theme = chapter > 0 && chapter < SimulationProgress.ChapterNames.Length
+                ? SimulationProgress.ChapterName(chapter) : L.T("ui.menu.archive_short");
+            if (chapterPreviewTitle != null)
+                chapterPreviewTitle.text = L.T("ui.menu.preview.chapter_card", chapter, theme);
+            if (chapterPreviewProgress != null)
+                chapterPreviewProgress.text = L.T("ui.menu.preview.chapter_progress", cleared, total);
+        }
+
+        private void ShowEmptyPreview()
+        {
+            if (chapterPreviewCard != null) chapterPreviewCard.style.display = DisplayStyle.None;
+            if (chamberPreviewCard != null) chamberPreviewCard.style.display = DisplayStyle.None;
+            if (previewEmptyLabel != null) previewEmptyLabel.style.display = DisplayStyle.Flex;
+            campaignRadial?.SetCenterNumber(currentChapter.ToString());
+        }
+
+        private void RejectLevelSelection()
+        {
+            SimulationAudio.PlayAnchorReject(Vector3.zero);
+        }
+
+        private void LaunchLevel(int chapter, int level)
+        {
+            if (!SimulationProgress.IsUnlocked(chapter, level))
+            {
+                RejectLevelSelection();
+                return;
+            }
+
             selectedChapter = chapter;
             selectedLevel = level;
-            UpdatePreviewCard(chapter, level);
+            previewChapter = chapter;
+            previewLevel = level;
+            campaignRadial?.SetSelection(chapter, level);
+            SimulationAudio.PlayMenuClick();
+            LaunchChamber(LevelSceneName(chapter, level));
+        }
+
+        private void UpdateRadialCenter(int chapter)
+        {
+            campaignRadial?.SetCenterNumber(chapter.ToString());
         }
 
         private void UpdatePreviewCard(int chapter, int level)
         {
+            if (chapterPreviewCard != null) chapterPreviewCard.style.display = DisplayStyle.None;
+            if (chamberPreviewCard != null) chamberPreviewCard.style.display = DisplayStyle.Flex;
+            if (previewEmptyLabel != null) previewEmptyLabel.style.display = DisplayStyle.None;
+
             string sceneName = LevelSceneName(chapter, level);
             bool unlocked = SimulationProgress.IsUnlocked(chapter, level);
             bool cleared = SimulationProgress.IsCleared(sceneName);
             string title = levelTitles[chapter, level];
             if (string.IsNullOrEmpty(title)) title = L.T("ui.menu.room_fallback", chapter, level);
-
-            string chapterTheme = chapter > 0 && chapter < SimulationProgress.ChapterNames.Length
-                ? SimulationProgress.ChapterName(chapter) : L.T("ui.menu.archive_short");
             Color chapColor = ChapterAccentColor(chapter);
 
-            if (previewChapterLabel != null)
-            {
-                previewChapterLabel.text = L.T("ui.menu.preview.chapter", chapter, chapterTheme);
-                previewChapterLabel.style.color = chapColor;
-            }
             if (previewTitleLabel != null)
                 previewTitleLabel.text = L.T("ui.menu.preview.title", chapter, level, title);
 
+            int stars = cleared ? Mathf.Clamp(SimulationProgress.GetStars(sceneName), 0, 3) : 0;
+            for (int i = 0; i < previewStars.Length; i++)
+            {
+                Label star = previewStars[i];
+                if (star == null) continue;
+                star.text = i < stars ? "★" : "☆";
+                star.style.color = i < stars ? PaletteSettings.Green : PaletteSettings.Yellow;
+            }
+
+            bool hasMemory = unlocked && SimulationProgress.HasFragment(sceneName);
+            if (previewMemoryLabel != null)
+                previewMemoryLabel.style.display = hasMemory ? DisplayStyle.Flex : DisplayStyle.None;
+
             if (btnPreviewLaunch != null)
             {
+                btnPreviewLaunch.style.display = DisplayStyle.Flex;
                 btnPreviewLaunch.SetEnabled(unlocked);
                 btnPreviewLaunch.style.backgroundColor = unlocked ? chapColor : PaletteSettings.Surface1;
                 btnPreviewLaunch.style.color = unlocked ? PaletteSettings.Crust : PaletteSettings.Subtext0;
@@ -549,37 +479,16 @@ namespace Polymulator
                     ? L.T("ui.menu.preview.launch.replay")
                     : (unlocked ? L.T("ui.menu.preview.launch.start") : L.T("ui.menu.preview.launch.locked"));
             }
-
-            if (previewStatusLabel != null)
-            {
-                if (!unlocked)
-                {
-                    previewStatusLabel.text = L.T("ui.menu.preview.status.locked");
-                }
-                else if (cleared)
-                {
-                    int stars = SimulationProgress.GetStars(sceneName);
-                    string starStr = new string('★', stars) + new string('☆', 3 - stars);
-                    string mem = SimulationProgress.HasFragment(sceneName) ? L.T("ui.menu.preview.memory_saved") : "";
-                    previewStatusLabel.text = L.T("ui.menu.preview.status.cleared", starStr, mem);
-                }
-                else
-                {
-                    previewStatusLabel.text = L.T("ui.menu.preview.status.ready");
-                }
-            }
         }
 
         private void Update()
         {
             if (boundRoot == null) TryBindAndRefresh();
 
+            campaignRadial?.Tick(Time.unscaledDeltaTime, SimulationSettings.ReduceMotion);
             HandleKeyboard();
-            float dt = Time.unscaledDeltaTime;
 
-            if (state == MenuState.LevelMenu && !draggingRibbon)
-                UpdateRibbonScrollSmoothing(dt);
-            else if (state == MenuState.PortalLaunch)
+            if (state == MenuState.PortalLaunch)
                 UpdateStaticPortalLaunch();
 
             if (resetConfirmUntil > 0f && Time.unscaledTime > resetConfirmUntil)
@@ -621,18 +530,68 @@ namespace Polymulator
 
             if (state != MenuState.LevelMenu) return;
 
-            if (kb.leftArrowKey.wasPressedThisFrame || kb.aKey.wasPressedThisFrame)
-                NudgeRibbonScroll(-260f);
-            else if (kb.rightArrowKey.wasPressedThisFrame || kb.dKey.wasPressedThisFrame)
-                NudgeRibbonScroll(260f);
-            else if (kb.f2Key.wasPressedThisFrame)
-                ToggleDemoAccess();
-            else if (kb.f9Key.wasPressedThisFrame)
+            if (kb.f9Key.wasPressedThisFrame)
                 ExecuteResetProgress();
             else if (kb.escapeKey.wasPressedThisFrame)
                 ReturnToTitle();
-            else if (kb.enterKey.wasPressedThisFrame || kb.numpadEnterKey.wasPressedThisFrame)
-                LaunchSelectedChamber();
+            else
+                HandleRadialKeyboard(kb);
+        }
+
+        private void HandleRadialKeyboard(Keyboard kb)
+        {
+            if (campaignRadial == null) return;
+
+            bool right = kb.rightArrowKey.wasPressedThisFrame || kb.dKey.wasPressedThisFrame;
+            bool horizontal = right || kb.leftArrowKey.wasPressedThisFrame || kb.aKey.wasPressedThisFrame;
+            bool up = kb.upArrowKey.wasPressedThisFrame || kb.wKey.wasPressedThisFrame;
+            bool down = kb.downArrowKey.wasPressedThisFrame || kb.sKey.wasPressedThisFrame;
+            bool confirm = kb.enterKey.wasPressedThisFrame || kb.numpadEnterKey.wasPressedThisFrame;
+
+            if (!campaignRadial.HasActiveHighlight && !horizontal && !up && !down) return;
+
+            if (!campaignRadial.HasActiveHighlight)
+            {
+                campaignRadial.SetFocus(currentChapter, currentLevel, true);
+                return;
+            }
+
+            int chapter = campaignRadial.ActiveChapterIndex;
+            int level = campaignRadial.ActiveLevelIndex;
+
+            if (horizontal && keyboardLevels.Count > 0)
+            {
+                int index = -1;
+                for (int i = 0; i < keyboardLevels.Count; i++)
+                {
+                    if (keyboardLevels[i].x == chapter && keyboardLevels[i].y == level)
+                    {
+                        index = i;
+                        break;
+                    }
+                }
+                if (index < 0) return;
+
+                int next = index + (right ? 1 : -1);
+                if (next < 0 || next >= keyboardLevels.Count) return;
+                Vector2Int target = keyboardLevels[next];
+                if (!SimulationProgress.IsUnlocked(target.x, target.y)) return;
+                campaignRadial.SetFocus(target.x, target.y, true);
+                return;
+            }
+
+            if (up || down)
+            {
+                int nextChapter = chapter + (down ? 1 : -1);
+                if (nextChapter < 1 || nextChapter > ChapterCount) return;
+                Vector2Int target = KeyboardLevelForChapter(nextChapter);
+                if (!SimulationProgress.IsUnlocked(target.x, target.y)) return;
+                campaignRadial.SetFocus(target.x, target.y, true);
+                return;
+            }
+
+            if (confirm && chapter > 0 && level > 0)
+                LaunchLevel(chapter, level);
         }
 
         private void LaunchActiveChamberFromTitle()
@@ -653,24 +612,24 @@ namespace Polymulator
             if (titleView != null) titleView.AddToClassList("title-view--hidden");
             if (ribbonView != null)
             {
+                CancelRibbonFade();
                 ribbonView.RemoveFromClassList("ribbon-view--hidden");
-                ribbonView.RemoveFromClassList("ribbon-view--fading");
+                ribbonView.AddToClassList("ribbon-view--fading");
+                ribbonFadeSchedule = ribbonView.schedule.Execute(() =>
+                {
+                    ribbonFadeSchedule = null;
+                    ribbonView.RemoveFromClassList("ribbon-view--fading");
+                }).StartingIn(16);
             }
 
-            Vector2 panelSize = GetPanelSize();
-            float viewW = Mathf.Max(400f, panelSize.x - 88f);
-            int levelCount = Mathf.Max(1, SimulationProgress.GetLevelsInChapter(currentChapter));
-            float dotOffset = 420f * (currentLevel / (float)(levelCount + 1));
-            float targetX = (currentChapter - 1) * ClusterStride + 182f + dotOffset;
-            horizontalScroll = targetScroll = ClampScroll(targetX - viewW * 0.45f, viewW);
-            if (ribbonTrack != null) ribbonTrack.style.left = -horizontalScroll;
-            UpdateCameraScrollParallax(viewW);
-
-            string curScene = LevelSceneName(currentChapter, currentLevel);
-            if (dotButtonsByScene.TryGetValue(curScene, out Button activeDot))
-                activeDot.Focus();
-            else if (btnPreviewLaunch != null)
-                btnPreviewLaunch.Focus();
+            previewChapter = selectedChapter;
+            previewLevel = selectedLevel;
+            if (campaignRadial != null)
+            {
+                campaignRadial.SetSelection(currentChapter, currentLevel);
+                campaignRadial.Focus();
+            }
+            ShowEmptyPreview();
         }
 
         private void LaunchShowcase()
@@ -703,7 +662,19 @@ namespace Polymulator
             SimulationVisualBridge.TriggerFloorRipple(new Vector3(-0.7f, 0f, -0.5f), ChapterAccentColor(selectedChapter), 8.5f, 1.3f, 0.65f);
 
             if (titleView != null) titleView.AddToClassList("title-view--hidden");
-            if (ribbonView != null) ribbonView.AddToClassList("ribbon-view--fading");
+            if (ribbonView != null)
+            {
+                CancelRibbonFade();
+                ribbonView.RemoveFromClassList("ribbon-view--hidden");
+                ribbonView.AddToClassList("ribbon-view--fading");
+            }
+        }
+
+        private void CancelRibbonFade()
+        {
+            if (ribbonFadeSchedule == null) return;
+            ribbonFadeSchedule.Pause();
+            ribbonFadeSchedule = null;
         }
 
         private void UpdateStaticPortalLaunch()
@@ -758,83 +729,6 @@ namespace Polymulator
             return capture;
         }
 
-        private Vector2 GetPanelSize()
-        {
-            Vector2 panelSize = uiDocument != null && uiDocument.rootVisualElement != null
-                ? uiDocument.rootVisualElement.worldBound.size : new Vector2(1920f, 1080f);
-            return panelSize.x < 100f ? new Vector2(1920f, 1080f) : panelSize;
-        }
-
-        private void OnRibbonPointerDown(PointerDownEvent evt)
-        {
-            if (state != MenuState.LevelMenu || evt.button != 0) return;
-            if (evt.target is Button) return;
-            draggingRibbon = true;
-            dragStartX = evt.position.x;
-            dragStartScroll = horizontalScroll;
-            targetScroll = horizontalScroll;
-            ribbonViewport.CapturePointer(evt.pointerId);
-        }
-
-        private void OnRibbonPointerMove(PointerMoveEvent evt)
-        {
-            if (!draggingRibbon) return;
-            float viewW = ribbonViewport != null ? ribbonViewport.resolvedStyle.width : 1832f;
-            float next = dragStartScroll - (evt.position.x - dragStartX);
-            horizontalScroll = targetScroll = ClampScroll(next, viewW);
-            if (ribbonTrack != null) ribbonTrack.style.left = -horizontalScroll;
-            UpdateCameraScrollParallax(viewW);
-        }
-
-        private void OnRibbonPointerUp(PointerUpEvent evt)
-        {
-            if (!draggingRibbon) return;
-            draggingRibbon = false;
-            if (ribbonViewport.HasPointerCapture(evt.pointerId))
-                ribbonViewport.ReleasePointer(evt.pointerId);
-        }
-
-        private void OnRibbonWheel(WheelEvent evt)
-        {
-            if (state != MenuState.LevelMenu) return;
-            float delta = Mathf.Abs(evt.delta.y) >= Mathf.Abs(evt.delta.x) ? evt.delta.y : evt.delta.x;
-            NudgeRibbonScroll(delta * 65f);
-            evt.StopPropagation();
-        }
-
-        private void NudgeRibbonScroll(float delta)
-        {
-            float viewW = ribbonViewport != null ? ribbonViewport.resolvedStyle.width : 1832f;
-            targetScroll = ClampScroll(targetScroll + delta, viewW);
-        }
-
-        private void UpdateRibbonScrollSmoothing(float dt)
-        {
-            if (ribbonTrack == null || Mathf.Approximately(horizontalScroll, targetScroll)) return;
-            float blend = 1f - Mathf.Exp(-14f * dt);
-            horizontalScroll = Mathf.Lerp(horizontalScroll, targetScroll, blend);
-            if (Mathf.Abs(targetScroll - horizontalScroll) < 0.5f) horizontalScroll = targetScroll;
-            ribbonTrack.style.left = -horizontalScroll;
-            float viewW = ribbonViewport != null ? ribbonViewport.resolvedStyle.width : 1832f;
-            UpdateCameraScrollParallax(viewW);
-        }
-
-        private void UpdateCameraScrollParallax(float viewportWidth)
-        {
-            if (cameraOrbit == null) return;
-            float max = MaxScroll(viewportWidth);
-            cameraOrbit.SetScrollFraction(Mathf.InverseLerp(-80f, max, horizontalScroll));
-        }
-
-        private static float MaxScroll(float viewportWidth)
-        {
-            float contentW = ChapterCount * ClusterStride + 260f;
-            return Mathf.Max(120f, contentW - Mathf.Max(400f, viewportWidth) + 80f);
-        }
-
-        private static float ClampScroll(float value, float viewportWidth)
-            => Mathf.Clamp(value, -80f, MaxScroll(viewportWidth));
-
         private static Color ChapterAccentColor(int chapter)
         {
             switch (chapter)
@@ -847,16 +741,6 @@ namespace Polymulator
             }
         }
 
-        private void ToggleDemoAccess()
-        {
-            SimulationProgress.IsDemoUnlocked = !SimulationProgress.IsDemoUnlocked;
-            RefreshCurrentProgress();
-            UpdateTitleAndMetaLabels();
-            RebuildRibbonNodes();
-            UpdatePreviewCard(selectedChapter, selectedLevel);
-            SimulationAudio.PlayMenuClick();
-        }
-
         private void ExecuteResetProgress()
         {
             SimulationProgress.ResetAll();
@@ -864,8 +748,9 @@ namespace Polymulator
             selectedChapter = currentChapter;
             selectedLevel = currentLevel;
             UpdateTitleAndMetaLabels();
-            RebuildRibbonNodes();
-            UpdatePreviewCard(selectedChapter, selectedLevel);
+            RebuildRadialCampaign();
+            campaignRadial?.ClearActive();
+            ShowEmptyPreview();
             SimulationAudio.PlayMenuSmash();
         }
 
@@ -938,8 +823,18 @@ namespace Polymulator
 
             LoadLevelCatalogTitles();
             UpdateTitleAndMetaLabels();
-            RebuildRibbonNodes();
-            UpdatePreviewCard(selectedChapter, selectedLevel);
+            bool wasActive = campaignRadial != null && campaignRadial.HasActiveHighlight;
+            RebuildRadialCampaign();
+            if (wasActive && campaignRadial != null)
+            {
+                campaignRadial.SetFocus(previewChapter, previewLevel, true);
+                UpdatePreviewCard(previewChapter, previewLevel);
+                UpdateRadialCenter(previewChapter);
+            }
+            else
+            {
+                ShowEmptyPreview();
+            }
             ApplySettingsValuesToUI();
         }
 
@@ -948,7 +843,16 @@ namespace Polymulator
             if (state != MenuState.LevelMenu) return;
             state = MenuState.Title;
             if (cameraOrbit != null) cameraOrbit.SetRibbonOpen(false);
-            if (ribbonView != null) ribbonView.AddToClassList("ribbon-view--hidden");
+            if (ribbonView != null)
+            {
+                CancelRibbonFade();
+                ribbonView.AddToClassList("ribbon-view--fading");
+                ribbonFadeSchedule = ribbonView.schedule.Execute(() =>
+                {
+                    ribbonFadeSchedule = null;
+                    ribbonView.AddToClassList("ribbon-view--hidden");
+                }).StartingIn(200);
+            }
             if (titleView != null) titleView.RemoveFromClassList("title-view--hidden");
             SimulationAudio.PlayMenuHover();
             FocusTitleButton(1);
