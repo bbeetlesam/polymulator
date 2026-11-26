@@ -339,6 +339,7 @@ ui.hud.plate.released,Weight plate released: energy bridge off,Pelat beban lepas
 ui.hud.start.room,Chamber {0}: ,Ruangan {0}: 
 ui.hud.start.showcase,Showcase Chamber: ,Ruang Showcase: 
 ui.hud.story.next,[SPACE] Continue,[SPACE] Lanjut
+ui.hud.target.rotation,Rotation {0:0}°,Rotasi {0:0}°
 ui.hud.target.weight,Weight {0:0.0} t,Bobot {0:0.0} t
 ui.language.english,ENGLISH,INGGRIS
 ui.language.indonesian,INDONESIAN,INDONESIA

@@ -353,6 +353,7 @@ MonoBehaviour:
   - ui.hud.start.room
   - ui.hud.start.showcase
   - ui.hud.story.next
+  - ui.hud.target.rotation
   - ui.hud.target.weight
   - ui.language.english
   - ui.language.indonesian
@@ -751,6 +752,7 @@ MonoBehaviour:
   - 'Ruangan {0}: '
   - 'Ruang Showcase: '
   - '[SPACE] Lanjut'
+  - "Rotasi {0:0}\xB0"
   - Bobot {0:0.0} t
   - INGGRIS
   - INDONESIA
