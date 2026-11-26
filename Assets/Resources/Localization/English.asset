@@ -359,6 +359,7 @@ MonoBehaviour:
   - ui.language.indonesian
   - ui.menu.active_badge
   - ui.menu.archive_short
+  - ui.menu.buttons.back
   - ui.menu.buttons.chapters
   - ui.menu.buttons.quit
   - ui.menu.buttons.showcase
@@ -757,6 +758,7 @@ MonoBehaviour:
   - INDONESIAN
   - ACTIVE
   - ARCHIVE
+  - Back
   - Select Chamber
   - Quit
   - Showcase Chamber

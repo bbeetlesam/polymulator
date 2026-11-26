@@ -31,7 +31,10 @@
                 </ui:VisualElement>
 
                 <ui:VisualElement name="title-buttons" class="title-buttons">
-                    <ui:Button name="btn-enter" text="" class="primary-cta-btn" />
+                    <ui:Button name="btn-enter" text="" class="primary-cta-btn">
+                        <poly:UiVectorIcon icon-kind="Play" class="cta-icon" picking-mode="Ignore" />
+                        <ui:Label name="btn-enter-label" text="" class="cta-label" picking-mode="Ignore" />
+                    </ui:Button>
                     <poly:LocalizedButton
                         loc-key="ui.menu.buttons.chapters"
                         name="btn-chapters"
@@ -42,11 +45,14 @@
                         name="btn-title-showcase"
                         class="loc-text nav-row-btn"
                     />
-                    <poly:LocalizedButton
-                        loc-key="ui.menu.settings.title"
+                    <ui:Button
                         name="btn-title-settings"
                         class="loc-text nav-row-btn"
-                    />
+                        text=""
+                    >
+                        <poly:UiVectorIcon icon-kind="Settings" class="row-icon" picking-mode="Ignore" />
+                        <poly:LocalizedText loc-key="ui.menu.settings.title" class="loc-text row-label" picking-mode="Ignore" />
+                    </ui:Button>
                     <ui:VisualElement class="nav-divider" picking-mode="Ignore" />
                     <poly:LocalizedButton
                         loc-key="ui.menu.buttons.quit"
@@ -90,16 +96,22 @@
             <ui:VisualElement class="ribbon-topbar">
                 <ui:VisualElement class="topbar-actions">
                     <ui:VisualElement class="topbar-buttons">
-                        <poly:LocalizedButton
-                            loc-key="ui.menu.settings.title"
+                        <ui:Button
                             name="btn-ribbon-settings"
                             class="loc-text top-action-btn"
-                        />
+                            text=""
+                        >
+                            <poly:UiVectorIcon icon-kind="Settings" class="top-action-icon" picking-mode="Ignore" />
+                            <poly:LocalizedText loc-key="ui.menu.settings.title" class="loc-text top-action-label" picking-mode="Ignore" />
+                        </ui:Button>
                         <ui:Button
                             name="btn-ribbon-back"
-                            text="&lt;"
-                            class="top-action-btn top-action-btn--icon"
-                        />
+                            text=""
+                            class="top-action-btn"
+                        >
+                            <poly:UiVectorIcon icon-kind="Back" class="top-action-icon" picking-mode="Ignore" />
+                            <poly:LocalizedText loc-key="ui.menu.buttons.back" class="loc-text top-action-label" picking-mode="Ignore" />
+                        </ui:Button>
                     </ui:VisualElement>
                     <ui:Label
                         name="ribbon-meta-label"
@@ -135,9 +147,9 @@
                             picking-mode="Ignore"
                         />
                         <ui:VisualElement name="preview-stars" class="preview-stars" picking-mode="Ignore">
-                            <ui:Label name="preview-star-0" text="" class="preview-star" picking-mode="Ignore" />
-                            <ui:Label name="preview-star-1" text="" class="preview-star" picking-mode="Ignore" />
-                            <ui:Label name="preview-star-2" text="" class="preview-star" picking-mode="Ignore" />
+                            <poly:UiVectorIcon name="preview-star-0" icon-kind="StarOutline" class="preview-star" picking-mode="Ignore" />
+                            <poly:UiVectorIcon name="preview-star-1" icon-kind="StarOutline" class="preview-star" picking-mode="Ignore" />
+                            <poly:UiVectorIcon name="preview-star-2" icon-kind="StarOutline" class="preview-star" picking-mode="Ignore" />
                         </ui:VisualElement>
                     </ui:VisualElement>
                     <ui:VisualElement class="preview-footer">
@@ -147,7 +159,10 @@
                             class="preview-memory"
                             picking-mode="Ignore"
                         />
-                        <ui:Button name="btn-preview-launch" text="" class="preview-launch-btn" />
+                        <ui:Button name="btn-preview-launch" text="" class="preview-launch-btn">
+                            <poly:UiVectorIcon icon-kind="Play" class="launch-icon" picking-mode="Ignore" />
+                            <ui:Label name="preview-launch-label" text="" class="preview-launch-label" picking-mode="Ignore" />
+                        </ui:Button>
                     </ui:VisualElement>
                 </ui:VisualElement>
 
@@ -178,11 +193,14 @@
                 />
 
                 <ui:VisualElement class="setting-row">
-                    <poly:LocalizedText
-                        loc-key="ui.menu.settings.volume"
-                        class="loc-text setting-label"
-                        picking-mode="Ignore"
-                    />
+                    <ui:VisualElement class="setting-label-group" picking-mode="Ignore">
+                        <poly:UiVectorIcon icon-kind="Volume" class="setting-icon" picking-mode="Ignore" />
+                        <poly:LocalizedText
+                            loc-key="ui.menu.settings.volume"
+                            class="loc-text setting-label"
+                            picking-mode="Ignore"
+                        />
+                    </ui:VisualElement>
                     <ui:Slider
                         name="slider-volume"
                         low-value="0"
@@ -199,11 +217,14 @@
                 </ui:VisualElement>
 
                 <ui:VisualElement class="setting-row">
-                    <poly:LocalizedText
-                        loc-key="ui.menu.settings.sensitivity"
-                        class="loc-text setting-label"
-                        picking-mode="Ignore"
-                    />
+                    <ui:VisualElement class="setting-label-group" picking-mode="Ignore">
+                        <poly:UiVectorIcon icon-kind="Camera" class="setting-icon" picking-mode="Ignore" />
+                        <poly:LocalizedText
+                            loc-key="ui.menu.settings.sensitivity"
+                            class="loc-text setting-label"
+                            picking-mode="Ignore"
+                        />
+                    </ui:VisualElement>
                     <ui:Slider
                         name="slider-sensitivity"
                         low-value="40"
@@ -220,20 +241,26 @@
                 </ui:VisualElement>
 
                 <ui:VisualElement class="setting-row">
-                    <poly:LocalizedText
-                        loc-key="ui.menu.settings.reduce_motion"
-                        class="loc-text setting-label"
-                        picking-mode="Ignore"
-                    />
+                    <ui:VisualElement class="setting-label-group" picking-mode="Ignore">
+                        <poly:UiVectorIcon icon-kind="ReduceMotion" class="setting-icon" picking-mode="Ignore" />
+                        <poly:LocalizedText
+                            loc-key="ui.menu.settings.reduce_motion"
+                            class="loc-text setting-label"
+                            picking-mode="Ignore"
+                        />
+                    </ui:VisualElement>
                     <ui:Toggle name="toggle-reduce-motion" class="setting-toggle" />
                 </ui:VisualElement>
 
                 <ui:VisualElement class="setting-row">
-                    <poly:LocalizedText
-                        loc-key="ui.menu.settings.language"
-                        class="loc-text setting-label"
-                        picking-mode="Ignore"
-                    />
+                    <ui:VisualElement class="setting-label-group" picking-mode="Ignore">
+                        <poly:UiVectorIcon icon-kind="Language" class="setting-icon" picking-mode="Ignore" />
+                        <poly:LocalizedText
+                            loc-key="ui.menu.settings.language"
+                            class="loc-text setting-label"
+                            picking-mode="Ignore"
+                        />
+                    </ui:VisualElement>
                     <ui:Button name="btn-language" text="" class="setting-language-btn" />
                 </ui:VisualElement>
 

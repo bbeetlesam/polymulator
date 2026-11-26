@@ -3,7 +3,7 @@ using UnityEngine.UIElements;
 
 namespace Polymulator
 {
-    public enum HudIconKind
+    public enum UiIconKind
     {
         Limited,
         Flexible,
@@ -13,7 +13,17 @@ namespace Polymulator
         Throw,
         Telekinesis,
         Partition,
-        Fusion
+        Fusion,
+        Back,
+        StarFilled,
+        StarOutline,
+        Weight,
+        Play,
+        Settings,
+        Volume,
+        Language,
+        ReduceMotion,
+        Camera
     }
 
     /// <summary>
@@ -21,13 +31,13 @@ namespace Polymulator
     /// Zero external SVG/texture dependency, tinted cleanly via USS color or code.
     /// </summary>
     [UxmlElement]
-    public sealed partial class HudVectorIcon : VisualElement
+    public sealed partial class UiVectorIcon : VisualElement
     {
-        private HudIconKind iconKind = HudIconKind.Limited;
+        private UiIconKind iconKind = UiIconKind.Limited;
         private Color? tintOverride;
 
         [UxmlAttribute("icon-kind")]
-        public HudIconKind IconKind
+        public UiIconKind IconKind
         {
             get => iconKind;
             set
@@ -38,7 +48,7 @@ namespace Polymulator
             }
         }
 
-        public HudVectorIcon()
+        public UiVectorIcon()
         {
             pickingMode = PickingMode.Ignore;
             generateVisualContent += OnGenerateVisualContent;
@@ -78,7 +88,7 @@ namespace Polymulator
 
             switch (iconKind)
             {
-                case HudIconKind.Limited:
+                case UiIconKind.Limited:
                     // Crisp bounded square frame + centered cube dot
                     painter.BeginPath();
                     painter.MoveTo(P(5f, 5f));
@@ -96,7 +106,7 @@ namespace Polymulator
                     painter.Fill();
                     break;
 
-                case HudIconKind.Flexible:
+                case UiIconKind.Flexible:
                     // Open diamond + centered orbital core
                     painter.BeginPath();
                     painter.MoveTo(P(12f, 3.5f));
@@ -110,7 +120,7 @@ namespace Polymulator
                     painter.Fill();
                     break;
 
-                case HudIconKind.Translasi:
+                case UiIconKind.Translasi:
                     // 4-way planar movement cross arrows
                     painter.BeginPath();
                     painter.MoveTo(P(12f, 3.5f)); painter.LineTo(P(12f, 20.5f));
@@ -122,7 +132,7 @@ namespace Polymulator
                     painter.Stroke();
                     break;
 
-                case HudIconKind.Elevasi:
+                case UiIconKind.Elevasi:
                     // Vertical shaft with opposing lift arrowheads + base plane
                     painter.BeginPath();
                     painter.MoveTo(P(12f, 4f)); painter.LineTo(P(12f, 17.5f));
@@ -132,7 +142,7 @@ namespace Polymulator
                     painter.Stroke();
                     break;
 
-                case HudIconKind.Rotasi:
+                case UiIconKind.Rotasi:
                     // Circular rotation arc + arrow tip
                     painter.BeginPath();
                     painter.Arc(P(12f, 12f), 7f * s, Angle.Degrees(30f), Angle.Degrees(315f), ArcDirection.Clockwise);
@@ -144,7 +154,7 @@ namespace Polymulator
                     painter.Stroke();
                     break;
 
-                case HudIconKind.Throw:
+                case UiIconKind.Throw:
                     // Parabolic throw trajectory arc + arrowhead
                     painter.BeginPath();
                     painter.MoveTo(P(4f, 18f));
@@ -157,7 +167,7 @@ namespace Polymulator
                     painter.Stroke();
                     break;
 
-                case HudIconKind.Telekinesis:
+                case UiIconKind.Telekinesis:
                     // Concentric beam emitters + floating core
                     painter.BeginPath();
                     painter.Arc(P(12f, 12f), 3f * s, Angle.Degrees(0f), Angle.Degrees(360f), ArcDirection.Clockwise);
@@ -170,7 +180,7 @@ namespace Polymulator
                     painter.Stroke();
                     break;
 
-                case HudIconKind.Partition:
+                case UiIconKind.Partition:
                     // Split cube halves with center cut line
                     painter.BeginPath();
                     painter.MoveTo(P(4f, 6f)); painter.LineTo(P(9.5f, 6f)); painter.LineTo(P(9.5f, 18f)); painter.LineTo(P(4f, 18f)); painter.ClosePath();
@@ -179,7 +189,7 @@ namespace Polymulator
                     painter.Stroke();
                     break;
 
-                case HudIconKind.Fusion:
+                case UiIconKind.Fusion:
                     // Two converging blocks merging toward center
                     painter.BeginPath();
                     painter.MoveTo(P(4.5f, 6.5f)); painter.LineTo(P(11.5f, 6.5f)); painter.LineTo(P(11.5f, 17.5f)); painter.LineTo(P(4.5f, 17.5f)); painter.ClosePath();
@@ -188,6 +198,118 @@ namespace Polymulator
                     painter.BeginPath();
                     painter.Arc(P(12f, 12f), 2.5f * s, Angle.Degrees(0f), Angle.Degrees(360f), ArcDirection.Clockwise);
                     painter.Fill();
+                    break;
+
+                case UiIconKind.Back:
+                    // Left chevron
+                    painter.BeginPath();
+                    painter.MoveTo(P(15f, 5f)); painter.LineTo(P(8f, 12f)); painter.LineTo(P(15f, 19f));
+                    painter.Stroke();
+                    break;
+
+                case UiIconKind.StarFilled:
+                case UiIconKind.StarOutline:
+                {
+                    Vector2[] pts =
+                    {
+                        P(12f, 3.5f), P(14.2f, 9.3f), P(20.1f, 9.9f), P(15.5f, 13.6f), P(17.2f, 19.4f),
+                        P(12f, 15.9f), P(6.8f, 19.4f), P(8.5f, 13.6f), P(3.9f, 9.9f), P(9.8f, 9.3f)
+                    };
+                    painter.BeginPath();
+                    painter.MoveTo(pts[0]);
+                    for (int i = 1; i < pts.Length; i++) painter.LineTo(pts[i]);
+                    painter.ClosePath();
+                    if (iconKind == UiIconKind.StarFilled) painter.Fill(); else painter.Stroke();
+                    break;
+                }
+
+                case UiIconKind.Weight:
+                    // Mass block with a downward pressure arrow
+                    painter.BeginPath();
+                    painter.MoveTo(P(7f, 11f)); painter.LineTo(P(17f, 11f)); painter.LineTo(P(17f, 18f)); painter.LineTo(P(7f, 18f));
+                    painter.ClosePath();
+                    painter.Stroke();
+                    painter.BeginPath();
+                    painter.MoveTo(P(12f, 3.5f)); painter.LineTo(P(12f, 9f));
+                    painter.MoveTo(P(9.5f, 6.7f)); painter.LineTo(P(12f, 9f)); painter.LineTo(P(14.5f, 6.7f));
+                    painter.Stroke();
+                    break;
+
+                case UiIconKind.Play:
+                    // Right-facing triangle
+                    painter.BeginPath();
+                    painter.MoveTo(P(8f, 4.5f)); painter.LineTo(P(20f, 12f)); painter.LineTo(P(8f, 19.5f));
+                    painter.ClosePath();
+                    painter.Fill();
+                    break;
+
+                case UiIconKind.Settings:
+                    // Gear ring with eight radial teeth
+                    painter.BeginPath();
+                    painter.Arc(P(12f, 12f), 4.6f * s, Angle.Degrees(0f), Angle.Degrees(360f), ArcDirection.Clockwise);
+                    painter.Stroke();
+                    for (int i = 0; i < 8; i++)
+                    {
+                        float a = i * Mathf.PI * 0.25f;
+                        float dx = Mathf.Cos(a), dy = Mathf.Sin(a);
+                        painter.BeginPath();
+                        painter.MoveTo(P(12f + dx * 6f, 12f + dy * 6f));
+                        painter.LineTo(P(12f + dx * 8.6f, 12f + dy * 8.6f));
+                        painter.Stroke();
+                    }
+                    break;
+
+                case UiIconKind.Volume:
+                    // Speaker cone with two sound waves
+                    painter.BeginPath();
+                    painter.MoveTo(P(4f, 9f)); painter.LineTo(P(8f, 9f)); painter.LineTo(P(13f, 5f));
+                    painter.LineTo(P(13f, 19f)); painter.LineTo(P(8f, 15f)); painter.LineTo(P(4f, 15f));
+                    painter.ClosePath();
+                    painter.Stroke();
+                    painter.BeginPath();
+                    painter.Arc(P(13f, 12f), 3f * s, Angle.Degrees(-45f), Angle.Degrees(45f), ArcDirection.Clockwise);
+                    painter.Stroke();
+                    painter.BeginPath();
+                    painter.Arc(P(13f, 12f), 5.4f * s, Angle.Degrees(-45f), Angle.Degrees(45f), ArcDirection.Clockwise);
+                    painter.Stroke();
+                    break;
+
+                case UiIconKind.Language:
+                    // Globe with equator and two curved meridians
+                    painter.BeginPath();
+                    painter.Arc(P(12f, 12f), 8f * s, Angle.Degrees(0f), Angle.Degrees(360f), ArcDirection.Clockwise);
+                    painter.Stroke();
+                    painter.BeginPath();
+                    painter.MoveTo(P(4f, 12f)); painter.LineTo(P(20f, 12f));
+                    painter.Stroke();
+                    painter.BeginPath();
+                    painter.MoveTo(P(12f, 4f));
+                    painter.QuadraticCurveTo(P(7f, 12f), P(12f, 20f));
+                    painter.QuadraticCurveTo(P(17f, 12f), P(12f, 4f));
+                    painter.Stroke();
+                    break;
+
+                case UiIconKind.ReduceMotion:
+                    // Motion arc crossed out
+                    painter.BeginPath();
+                    painter.Arc(P(12f, 12f), 7f * s, Angle.Degrees(20f), Angle.Degrees(340f), ArcDirection.Clockwise);
+                    painter.Stroke();
+                    painter.BeginPath();
+                    painter.MoveTo(P(5.5f, 18.5f)); painter.LineTo(P(18.5f, 5.5f));
+                    painter.Stroke();
+                    break;
+
+                case UiIconKind.Camera:
+                    // Camera body with protruding viewfinder and lens
+                    painter.BeginPath();
+                    painter.MoveTo(P(3.5f, 8f)); painter.LineTo(P(7f, 8f)); painter.LineTo(P(9f, 5.5f));
+                    painter.LineTo(P(15f, 5.5f)); painter.LineTo(P(17f, 8f)); painter.LineTo(P(20.5f, 8f));
+                    painter.LineTo(P(20.5f, 19f)); painter.LineTo(P(3.5f, 19f));
+                    painter.ClosePath();
+                    painter.Stroke();
+                    painter.BeginPath();
+                    painter.Arc(P(12f, 13.5f), 4.2f * s, Angle.Degrees(0f), Angle.Degrees(360f), ArcDirection.Clockwise);
+                    painter.Stroke();
                     break;
             }
         }

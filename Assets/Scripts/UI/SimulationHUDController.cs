@@ -47,7 +47,9 @@ namespace Polymulator
         private VisualElement modalMetrics;
         private Label modalTitle;
         private Label modalSubtitle;
-        private Label modalRankLabel;
+        private VisualElement modalRank;
+        private readonly UiVectorIcon[] modalRankStars = new UiVectorIcon[3];
+        private Label modalRankTag;
         private Label metricTranslations;
         private Label metricRotations;
         private Label metricTethers;
@@ -98,12 +100,12 @@ namespace Polymulator
 
         private VisualElement slotRotasi;
         private VisualElement slotSpecial;
-        private HudVectorIcon iconSpecial;
-        private HudVectorIcon iconRotasi;
-        private HudVectorIcon iconTranslasi;
-        private HudVectorIcon iconElevasi;
-        private HudVectorIcon iconPartition;
-        private HudVectorIcon iconFusion;
+        private UiVectorIcon iconSpecial;
+        private UiVectorIcon iconRotasi;
+        private UiVectorIcon iconTranslasi;
+        private UiVectorIcon iconElevasi;
+        private UiVectorIcon iconPartition;
+        private UiVectorIcon iconFusion;
         private Label titleSpecial;
 
         private bool controlsExpanded = false;
@@ -262,7 +264,9 @@ namespace Polymulator
             modalMetrics = root.Q<VisualElement>("modal-metrics");
             modalTitle = root.Q<Label>("modal-title");
             modalSubtitle = root.Q<Label>("modal-subtitle");
-            modalRankLabel = root.Q<Label>("modal-rank-label");
+            modalRank = root.Q<VisualElement>("modal-rank-label");
+            for (int i = 0; i < modalRankStars.Length; i++) modalRankStars[i] = root.Q<UiVectorIcon>("modal-star-" + i);
+            modalRankTag = root.Q<Label>("modal-rank-tag");
             endingEpilogueBox = root.Q<VisualElement>("ending-epilogue-box");
             endingSummaryLabel = root.Q<Label>("ending-summary-label");
             endingPara1 = root.Q<Label>("ending-epilogue-p1");
@@ -354,12 +358,12 @@ namespace Polymulator
             slotSpecial = root.Q<VisualElement>("slot-special");
             slotPartition = root.Q<VisualElement>("slot-partition");
             slotFusion = root.Q<VisualElement>("slot-fusion");
-            iconTranslasi = root.Q<HudVectorIcon>("icon-translasi");
-            iconElevasi = root.Q<HudVectorIcon>("icon-elevasi");
-            iconRotasi = root.Q<HudVectorIcon>("icon-rotasi");
-            iconSpecial = root.Q<HudVectorIcon>("icon-special");
-            iconPartition = root.Q<HudVectorIcon>("icon-partition");
-            iconFusion = root.Q<HudVectorIcon>("icon-fusion");
+            iconTranslasi = root.Q<UiVectorIcon>("icon-translasi");
+            iconElevasi = root.Q<UiVectorIcon>("icon-elevasi");
+            iconRotasi = root.Q<UiVectorIcon>("icon-rotasi");
+            iconSpecial = root.Q<UiVectorIcon>("icon-special");
+            iconPartition = root.Q<UiVectorIcon>("icon-partition");
+            iconFusion = root.Q<UiVectorIcon>("icon-fusion");
             titleSpecial = root.Q<Label>("title-special");
 
             if (iconPartition != null) iconPartition.SetTint(PaletteSettings.Peach);
@@ -942,7 +946,7 @@ namespace Polymulator
             }
             if (iconSpecial != null)
             {
-                iconSpecial.IconKind = isFlexible ? HudIconKind.Telekinesis : HudIconKind.Throw;
+                iconSpecial.IconKind = isFlexible ? UiIconKind.Telekinesis : UiIconKind.Throw;
                 iconSpecial.SetTint(accent);
             }
             if (titleSpecial != null) titleSpecial.text = isFlexible
@@ -1170,16 +1174,23 @@ namespace Polymulator
                 modalSubtitle.text = completed
                     ? L.T("ui.hud.overlay.cleared_subtitle", levelDisplayName)
                     : L.T("ui.hud.overlay.paused_subtitle", levelNumberLabel, levelDisplayName);
-            if (modalRankLabel != null)
+            if (modalRank != null)
             {
-                modalRankLabel.EnableInClassList("modal-rank--hidden", !completed);
+                modalRank.EnableInClassList("modal-rank--hidden", !completed);
                 if (completed)
                 {
-                    string stars = new string('★', lastClearStars) + new string('☆', 3 - lastClearStars);
-                    string fragTag = fragmentCollectedThisRun || SimulationProgress.HasFragment(SceneManager.GetActiveScene().name)
-                        ? L.T("ui.hud.overlay.memory_saved")
-                        : string.Empty;
-                    modalRankLabel.text = stars + fragTag;
+                    for (int i = 0; i < modalRankStars.Length; i++)
+                    {
+                        UiVectorIcon star = modalRankStars[i];
+                        if (star == null) continue;
+                        bool earned = i < lastClearStars;
+                        star.IconKind = earned ? UiIconKind.StarFilled : UiIconKind.StarOutline;
+                        star.SetTint(earned ? PaletteSettings.Green : PaletteSettings.Yellow);
+                    }
+                    if (modalRankTag != null)
+                        modalRankTag.text = fragmentCollectedThisRun || SimulationProgress.HasFragment(SceneManager.GetActiveScene().name)
+                            ? L.T("ui.hud.overlay.memory_saved")
+                            : string.Empty;
                 }
             }
             if (modalMetrics != null)
@@ -1247,7 +1258,7 @@ namespace Polymulator
             if (modalAccentBar != null) modalAccentBar.style.backgroundColor = accent;
             if (modalTitle != null) modalTitle.text = outcome.title;
             if (modalSubtitle != null) modalSubtitle.text = outcome.badge;
-            if (modalRankLabel != null) modalRankLabel.AddToClassList("modal-rank--hidden");
+            if (modalRank != null) modalRank.AddToClassList("modal-rank--hidden");
             if (modalMetrics != null) modalMetrics.AddToClassList("modal-metrics--hidden");
             if (pauseSettingsPanel != null) pauseSettingsPanel.AddToClassList("pause-settings-panel--hidden");
 

@@ -115,6 +115,19 @@
     -unity-text-align: middle-right;
 }
 
+.target-metric-row {
+    flex-direction: row;
+    align-items: center;
+    justify-content: flex-end;
+}
+
+.target-metric-icon {
+    width: 16px;
+    height: 16px;
+    margin-left: 6px;
+    color: #94E2D5;
+}
+
 .target-meta-label {
     -unity-font-definition: url("/Assets/UI/Fonts/Font_AktMedium.asset");
     font-size: 15px;
@@ -458,12 +471,22 @@
 }
 
 .modal-rank {
-    -unity-font-definition: url("/Assets/UI/Fonts/Font_AktSemiBold.asset");
-    font-size: 18px;
-    color: #F9E2AF;
-    letter-spacing: 1.5px;
+    flex-direction: row;
+    align-items: center;
     margin-bottom: 16px;
-    -unity-text-align: middle-left;
+}
+
+.modal-rank-star {
+    width: 20px;
+    height: 20px;
+    margin-right: 4px;
+}
+
+.modal-rank-tag {
+    -unity-font-definition: url("/Assets/UI/Fonts/Font_AktSemiBold.asset");
+    font-size: 14px;
+    color: #F9E2AF;
+    margin-left: 8px;
 }
 
 .modal-rank--hidden {
@@ -591,11 +614,25 @@
     margin-bottom: 0;
 }
 
+.pause-setting-label-group {
+    flex-direction: row;
+    align-items: center;
+    width: 200px;
+}
+
+.pause-setting-icon {
+    width: 18px;
+    height: 18px;
+    margin-right: 10px;
+    color: #BAC2DE;
+}
+
 .pause-setting-label {
     -unity-font-definition: url("/Assets/UI/Fonts/Font_AktMedium.asset");
     font-size: 15px;
     color: #CDD6F4;
-    min-width: 175px;
+    flex-grow: 1;
+    -unity-text-align: middle-left;
 }
 
 .pause-setting-slider {

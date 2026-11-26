@@ -345,6 +345,7 @@ ui.language.english,ENGLISH,INGGRIS
 ui.language.indonesian,INDONESIAN,INDONESIA
 ui.menu.active_badge,ACTIVE,AKTIF
 ui.menu.archive_short,ARCHIVE,ARSIP
+ui.menu.buttons.back,Back,Kembali
 ui.menu.buttons.chapters,Select Chamber,Pilih Ruangan
 ui.menu.buttons.quit,Quit,Keluar
 ui.menu.buttons.showcase,Showcase Chamber,Ruang Showcase

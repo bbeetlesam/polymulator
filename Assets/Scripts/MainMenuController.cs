@@ -48,10 +48,12 @@ namespace Polymulator
         private Label chapterPreviewTitle;
         private Label chapterPreviewProgress;
         private Label previewTitleLabel;
-        private readonly Label[] previewStars = new Label[3];
+        private readonly UiVectorIcon[] previewStars = new UiVectorIcon[3];
         private Label previewMemoryLabel;
         private Label previewEmptyLabel;
         private Button btnPreviewLaunch;
+        private Label btnEnterLabel;
+        private Label previewLaunchLabel;
         private int previewChapter = 1;
         private int previewLevel = 1;
 
@@ -155,6 +157,7 @@ namespace Polymulator
             titleView = root.Q<VisualElement>("title-view");
             titleProgressLabel = root.Q<Label>("title-progress-label");
             btnEnter = root.Q<Button>("btn-enter");
+            btnEnterLabel = root.Q<Label>("btn-enter-label");
             btnChapters = root.Q<Button>("btn-chapters");
             btnTitleShowcase = root.Q<Button>("btn-title-showcase");
             btnTitleSettings = root.Q<Button>("btn-title-settings");
@@ -174,10 +177,11 @@ namespace Polymulator
             chapterPreviewTitle = root.Q<Label>("chapter-preview-title");
             chapterPreviewProgress = root.Q<Label>("chapter-preview-progress");
             previewTitleLabel = root.Q<Label>("preview-title-label");
-            for (int i = 0; i < previewStars.Length; i++) previewStars[i] = root.Q<Label>("preview-star-" + i);
+            for (int i = 0; i < previewStars.Length; i++) previewStars[i] = root.Q<UiVectorIcon>("preview-star-" + i);
             previewMemoryLabel = root.Q<Label>("preview-memory-label");
             previewEmptyLabel = root.Q<Label>("preview-empty-label");
             btnPreviewLaunch = root.Q<Button>("btn-preview-launch");
+            previewLaunchLabel = root.Q<Label>("preview-launch-label");
             if (btnPreviewLaunch != null) btnPreviewLaunch.focusable = false;
 
             settingsOverlay = root.Q<VisualElement>("settings-overlay");
@@ -313,9 +317,9 @@ namespace Polymulator
 
         private void UpdateTitleAndMetaLabels()
         {
-            if (btnEnter != null)
+            if (btnEnterLabel != null)
             {
-                btnEnter.text = currentChapter > 1 || currentLevel > 1
+                btnEnterLabel.text = currentChapter > 1 || currentLevel > 1
                     ? L.T("ui.menu.continue", currentChapter, currentLevel)
                     : L.T("ui.menu.start");
             }
@@ -459,10 +463,10 @@ namespace Polymulator
             int stars = cleared ? Mathf.Clamp(SimulationProgress.GetStars(sceneName), 0, 3) : 0;
             for (int i = 0; i < previewStars.Length; i++)
             {
-                Label star = previewStars[i];
+                UiVectorIcon star = previewStars[i];
                 if (star == null) continue;
-                star.text = i < stars ? "★" : "☆";
-                star.style.color = i < stars ? PaletteSettings.Green : PaletteSettings.Yellow;
+                star.IconKind = i < stars ? UiIconKind.StarFilled : UiIconKind.StarOutline;
+                star.SetTint(i < stars ? PaletteSettings.Green : PaletteSettings.Yellow);
             }
 
             bool hasMemory = unlocked && SimulationProgress.HasFragment(sceneName);
@@ -475,9 +479,10 @@ namespace Polymulator
                 btnPreviewLaunch.SetEnabled(unlocked);
                 btnPreviewLaunch.style.backgroundColor = unlocked ? chapColor : PaletteSettings.Surface1;
                 btnPreviewLaunch.style.color = unlocked ? PaletteSettings.Crust : PaletteSettings.Subtext0;
-                btnPreviewLaunch.text = cleared
-                    ? L.T("ui.menu.preview.launch.replay")
-                    : (unlocked ? L.T("ui.menu.preview.launch.start") : L.T("ui.menu.preview.launch.locked"));
+                if (previewLaunchLabel != null)
+                    previewLaunchLabel.text = cleared
+                        ? L.T("ui.menu.preview.launch.replay")
+                        : (unlocked ? L.T("ui.menu.preview.launch.start") : L.T("ui.menu.preview.launch.locked"));
             }
         }
 
