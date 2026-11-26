@@ -86,7 +86,7 @@
     color: #CDD6F4;
 }
 
-/* Top-Right Contextual Object Card (Name + Weight only) */
+/* Top-Right Contextual Object Card (Name + Weight + Rotation) */
 .target-card {
     min-width: 210px;
     max-width: 320px;
@@ -119,6 +119,15 @@
     -unity-font-definition: url("/Assets/UI/Fonts/Font_AktMedium.asset");
     font-size: 15px;
     color: #94E2D5;
+    white-space: normal;
+    -unity-text-align: middle-right;
+}
+
+.target-rotation-label {
+    -unity-font-definition: url("/Assets/UI/Fonts/Font_AktMedium.asset");
+    font-size: 14px;
+    color: #BAC2DE;
+    margin-top: 2px;
     white-space: normal;
     -unity-text-align: middle-right;
 }

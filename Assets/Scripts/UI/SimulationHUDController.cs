@@ -76,6 +76,7 @@ namespace Polymulator
         private VisualElement targetAccentBar;
         private Label targetNameLabel;
         private Label targetMetaLabel;
+        private Label targetRotationLabel;
 
         private VisualElement statusToast;
         private Label statusToastLabel;
@@ -121,6 +122,7 @@ namespace Polymulator
         private bool lastTargetVisible;
         private string lastTargetName = string.Empty;
         private string lastTargetWeight = string.Empty;
+        private string lastTargetRotation = string.Empty;
         private Color lastTargetBarColor;
         private int lastClearStars = 1;
         private bool fragmentCollectedThisRun;
@@ -295,6 +297,7 @@ namespace Polymulator
             targetAccentBar = root.Q<VisualElement>("target-accent-bar");
             targetNameLabel = root.Q<Label>("target-name-label");
             targetMetaLabel = root.Q<Label>("target-meta-label");
+            targetRotationLabel = root.Q<Label>("target-rotation-label");
 
             statusToast = root.Q<VisualElement>("status-toast");
             statusToastLabel = root.Q<Label>("status-toast-label");
@@ -1390,6 +1393,9 @@ namespace Polymulator
             {
                 weightText = L.T("ui.hud.target.weight", activeObj.Body.mass);
             }
+            string rotationText = showTargetCard
+                ? L.T("ui.hud.target.rotation", Mathf.Repeat(Mathf.Round(activeObj.transform.eulerAngles.y), 360f))
+                : string.Empty;
 
             bool isFlexible = modeController != null && modeController.IsFlexible;
             Color modeColor = isFlexible ? PaletteSettings.ModeFlexible : PaletteSettings.ModeLimited;
@@ -1401,6 +1407,7 @@ namespace Polymulator
                 showTargetCard == lastTargetVisible &&
                 objName == lastTargetName &&
                 weightText == lastTargetWeight &&
+                rotationText == lastTargetRotation &&
                 barColor == lastTargetBarColor)
             {
                 return;
@@ -1409,6 +1416,7 @@ namespace Polymulator
             lastTargetVisible = showTargetCard;
             lastTargetName = objName;
             lastTargetWeight = weightText;
+            lastTargetRotation = rotationText;
             lastTargetBarColor = barColor;
 
             targetCard.EnableInClassList("target-card--hidden", !showTargetCard);
@@ -1420,6 +1428,12 @@ namespace Polymulator
                 bool hasWeight = !string.IsNullOrEmpty(weightText);
                 targetMetaLabel.style.display = hasWeight ? DisplayStyle.Flex : DisplayStyle.None;
                 if (hasWeight) targetMetaLabel.text = weightText;
+            }
+            if (targetRotationLabel != null)
+            {
+                bool hasRotation = !string.IsNullOrEmpty(rotationText);
+                targetRotationLabel.style.display = hasRotation ? DisplayStyle.Flex : DisplayStyle.None;
+                if (hasRotation) targetRotationLabel.text = rotationText;
             }
             if (targetAccentBar != null) targetAccentBar.style.backgroundColor = barColor;
         }

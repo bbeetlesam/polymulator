@@ -21,6 +21,7 @@
                 <ui:VisualElement class="target-content" picking-mode="Ignore">
                     <ui:Label name="target-name-label" text="" class="target-name-label" picking-mode="Ignore" />
                     <ui:Label name="target-meta-label" text="" class="target-meta-label" picking-mode="Ignore" />
+                    <ui:Label name="target-rotation-label" text="" class="target-rotation-label" picking-mode="Ignore" />
                 </ui:VisualElement>
             </ui:VisualElement>
         </ui:VisualElement>
