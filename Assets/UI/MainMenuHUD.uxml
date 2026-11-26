@@ -94,32 +94,30 @@
             </ui:VisualElement>
 
             <ui:VisualElement class="ribbon-topbar">
-                <ui:VisualElement class="topbar-actions">
-                    <ui:VisualElement class="topbar-buttons">
-                        <ui:Button
-                            name="btn-ribbon-settings"
-                            class="loc-text top-action-btn"
-                            text=""
-                        >
-                            <poly:UiVectorIcon icon-kind="Settings" class="top-action-icon" picking-mode="Ignore" />
-                            <poly:LocalizedText loc-key="ui.menu.settings.title" class="loc-text top-action-label" picking-mode="Ignore" />
-                        </ui:Button>
-                        <ui:Button
-                            name="btn-ribbon-back"
-                            text=""
-                            class="top-action-btn"
-                        >
-                            <poly:UiVectorIcon icon-kind="Back" class="top-action-icon" picking-mode="Ignore" />
-                            <poly:LocalizedText loc-key="ui.menu.buttons.back" class="loc-text top-action-label" picking-mode="Ignore" />
-                        </ui:Button>
-                    </ui:VisualElement>
-                    <ui:Label
-                        name="ribbon-meta-label"
+                <ui:VisualElement class="topbar-buttons">
+                    <ui:Button
+                        name="btn-ribbon-back"
                         text=""
-                        class="topbar-progress"
-                        picking-mode="Ignore"
-                    />
+                        class="top-action-btn"
+                    >
+                        <poly:UiVectorIcon icon-kind="Back" class="top-action-icon" picking-mode="Ignore" />
+                        <poly:LocalizedText loc-key="ui.menu.buttons.back" class="loc-text top-action-label" picking-mode="Ignore" />
+                    </ui:Button>
+                    <ui:Button
+                        name="btn-ribbon-settings"
+                        class="loc-text top-action-btn"
+                        text=""
+                    >
+                        <poly:UiVectorIcon icon-kind="Settings" class="top-action-icon" picking-mode="Ignore" />
+                        <poly:LocalizedText loc-key="ui.menu.settings.title" class="loc-text top-action-label" picking-mode="Ignore" />
+                    </ui:Button>
                 </ui:VisualElement>
+                <ui:Label
+                    name="ribbon-meta-label"
+                    text=""
+                    class="topbar-progress"
+                    picking-mode="Ignore"
+                />
             </ui:VisualElement>
 
             <ui:VisualElement name="preview-dock" class="preview-dock">

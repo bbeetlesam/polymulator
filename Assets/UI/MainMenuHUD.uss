@@ -263,26 +263,30 @@
 }
 
 .ribbon-topbar {
-    flex-direction: row;
-    justify-content: flex-end;
-    align-items: flex-start;
-}
-
-.topbar-actions {
-    align-items: flex-end;
+    position: absolute;
+    left: 0;
+    right: 0;
+    top: 0;
+    height: 0;
 }
 
 .topbar-buttons {
+    position: absolute;
+    left: 40px;
+    top: 40px;
     flex-direction: row;
     align-items: center;
 }
 
 .topbar-progress {
+    position: absolute;
+    top: 40px;
+    left: 50%;
+    translate: -50% 0;
     -unity-font-definition: url("/Assets/UI/Fonts/Font_AktMedium.asset");
     font-size: 14px;
     color: #BAC2DE;
-    margin-top: 6px;
-    -unity-text-align: middle-right;
+    -unity-text-align: middle-center;
 }
 
 .top-action-btn {
@@ -302,8 +306,9 @@
     transition-duration: 0.14s;
 }
 
-.topbar-buttons .top-action-btn:first-child {
+.topbar-buttons .top-action-btn {
     margin-left: 0;
+    margin-right: 8px;
 }
 
 .top-action-btn:hover {
@@ -402,9 +407,10 @@
 
 .preview-dock {
     position: absolute;
-    left: 44px;
-    top: 34px;
-    width: 540px;
+    right: 40px;
+    top: 40px;
+    width: auto;
+    max-width: 540px;
 }
 
 .preview-card {
