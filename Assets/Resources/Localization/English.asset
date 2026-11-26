@@ -360,22 +360,20 @@ MonoBehaviour:
   - ui.menu.active_badge
   - ui.menu.archive_short
   - ui.menu.buttons.chapters
-  - ui.menu.buttons.home
-  - ui.menu.buttons.open_demo
   - ui.menu.buttons.quit
   - ui.menu.buttons.showcase
   - ui.menu.chapter_pill
   - ui.menu.continue
-  - ui.menu.demo.off
-  - ui.menu.demo.on
-  - ui.menu.hints.ribbon_nav
   - ui.menu.hints.title_nav
   - ui.menu.kicker
   - ui.menu.preview.chapter
+  - ui.menu.preview.chapter_card
+  - ui.menu.preview.chapter_progress
   - ui.menu.preview.launch.locked
   - ui.menu.preview.launch.replay
   - ui.menu.preview.launch.start
   - ui.menu.preview.memory_saved
+  - ui.menu.preview.memory_saved_short
   - ui.menu.preview.showcase.chapter
   - ui.menu.preview.showcase.launch
   - ui.menu.preview.showcase.status
@@ -384,6 +382,7 @@ MonoBehaviour:
   - ui.menu.preview.status.locked
   - ui.menu.preview.status.ready
   - ui.menu.preview.title
+  - ui.menu.preview.unselected
   - ui.menu.progress.ribbon
   - ui.menu.progress.title
   - ui.menu.room_fallback
@@ -759,30 +758,29 @@ MonoBehaviour:
   - ACTIVE
   - ARCHIVE
   - Select Chamber
-  - '[Esc] Home'
-  - Open Demo
   - Quit
   - Showcase Chamber
   - CHAPTER 0{0}
   - Continue Chamber {0}.{1}
-  - '[F2] Unlock All: Off'
-  - '[F2] Unlock All: On'
-  - "Drag / Scroll / A-D: Browse Chapters   \u2022   Click a chamber node or press Enter to enter"
   - "Arrow / W-S: Select   \u2022   Enter: Open"
   - DISTRICT EDGE  /  SPATIAL ARCHIVE
   - "Chapter {0}  \u2022  {1}"
+  - "Chapter {0} \u2014 {1}"
+  - '{0}/{1} Chambers cleared'
   - Locked
   - Replay
   - Start
   - "  \u2022  Memory saved"
+  - Memory saved
   - "Showcase Chamber  \u2022  All Mechanics Unlocked"
   - Open Showcase
   - Partition [1], Fusion [2], Telekinesis [F], Rotation [R], and Flexible Mode are active immediately
   - Full POLYMULATOR Demo
   - Cleared  [{0}]{1}
   - 'Chamber locked: clear the previous chamber first'
-  - "Ready to start  \u2022  Click a chamber node or press Enter"
+  - "Ready to start  \u2022  Launch from the button below"
   - "{0}.{1}  \u2022  {2}"
+  - Please select the simulation level.
   - "{0}/{1} Chambers  \u2022  {2} Memories"
   - "{0}/{1} Chambers Cleared  \u2022  {2} Memories"
   - Chamber {0}.{1}
