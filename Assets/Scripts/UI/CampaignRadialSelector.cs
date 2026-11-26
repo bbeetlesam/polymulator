@@ -532,7 +532,7 @@ namespace Polymulator
             AddWedge(painter, geo, start, end, geo.ArcInner, outer);
             painter.fillColor = chapter.Locked
                 ? WithAlpha(PaletteSettings.Subtext0, 0.2f)
-                : PaletteSettings.Surface0;
+                : PaletteSettings.Base;
             painter.Fill();
 
             if (!chapter.Locked && chapterProgress[arrayIndex] > 0f)
@@ -564,7 +564,7 @@ namespace Polymulator
                     ? WithAlpha(PaletteSettings.Blue, 0.85f)
                     : (locked
                         ? WithAlpha(PaletteSettings.Subtext0, 0.22f)
-                        : WithAlpha(PaletteSettings.Sapphire, 0.45f));
+                        : PaletteSettings.Base);
                 painter.Fill();
 
                 bool highlight = level.Level == activeLevel && (hoverChapter == 0 || hoverIsLevel);
@@ -601,10 +601,7 @@ namespace Polymulator
             angle = 0f;
             for (int i = 0; i < chapters.Count; i++)
             {
-                int previous = (i - 1 + chapters.Count) % chapters.Count;
-                float previousExtent = geo.Outer + geo.LevelBand * chapterGrowth[previous];
-                float currentExtent = geo.Outer + geo.LevelBand * chapterGrowth[i];
-                float outerExtent = Mathf.Max(previousExtent, currentExtent) + geo.Outline;
+                float outerExtent = geo.Outer + geo.Outline * 0.5f;
                 AddWedge(painter, geo, angle - geo.GapHalf, angle + geo.GapHalf, geo.ArcInner, outerExtent);
                 painter.fillColor = PaletteSettings.Base;
                 painter.Fill();
