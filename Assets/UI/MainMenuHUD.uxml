@@ -82,7 +82,7 @@
         <!-- Chapter & Chamber Index View -->
         <ui:VisualElement name="ribbon-view" class="ribbon-view ribbon-view--hidden">
             <ui:VisualElement name="ribbon-viewport" class="ribbon-viewport">
-                <!-- Visual tuning: circle radius, chapter arc thickness, outline thickness, level pie depth and level separator thickness. All values in design pixels; the chapter gap follows outline thickness. -->
+                <!-- Visual tuning: circle radius, chapter arc thickness, outline thickness, level pie depth, level separator thickness and reveal duration. All values in design pixels except reveal duration in seconds; the chapter gap follows outline thickness. -->
                 <poly:CampaignRadialSelector
                     name="campaign-radial"
                     class="campaign-radial"
@@ -91,6 +91,7 @@
                     outline-thickness="8"
                     level-pie-depth="175"
                     level-separator-thickness="2"
+                    reveal-duration="0.08"
                 />
             </ui:VisualElement>
 

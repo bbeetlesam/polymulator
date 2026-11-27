@@ -31,9 +31,9 @@ namespace Polymulator
     }
 
     /// <summary>
-    /// Campaign circle. The five UXML attributes are the only visual tuning knobs:
-    /// circle-radius, arc-thickness, outline-thickness, level-pie-depth and level-separator-thickness.
-    /// The chapter gap is derived from outline-thickness; every other dimension is derived.
+    /// Campaign circle. The six UXML attributes are the only visual tuning knobs:
+    /// circle-radius, arc-thickness, outline-thickness, level-pie-depth, level-separator-thickness
+    /// and reveal-duration. The chapter gap is derived from outline-thickness; every other dimension is derived.
     /// </summary>
     [UxmlElement]
     public sealed partial class CampaignRadialSelector : VisualElement
@@ -56,6 +56,7 @@ namespace Polymulator
         private float outlineThickness = 2.5f;
         private float levelPieDepth = 480f;
         private float levelSeparatorThickness = 2f;
+        private float revealDuration = 0.07f;
 
         [UxmlAttribute("circle-radius")]
         public float CircleRadius
@@ -126,12 +127,17 @@ namespace Polymulator
             }
         }
 
+        [UxmlAttribute("reveal-duration")]
+        public float RevealDuration
+        {
+            get => revealDuration;
+            set => revealDuration = Mathf.Max(0.01f, value);
+        }
+
         private readonly List<CampaignRadialChapter> chapters = new List<CampaignRadialChapter>();
         private readonly List<Label> levelLabels = new List<Label>();
         private float[] chapterGrowth = Array.Empty<float>();
         private float[] chapterProgress = Array.Empty<float>();
-
-        private const float RevealTimeConstant = 0.07f;
 
         private Label centerNumber;
         private string centerValue = string.Empty;
@@ -314,7 +320,7 @@ namespace Polymulator
             if (chapters.Count == 0) return;
 
             int active = ActiveChapter();
-            float growthSpeed = reduceMotion ? 1f : 1f - Mathf.Exp(-deltaTime / RevealTimeConstant);
+            float growthSpeed = reduceMotion ? 1f : 1f - Mathf.Exp(-deltaTime / revealDuration);
             float fillSpeed = reduceMotion ? 1f : 1f - Mathf.Exp(-deltaTime / 0.12f);
             bool changed = false;
 
