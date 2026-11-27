@@ -399,7 +399,7 @@ namespace Polymulator
 
         private void ShowEmptyPreview()
         {
-            if (chapterFooterLabel != null) chapterFooterLabel.text = string.Empty;
+            UpdateChapterFooter(currentChapter);
             if (chamberPreviewCard != null) chamberPreviewCard.style.display = DisplayStyle.None;
             if (previewEmptyLabel != null) previewEmptyLabel.style.display = DisplayStyle.Flex;
             campaignRadial?.SetCenterNumber(currentChapter.ToString());
@@ -614,14 +614,14 @@ namespace Polymulator
                 }).StartingIn(16);
             }
 
-            previewChapter = selectedChapter;
-            previewLevel = selectedLevel;
+            previewChapter = currentChapter;
+            previewLevel = currentLevel;
             if (campaignRadial != null)
             {
-                campaignRadial.SetSelection(currentChapter, currentLevel);
+                campaignRadial.BeginEntryAnimation();
+                campaignRadial.SetFocus(currentChapter, currentLevel, true);
                 campaignRadial.Focus();
             }
-            ShowEmptyPreview();
         }
 
         private void LaunchShowcase()

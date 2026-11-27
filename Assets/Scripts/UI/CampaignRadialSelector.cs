@@ -138,9 +138,13 @@ namespace Polymulator
         private float[] chapterGrowth = Array.Empty<float>();
         private float[] chapterProgress = Array.Empty<float>();
 
+        private const float RevealTimeConstant = 0.07f;
+
         private Label centerNumber;
         private string centerValue = string.Empty;
         private float centerReveal = 1f;
+        private float circleReveal = 1f;
+        private bool pieStagePending;
 
         private RadialSelectionMode mode = RadialSelectionMode.ChapterOverview;
         private int expandedChapter;
@@ -177,7 +181,6 @@ namespace Polymulator
             RegisterCallback<GeometryChangedEvent>(_ => UpdateOverlayLayout());
             RegisterCallback<PointerMoveEvent>(OnPointerMove);
             RegisterCallback<PointerDownEvent>(OnPointerDown);
-            RegisterCallback<PointerLeaveEvent>(_ => ClearActive());
             RegisterCallback<FocusInEvent>(_ =>
             {
                 HasKeyboardFocus = true;
@@ -187,7 +190,6 @@ namespace Polymulator
             {
                 HasKeyboardFocus = false;
                 MarkDirtyRepaint();
-                if (hoverChapter == 0) ClearActive();
             });
 
             centerNumber = new Label();
@@ -227,6 +229,16 @@ namespace Polymulator
             expandedChapter = 0;
             SetCenterNumber(selectedChapter.ToString());
             RebuildLevelLabels();
+            MarkDirtyRepaint();
+            UpdateOverlayLayout();
+        }
+
+        public void BeginEntryAnimation()
+        {
+            circleReveal = 0f;
+            pieStagePending = true;
+            for (int i = 0; i < chapterGrowth.Length; i++) chapterGrowth[i] = 0f;
+            RestartCenterReveal();
             MarkDirtyRepaint();
             UpdateOverlayLayout();
         }
@@ -310,6 +322,11 @@ namespace Polymulator
             if (centerValue == next) return;
             centerValue = next;
             centerNumber.text = next;
+            RestartCenterReveal();
+        }
+
+        private void RestartCenterReveal()
+        {
             centerReveal = 0f;
             centerNumber.style.opacity = 0f;
             centerNumber.style.scale = new Scale(new Vector2(0.9f, 0.9f));
@@ -320,14 +337,25 @@ namespace Polymulator
             if (chapters.Count == 0) return;
 
             int active = ActiveChapter();
-            float growthSpeed = reduceMotion ? 1f : 1f - Mathf.Exp(-deltaTime / 0.07f);
+            float growthSpeed = reduceMotion ? 1f : 1f - Mathf.Exp(-deltaTime / RevealTimeConstant);
             float fillSpeed = reduceMotion ? 1f : 1f - Mathf.Exp(-deltaTime / 0.12f);
             bool changed = false;
+
+            if (circleReveal < 1f)
+            {
+                circleReveal = reduceMotion ? 1f : Mathf.Lerp(circleReveal, 1f, growthSpeed);
+                if (circleReveal > 0.995f)
+                {
+                    circleReveal = 1f;
+                    pieStagePending = false;
+                }
+                changed = true;
+            }
 
             for (int i = 0; i < chapters.Count; i++)
             {
                 int chapterIndex = chapters[i].Index;
-                float growthTarget = chapterIndex == active ? 1f : 0f;
+                float growthTarget = chapterIndex == active && !pieStagePending ? 1f : 0f;
                 int total = Mathf.Max(1, chapters[i].Levels.Count);
                 float progressTarget = chapters[i].Locked ? 0f : Mathf.Clamp01(chapters[i].ClearedCount / (float)total);
 
@@ -410,7 +438,10 @@ namespace Polymulator
             float levelBand = levelPieDepth;
             float extent = circleRadius + levelBand + outlineThickness * 2f + 8f;
             float scale = Mathf.Clamp(size * 0.5f / Mathf.Max(1f, extent), 0.2f, 1f);
-            float arcInner = Mathf.Max(circleRadius * 0.5f, circleRadius - arcThickness) * scale;
+            float reveal = Mathf.Clamp01(circleReveal);
+            float baseArcInner = Mathf.Max(circleRadius * 0.5f, circleRadius - arcThickness) * scale;
+            float arcInner = Mathf.Max(0.5f, baseArcInner * reveal);
+            float outer = Mathf.Max(1f, circleRadius * scale * reveal);
             float gap = Mathf.Min(10f, Mathf.Rad2Deg * outlineThickness / Mathf.Max(1f, circleRadius));
 
             return new RadialGeometry
@@ -419,7 +450,7 @@ namespace Polymulator
                 Scale = scale,
                 CenterRadius = arcInner,
                 ArcInner = arcInner,
-                Outer = circleRadius * scale,
+                Outer = outer,
                 LevelBand = levelBand * scale,
                 Outline = Mathf.Max(1f, outlineThickness * scale),
                 Separator = Mathf.Max(0.5f, levelSeparatorThickness * scale),
@@ -748,11 +779,7 @@ namespace Polymulator
 
         private void OnPointerMove(PointerMoveEvent evt)
         {
-            if (!HitTest(evt.localPosition, out int chapter, out int level, out bool overLevelPie))
-            {
-                ClearActive();
-                return;
-            }
+            if (!HitTest(evt.localPosition, out int chapter, out int level, out bool overLevelPie)) return;
 
             hasActive = true;
             if (!HasKeyboardFocus) Focus();
@@ -766,7 +793,11 @@ namespace Polymulator
 
         private void OnPointerDown(PointerDownEvent evt)
         {
-            if (!HitTest(evt.localPosition, out int chapter, out int level, out bool overLevelPie)) return;
+            if (!HitTest(evt.localPosition, out int chapter, out int level, out bool overLevelPie))
+            {
+                ClearActive();
+                return;
+            }
             if (!overLevelPie) return;
             evt.StopPropagation();
             Focus();
