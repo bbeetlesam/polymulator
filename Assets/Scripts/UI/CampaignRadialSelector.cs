@@ -620,6 +620,7 @@ namespace Polymulator
             angle = 0f;
             painter.strokeColor = PaletteSettings.Base;
             painter.lineWidth = geo.Outline;
+            painter.lineJoin = LineJoin.Round;
             for (int i = 0; i < chapters.Count; i++)
             {
                 float chapterSpan = chapters[i].Levels.Count * span;
@@ -631,12 +632,15 @@ namespace Polymulator
                 angle += chapterSpan;
             }
 
-            AddWedge(painter, geo, 0f, 360f, 0f, geo.CenterRadius);
+            painter.BeginPath();
+            painter.Arc(geo.Center, geo.CenterRadius, Angle.Degrees(0f), Angle.Degrees(360f), ArcDirection.Clockwise);
+            painter.ClosePath();
             painter.fillColor = PaletteSettings.Crust;
             painter.Fill();
-            AddArc(painter, geo, geo.CenterRadius, 0f, 360f);
             painter.strokeColor = PaletteSettings.Base;
             painter.lineWidth = geo.Outline;
+            painter.lineJoin = LineJoin.Round;
+            painter.lineCap = LineCap.Round;
             painter.Stroke();
         }
 
