@@ -399,10 +399,17 @@
     position: absolute;
     width: 40px;
     height: 28px;
-    -unity-font-definition: url("/Assets/UI/Fonts/Font_AktBold.asset");
-    font-size: 20px;
+    -unity-font-definition: url("/Assets/UI/Fonts/Font_SoraSemiBold.asset");
+    font-size: 30px;
     color: #CDD6F4;
     -unity-text-align: middle-center;
+}
+
+.radial-level-icon {
+    position: absolute;
+    width: 30px;
+    height: 30px;
+    translate: -50% -50%;
 }
 
 .preview-dock {

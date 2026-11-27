@@ -20,6 +20,7 @@ namespace Polymulator
         public bool Cleared;
         public bool Current;
         public Label Label;
+        public UiVectorIcon Icon;
     }
 
     public sealed class CampaignRadialChapter
@@ -136,6 +137,7 @@ namespace Polymulator
 
         private readonly List<CampaignRadialChapter> chapters = new List<CampaignRadialChapter>();
         private readonly List<Label> levelLabels = new List<Label>();
+        private readonly List<UiVectorIcon> levelIcons = new List<UiVectorIcon>();
         private float[] chapterGrowth = Array.Empty<float>();
         private float[] chapterProgress = Array.Empty<float>();
 
@@ -390,6 +392,8 @@ namespace Polymulator
         {
             for (int i = 0; i < levelLabels.Count; i++) levelLabels[i].RemoveFromHierarchy();
             levelLabels.Clear();
+            for (int i = 0; i < levelIcons.Count; i++) levelIcons[i].RemoveFromHierarchy();
+            levelIcons.Clear();
 
             for (int c = 0; c < chapters.Count; c++)
             {
@@ -402,6 +406,13 @@ namespace Polymulator
                     level.Label = label;
                     levelLabels.Add(label);
                     Add(label);
+
+                    UiVectorIcon icon = new UiVectorIcon();
+                    icon.AddToClassList("radial-level-icon");
+                    icon.pickingMode = PickingMode.Ignore;
+                    level.Icon = icon;
+                    levelIcons.Add(icon);
+                    Add(icon);
                 }
             }
         }
@@ -880,6 +891,8 @@ namespace Polymulator
                     CampaignRadialLevel level = chapter.Levels[l];
                     if (level.Label == null) continue;
                     level.Label.style.display = visible ? DisplayStyle.Flex : DisplayStyle.None;
+                    if (level.Icon != null)
+                        level.Icon.style.display = visible ? DisplayStyle.Flex : DisplayStyle.None;
                     if (!visible) continue;
 
                     float mid = angle + geo.GapHalf + (l + 0.5f) * insetSpan;
@@ -890,6 +903,34 @@ namespace Polymulator
                     level.Label.style.color = highlight
                         ? PaletteSettings.Yellow
                         : PaletteSettings.TextPrimary;
+
+                    if (level.Icon == null) continue;
+                    PieLevelState state = StateOf(chapter, level);
+                    if (state == PieLevelState.Unlocked)
+                    {
+                        level.Icon.style.display = DisplayStyle.None;
+                        continue;
+                    }
+
+                    Vector2 iconPoint = PolarPoint(geo.Center, (geo.ArcInner + geo.Outer) * 0.5f, mid);
+                    level.Icon.style.left = iconPoint.x;
+                    level.Icon.style.top = iconPoint.y;
+                    level.Icon.style.opacity = chapterGrowth[c];
+                    if (state == PieLevelState.Cleared)
+                    {
+                        level.Icon.IconKind = UiIconKind.StarFilled;
+                        level.Icon.SetTint(PaletteSettings.Green);
+                    }
+                    else if (state == PieLevelState.Current)
+                    {
+                        level.Icon.IconKind = UiIconKind.Play;
+                        level.Icon.SetTint(PaletteSettings.Peach);
+                    }
+                    else
+                    {
+                        level.Icon.IconKind = UiIconKind.Lock;
+                        level.Icon.SetTint(PaletteSettings.Overlay0);
+                    }
                 }
                 angle += chapterSpan;
             }
