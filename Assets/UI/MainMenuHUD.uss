@@ -422,21 +422,15 @@
     padding: 16px 20px;
 }
 
-.chapter-preview-card {
-    flex-direction: column;
-}
-
-.chapter-preview-title {
-    -unity-font-definition: url("/Assets/UI/Fonts/Font_AktBold.asset");
-    font-size: 22px;
+.chapter-footer-label {
+    position: absolute;
+    bottom: 40px;
+    left: 50%;
+    translate: -50% 0;
+    -unity-font-definition: url("/Assets/UI/Fonts/Font_AktMedium.asset");
+    font-size: 20px;
     color: #CDD6F4;
-    margin-bottom: 4px;
-}
-
-.chapter-preview-progress {
-    -unity-font-definition: url("/Assets/UI/Fonts/Font_AktRegular.asset");
-    font-size: 15px;
-    color: #BAC2DE;
+    -unity-text-align: middle-center;
 }
 
 .chamber-preview-card {

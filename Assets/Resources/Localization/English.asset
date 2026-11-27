@@ -363,13 +363,12 @@ MonoBehaviour:
   - ui.menu.buttons.chapters
   - ui.menu.buttons.quit
   - ui.menu.buttons.showcase
+  - ui.menu.chapter_footer
   - ui.menu.chapter_pill
   - ui.menu.continue
   - ui.menu.hints.title_nav
   - ui.menu.kicker
   - ui.menu.preview.chapter
-  - ui.menu.preview.chapter_card
-  - ui.menu.preview.chapter_progress
   - ui.menu.preview.launch.locked
   - ui.menu.preview.launch.replay
   - ui.menu.preview.launch.start
@@ -762,13 +761,12 @@ MonoBehaviour:
   - Select Chamber
   - Quit
   - Showcase Chamber
+  - "Chapter {0} - {1}"
   - CHAPTER 0{0}
   - Continue Chamber {0}.{1}
   - "Arrow / W-S: Select   \u2022   Enter: Open"
   - DISTRICT EDGE  /  SPATIAL ARCHIVE
   - "Chapter {0}  \u2022  {1}"
-  - "Chapter {0} \u2014 {1}"
-  - '{0}/{1} Chambers cleared'
   - Locked
   - Replay
   - Start

@@ -44,9 +44,7 @@ namespace Polymulator
         private Button btnRibbonBack;
 
         private VisualElement chamberPreviewCard;
-        private VisualElement chapterPreviewCard;
-        private Label chapterPreviewTitle;
-        private Label chapterPreviewProgress;
+        private Label chapterFooterLabel;
         private Label previewTitleLabel;
         private readonly UiVectorIcon[] previewStars = new UiVectorIcon[3];
         private Label previewMemoryLabel;
@@ -173,9 +171,7 @@ namespace Polymulator
             if (btnRibbonBack != null) btnRibbonBack.focusable = false;
 
             chamberPreviewCard = root.Q<VisualElement>("chamber-preview-card");
-            chapterPreviewCard = root.Q<VisualElement>("chapter-preview-card");
-            chapterPreviewTitle = root.Q<Label>("chapter-preview-title");
-            chapterPreviewProgress = root.Q<Label>("chapter-preview-progress");
+            chapterFooterLabel = root.Q<Label>("chapter-footer-label");
             previewTitleLabel = root.Q<Label>("preview-title-label");
             for (int i = 0; i < previewStars.Length; i++) previewStars[i] = root.Q<UiVectorIcon>("preview-star-" + i);
             previewMemoryLabel = root.Q<Label>("preview-memory-label");
@@ -387,31 +383,23 @@ namespace Polymulator
         {
             previewChapter = chapter;
             previewLevel = level;
-            if (source == RadialPreviewSource.ChapterArc)
-                ShowChapterPreview(chapter, cleared, total);
-            else
-                UpdatePreviewCard(chapter, level);
+            UpdatePreviewCard(chapter, level);
+            UpdateChapterFooter(chapter);
             UpdateRadialCenter(chapter);
             SimulationAudio.PlayMenuHover();
         }
 
-        private void ShowChapterPreview(int chapter, int cleared, int total)
+        private void UpdateChapterFooter(int chapter)
         {
-            if (chapterPreviewCard != null) chapterPreviewCard.style.display = DisplayStyle.Flex;
-            if (chamberPreviewCard != null) chamberPreviewCard.style.display = DisplayStyle.None;
-            if (previewEmptyLabel != null) previewEmptyLabel.style.display = DisplayStyle.None;
-
+            if (chapterFooterLabel == null) return;
             string theme = chapter > 0 && chapter < SimulationProgress.ChapterNames.Length
                 ? SimulationProgress.ChapterName(chapter) : L.T("ui.menu.archive_short");
-            if (chapterPreviewTitle != null)
-                chapterPreviewTitle.text = L.T("ui.menu.preview.chapter_card", chapter, theme);
-            if (chapterPreviewProgress != null)
-                chapterPreviewProgress.text = L.T("ui.menu.preview.chapter_progress", cleared, total);
+            chapterFooterLabel.text = L.T("ui.menu.chapter_footer", chapter, theme);
         }
 
         private void ShowEmptyPreview()
         {
-            if (chapterPreviewCard != null) chapterPreviewCard.style.display = DisplayStyle.None;
+            if (chapterFooterLabel != null) chapterFooterLabel.text = string.Empty;
             if (chamberPreviewCard != null) chamberPreviewCard.style.display = DisplayStyle.None;
             if (previewEmptyLabel != null) previewEmptyLabel.style.display = DisplayStyle.Flex;
             campaignRadial?.SetCenterNumber(currentChapter.ToString());
@@ -446,7 +434,6 @@ namespace Polymulator
 
         private void UpdatePreviewCard(int chapter, int level)
         {
-            if (chapterPreviewCard != null) chapterPreviewCard.style.display = DisplayStyle.None;
             if (chamberPreviewCard != null) chamberPreviewCard.style.display = DisplayStyle.Flex;
             if (previewEmptyLabel != null) previewEmptyLabel.style.display = DisplayStyle.None;
 
@@ -834,6 +821,7 @@ namespace Polymulator
             {
                 campaignRadial.SetFocus(previewChapter, previewLevel, true);
                 UpdatePreviewCard(previewChapter, previewLevel);
+                UpdateChapterFooter(previewChapter);
                 UpdateRadialCenter(previewChapter);
             }
             else

@@ -38,8 +38,8 @@ namespace Polymulator
     }
 
     /// <summary>
-    /// Campaign circle. The four UXML attributes are the only visual tuning knobs:
-    /// circle-radius, arc-thickness, outline-thickness and level-pie-depth.
+    /// Campaign circle. The five UXML attributes are the only visual tuning knobs:
+    /// circle-radius, arc-thickness, outline-thickness, level-pie-depth and level-separator-thickness.
     /// The chapter gap is derived from outline-thickness; every other dimension is derived.
     /// </summary>
     [UxmlElement]
@@ -54,6 +54,7 @@ namespace Polymulator
             public float Outer;
             public float LevelBand;
             public float Outline;
+            public float Separator;
             public float GapHalf;
         }
 
@@ -61,6 +62,7 @@ namespace Polymulator
         private float arcThickness = 16f;
         private float outlineThickness = 2.5f;
         private float levelPieDepth = 480f;
+        private float levelSeparatorThickness = 2f;
 
         [UxmlAttribute("circle-radius")]
         public float CircleRadius
@@ -115,6 +117,19 @@ namespace Polymulator
                 levelPieDepth = next;
                 MarkDirtyRepaint();
                 UpdateOverlayLayout();
+            }
+        }
+
+        [UxmlAttribute("level-separator-thickness")]
+        public float LevelSeparatorThickness
+        {
+            get => levelSeparatorThickness;
+            set
+            {
+                float next = Mathf.Max(0.5f, value);
+                if (Mathf.Approximately(levelSeparatorThickness, next)) return;
+                levelSeparatorThickness = next;
+                MarkDirtyRepaint();
             }
         }
 
@@ -407,6 +422,7 @@ namespace Polymulator
                 Outer = circleRadius * scale,
                 LevelBand = levelBand * scale,
                 Outline = Mathf.Max(1f, outlineThickness * scale),
+                Separator = Mathf.Max(0.5f, levelSeparatorThickness * scale),
                 GapHalf = gap * 0.5f
             };
         }
@@ -516,6 +532,13 @@ namespace Polymulator
             }
         }
 
+        private void AddRadialLine(Painter2D painter, RadialGeometry geo, float angle, float inner, float outer)
+        {
+            painter.BeginPath();
+            painter.MoveTo(PolarPoint(geo.Center, inner, angle));
+            painter.LineTo(PolarPoint(geo.Center, outer, angle));
+        }
+
         private static Color WithAlpha(Color color, float alpha)
         {
             Color result = color;
@@ -567,13 +590,21 @@ namespace Polymulator
                         : PaletteSettings.Base);
                 painter.Fill();
             }
+
+            painter.strokeColor = Color.Lerp(PaletteSettings.Base, PaletteSettings.Blue, 0.67f);
+            painter.lineWidth = geo.Separator;
+            for (int l = 1; l < chapter.Levels.Count; l++)
+            {
+                float boundaryAngle = start + l * span;
+                AddRadialLine(painter, geo, boundaryAngle, inner, outer);
+                painter.Stroke();
+            }
         }
 
         private void DrawLevelHighlight(Painter2D painter, RadialGeometry geo,
             float span, int activeChapter, int activeLevel)
         {
             if (activeChapter <= 0 || activeLevel <= 0 || !hasActive) return;
-            if (hoverChapter > 0 && !hoverIsLevel) return;
 
             int arrayIndex = ChapterArrayIndex(activeChapter);
             if (arrayIndex < 0 || chapterGrowth[arrayIndex] <= 0.02f) return;
@@ -704,17 +735,10 @@ namespace Polymulator
                     if (radius > geo.Outer + pieDepth + 2f * geo.Scale) return false;
 
                     chapter = chapters[c].Index;
-                    if (radius > geo.Outer - 2f * geo.Scale)
-                    {
-                        float insetSpan = (end - start) / Mathf.Max(1, chapters[c].Levels.Count);
-                        int offset = Mathf.FloorToInt((angle - start) / insetSpan);
-                        level = Mathf.Clamp(offset + 1, 1, chapters[c].Levels.Count);
-                        overLevelPie = true;
-                    }
-                    else
-                    {
-                        level = PreferredLevel(chapter);
-                    }
+                    float insetSpan = (end - start) / Mathf.Max(1, chapters[c].Levels.Count);
+                    int offset = Mathf.FloorToInt((angle - start) / insetSpan);
+                    level = Mathf.Clamp(offset + 1, 1, chapters[c].Levels.Count);
+                    overLevelPie = radius > geo.Outer - 2f * geo.Scale;
                     return true;
                 }
                 boundary += chapterSpan;
@@ -768,7 +792,7 @@ namespace Polymulator
             centerNumber.style.top = geo.Center.y - centerSize * 0.5f;
             centerNumber.style.width = centerSize;
             centerNumber.style.height = centerSize;
-            centerNumber.style.fontSize = Mathf.Max(8f, geo.CenterRadius * 0.82f);
+            centerNumber.style.fontSize = Mathf.Max(8f, geo.CenterRadius * 0.88f);
             if (centerReveal >= 1f)
             {
                 centerNumber.style.opacity = 1f;
@@ -799,8 +823,7 @@ namespace Polymulator
                     Vector2 point = PolarPoint(geo.Center, labelRadius, mid);
                     level.Label.style.left = Mathf.Clamp(point.x - 20f * geo.Scale, 0f, contentRect.width - 40f * geo.Scale);
                     level.Label.style.top = Mathf.Clamp(point.y - 14f * geo.Scale, 0f, contentRect.height - 28f * geo.Scale);
-                    bool highlight = chapter.Index == activeChapter && level.Level == activeLevel
-                        && (hoverChapter == 0 || hoverIsLevel);
+                    bool highlight = chapter.Index == activeChapter && level.Level == activeLevel;
                     level.Label.style.color = highlight
                         ? PaletteSettings.Yellow
                         : PaletteSettings.TextPrimary;

@@ -349,13 +349,12 @@ ui.menu.buttons.back,Back,Kembali
 ui.menu.buttons.chapters,Select Chamber,Pilih Ruangan
 ui.menu.buttons.quit,Quit,Keluar
 ui.menu.buttons.showcase,Showcase Chamber,Ruang Showcase
+ui.menu.chapter_footer,Chapter {0} - {1},Bab {0} - {1}
 ui.menu.chapter_pill,CHAPTER 0{0},CHAPTER 0{0}
 ui.menu.continue,Continue Chamber {0}.{1},Lanjutkan Ruangan {0}.{1}
 ui.menu.hints.title_nav,Arrow / W-S: Select   •   Enter: Open,Panah / W-S: Pilih   •   Enter: Buka
 ui.menu.kicker,DISTRICT EDGE  /  SPATIAL ARCHIVE,KOTA TEPI  /  ARSIP SPASIAL
 ui.menu.preview.chapter,Chapter {0}  •  {1},Chapter {0}  •  {1}
-ui.menu.preview.chapter_card,Chapter {0} — {1},Bab {0} — {1}
-ui.menu.preview.chapter_progress,{0}/{1} Chambers cleared,{0}/{1} Ruangan selesai
 ui.menu.preview.launch.locked,Locked,Terkunci
 ui.menu.preview.launch.replay,Replay,Main Ulang
 ui.menu.preview.launch.start,Start,Mulai

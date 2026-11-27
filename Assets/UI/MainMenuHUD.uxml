@@ -82,7 +82,7 @@
         <!-- Chapter & Chamber Index View -->
         <ui:VisualElement name="ribbon-view" class="ribbon-view ribbon-view--hidden">
             <ui:VisualElement name="ribbon-viewport" class="ribbon-viewport">
-                <!-- Visual tuning: circle radius, chapter arc thickness, outline thickness and level pie depth. All values in design pixels; the chapter gap follows outline thickness. -->
+                <!-- Visual tuning: circle radius, chapter arc thickness, outline thickness, level pie depth and level separator thickness. All values in design pixels; the chapter gap follows outline thickness. -->
                 <poly:CampaignRadialSelector
                     name="campaign-radial"
                     class="campaign-radial"
@@ -90,6 +90,7 @@
                     arc-thickness="100"
                     outline-thickness="8"
                     level-pie-depth="175"
+                    level-separator-thickness="2"
                 />
             </ui:VisualElement>
 
@@ -121,21 +122,6 @@
             </ui:VisualElement>
 
             <ui:VisualElement name="preview-dock" class="preview-dock">
-                <ui:VisualElement name="chapter-preview-card" class="preview-card chapter-preview-card">
-                    <ui:Label
-                        name="chapter-preview-title"
-                        text=""
-                        class="chapter-preview-title"
-                        picking-mode="Ignore"
-                    />
-                    <ui:Label
-                        name="chapter-preview-progress"
-                        text=""
-                        class="chapter-preview-progress"
-                        picking-mode="Ignore"
-                    />
-                </ui:VisualElement>
-
                 <ui:VisualElement name="chamber-preview-card" class="preview-card chamber-preview-card">
                     <ui:VisualElement class="preview-heading" picking-mode="Ignore">
                         <ui:Label
@@ -171,6 +157,13 @@
                     picking-mode="Ignore"
                 />
             </ui:VisualElement>
+
+            <ui:Label
+                name="chapter-footer-label"
+                text=""
+                class="chapter-footer-label"
+                picking-mode="Ignore"
+            />
         </ui:VisualElement>
 
         <!-- Settings Modal -->

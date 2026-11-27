@@ -363,13 +363,12 @@ MonoBehaviour:
   - ui.menu.buttons.chapters
   - ui.menu.buttons.quit
   - ui.menu.buttons.showcase
+  - ui.menu.chapter_footer
   - ui.menu.chapter_pill
   - ui.menu.continue
   - ui.menu.hints.title_nav
   - ui.menu.kicker
   - ui.menu.preview.chapter
-  - ui.menu.preview.chapter_card
-  - ui.menu.preview.chapter_progress
   - ui.menu.preview.launch.locked
   - ui.menu.preview.launch.replay
   - ui.menu.preview.launch.start
@@ -762,13 +761,12 @@ MonoBehaviour:
   - Pilih Ruangan
   - Keluar
   - Ruang Showcase
+  - "Bab {0} - {1}"
   - CHAPTER 0{0}
   - Lanjutkan Ruangan {0}.{1}
   - "Panah / W-S: Pilih   \u2022   Enter: Buka"
   - KOTA TEPI  /  ARSIP SPASIAL
   - "Chapter {0}  \u2022  {1}"
-  - "Bab {0} \u2014 {1}"
-  - '{0}/{1} Ruangan selesai'
   - Terkunci
   - Main Ulang
   - Mulai
