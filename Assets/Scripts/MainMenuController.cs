@@ -52,6 +52,7 @@ namespace Polymulator
         private Button btnPreviewLaunch;
         private Label btnEnterLabel;
         private Label previewLaunchLabel;
+        private UiVectorIcon previewLaunchIcon;
         private int previewChapter = 1;
         private int previewLevel = 1;
 
@@ -178,6 +179,7 @@ namespace Polymulator
             previewEmptyLabel = root.Q<Label>("preview-empty-label");
             btnPreviewLaunch = root.Q<Button>("btn-preview-launch");
             previewLaunchLabel = root.Q<Label>("preview-launch-label");
+            previewLaunchIcon = root.Q<UiVectorIcon>("preview-launch-icon");
             if (btnPreviewLaunch != null) btnPreviewLaunch.focusable = false;
 
             settingsOverlay = root.Q<VisualElement>("settings-overlay");
@@ -466,6 +468,11 @@ namespace Polymulator
                 btnPreviewLaunch.SetEnabled(unlocked);
                 btnPreviewLaunch.style.backgroundColor = unlocked ? chapColor : PaletteSettings.Surface1;
                 btnPreviewLaunch.style.color = unlocked ? PaletteSettings.Crust : PaletteSettings.Subtext0;
+                if (previewLaunchIcon != null)
+                {
+                    previewLaunchIcon.IconKind = unlocked ? UiIconKind.Play : UiIconKind.Lock;
+                    previewLaunchIcon.SetTint(unlocked ? PaletteSettings.Crust : PaletteSettings.TextPrimary);
+                }
                 if (previewLaunchLabel != null)
                     previewLaunchLabel.text = cleared
                         ? L.T("ui.menu.preview.launch.replay")

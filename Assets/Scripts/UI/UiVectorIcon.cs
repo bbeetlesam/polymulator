@@ -19,6 +19,7 @@ namespace Polymulator
         StarOutline,
         Weight,
         Play,
+        Lock,
         Settings,
         Volume,
         Language,
@@ -240,6 +241,21 @@ namespace Polymulator
                     painter.BeginPath();
                     painter.MoveTo(P(8f, 4.5f)); painter.LineTo(P(20f, 12f)); painter.LineTo(P(8f, 19.5f));
                     painter.ClosePath();
+                    painter.Fill();
+                    break;
+
+                case UiIconKind.Lock:
+                    // Padlock with an open shackle and a keyhole
+                    painter.BeginPath();
+                    painter.Arc(P(12f, 10.5f), 4.2f * s, Angle.Degrees(180f), Angle.Degrees(360f), ArcDirection.Clockwise);
+                    painter.Stroke();
+                    painter.BeginPath();
+                    painter.MoveTo(P(6.5f, 10.5f)); painter.LineTo(P(17.5f, 10.5f));
+                    painter.LineTo(P(17.5f, 19f)); painter.LineTo(P(6.5f, 19f));
+                    painter.ClosePath();
+                    painter.Stroke();
+                    painter.BeginPath();
+                    painter.Arc(P(12f, 14.5f), 1.4f * s, Angle.Degrees(0f), Angle.Degrees(360f), ArcDirection.Clockwise);
                     painter.Fill();
                     break;
 

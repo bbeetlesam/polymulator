@@ -419,7 +419,7 @@
     border-color: #6C7086;
     border-width: 1px;
     border-radius: 3px;
-    padding: 16px 20px;
+    padding: 12px 16px;
 }
 
 .chapter-footer-label {
@@ -440,7 +440,6 @@
 .preview-heading {
     flex-direction: row;
     align-items: center;
-    justify-content: space-between;
     margin-bottom: 12px;
 }
 
@@ -454,6 +453,7 @@
 .preview-stars {
     flex-direction: row;
     align-items: center;
+    margin-right: 12px;
 }
 
 .preview-star {
@@ -473,7 +473,7 @@
     -unity-font-definition: url("/Assets/UI/Fonts/Font_AktRegular.asset");
     font-size: 14px;
     color: #BAC2DE;
-    -unity-text-align: middle-left;
+    -unity-text-align: middle-right;
 }
 
 .preview-empty {
@@ -491,6 +491,7 @@
 
 .preview-launch-btn {
     -unity-font-definition: url("/Assets/UI/Fonts/Font_AktBold.asset");
+    margin-left: 12px;
     flex-direction: row;
     align-items: center;
     justify-content: center;

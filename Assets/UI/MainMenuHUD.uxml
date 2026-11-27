@@ -124,30 +124,30 @@
 
             <ui:VisualElement name="preview-dock" class="preview-dock">
                 <ui:VisualElement name="chamber-preview-card" class="preview-card chamber-preview-card">
-                    <ui:VisualElement class="preview-heading" picking-mode="Ignore">
+                    <ui:VisualElement class="preview-heading">
                         <ui:Label
                             name="preview-title-label"
                             text=""
                             class="preview-title"
                             picking-mode="Ignore"
                         />
+                        <ui:Button name="btn-preview-launch" text="" class="preview-launch-btn">
+                            <poly:UiVectorIcon name="preview-launch-icon" icon-kind="Play" class="launch-icon" picking-mode="Ignore" />
+                            <ui:Label name="preview-launch-label" text="" class="preview-launch-label" picking-mode="Ignore" />
+                        </ui:Button>
+                    </ui:VisualElement>
+                    <ui:VisualElement class="preview-footer">
                         <ui:VisualElement name="preview-stars" class="preview-stars" picking-mode="Ignore">
                             <poly:UiVectorIcon name="preview-star-0" icon-kind="StarOutline" class="preview-star" picking-mode="Ignore" />
                             <poly:UiVectorIcon name="preview-star-1" icon-kind="StarOutline" class="preview-star" picking-mode="Ignore" />
                             <poly:UiVectorIcon name="preview-star-2" icon-kind="StarOutline" class="preview-star" picking-mode="Ignore" />
                         </ui:VisualElement>
-                    </ui:VisualElement>
-                    <ui:VisualElement class="preview-footer">
                         <poly:LocalizedText
                             name="preview-memory-label"
                             loc-key="ui.menu.preview.memory_saved_short"
                             class="preview-memory"
                             picking-mode="Ignore"
                         />
-                        <ui:Button name="btn-preview-launch" text="" class="preview-launch-btn">
-                            <poly:UiVectorIcon icon-kind="Play" class="launch-icon" picking-mode="Ignore" />
-                            <ui:Label name="preview-launch-label" text="" class="preview-launch-label" picking-mode="Ignore" />
-                        </ui:Button>
                     </ui:VisualElement>
                 </ui:VisualElement>
 
