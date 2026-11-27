@@ -153,7 +153,6 @@ namespace Polymulator
         private int selectedLevel = 1;
         private int hoverChapter;
         private int hoverLevel;
-        private bool hoverOverPie;
         private bool hasActive;
 
         public event Action<int, int> PreviewChanged;
@@ -222,7 +221,6 @@ namespace Polymulator
             focusedLevel = selectedLevel;
             hoverChapter = 0;
             hoverLevel = 0;
-            hoverOverPie = false;
             hasActive = false;
             mode = RadialSelectionMode.ChapterOverview;
             expandedChapter = 0;
@@ -260,7 +258,6 @@ namespace Polymulator
             expandedChapter = expanded ? focusedChapter : 0;
             hoverChapter = 0;
             hoverLevel = 0;
-            hoverOverPie = false;
             hasActive = true;
             MarkDirtyRepaint();
             UpdateOverlayLayout();
@@ -276,7 +273,6 @@ namespace Polymulator
             focusedLevel = PreferredLevel(target);
             hoverChapter = 0;
             hoverLevel = 0;
-            hoverOverPie = false;
             hasActive = true;
             MarkDirtyRepaint();
             UpdateOverlayLayout();
@@ -289,7 +285,6 @@ namespace Polymulator
             hasActive = false;
             hoverChapter = 0;
             hoverLevel = 0;
-            hoverOverPie = false;
             mode = RadialSelectionMode.ChapterOverview;
             expandedChapter = 0;
 
@@ -777,11 +772,10 @@ namespace Polymulator
             DrawLevelHighlight(painter, geo, span, activeChapter, activeLevel);
         }
 
-        private bool HitTest(Vector2 localPoint, out int chapter, out int level, out bool overLevelPie)
+        private bool HitTest(Vector2 localPoint, out int chapter, out int level)
         {
             chapter = 0;
             level = 0;
-            overLevelPie = false;
             if (chapters.Count == 0) return false;
 
             RadialGeometry geo = GetGeometry();
@@ -810,7 +804,6 @@ namespace Polymulator
                     float insetSpan = (end - start) / Mathf.Max(1, chapters[c].Levels.Count);
                     int offset = Mathf.FloorToInt((angle - start) / insetSpan);
                     level = Mathf.Clamp(offset + 1, 1, chapters[c].Levels.Count);
-                    overLevelPie = radius > geo.Outer - 2f * geo.Scale;
                     return true;
                 }
                 boundary += chapterSpan;
@@ -820,26 +813,24 @@ namespace Polymulator
 
         private void OnPointerMove(PointerMoveEvent evt)
         {
-            if (!HitTest(evt.localPosition, out int chapter, out int level, out bool overLevelPie)) return;
+            if (!HitTest(evt.localPosition, out int chapter, out int level)) return;
 
             hasActive = true;
             if (!HasKeyboardFocus) Focus();
-            if (chapter == hoverChapter && level == hoverLevel && overLevelPie == hoverOverPie) return;
+            if (chapter == hoverChapter && level == hoverLevel) return;
             hoverChapter = chapter;
             hoverLevel = level;
-            hoverOverPie = overLevelPie;
             MarkDirtyRepaint();
             NotifyPreview();
         }
 
         private void OnPointerDown(PointerDownEvent evt)
         {
-            if (!HitTest(evt.localPosition, out int chapter, out int level, out bool overLevelPie))
+            if (!HitTest(evt.localPosition, out int chapter, out int level))
             {
                 ClearActive();
                 return;
             }
-            if (!overLevelPie) return;
             evt.StopPropagation();
             Focus();
 
