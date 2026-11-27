@@ -379,7 +379,7 @@ namespace Polymulator
                 menuRoot.EnableInClassList("menu-root--reduce-motion", SimulationSettings.ReduceMotion);
         }
 
-        private void OnRadialPreviewChanged(int chapter, int level, RadialPreviewSource source, int cleared, int total)
+        private void OnRadialPreviewChanged(int chapter, int level)
         {
             previewChapter = chapter;
             previewLevel = level;

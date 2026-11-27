@@ -11,13 +11,6 @@ namespace Polymulator
         ChapterExpanded
     }
 
-    public enum RadialPreviewSource
-    {
-        ChapterArc,
-        LevelSlice,
-        Keyboard
-    }
-
     public sealed class CampaignRadialLevel
     {
         public int Chapter;
@@ -154,10 +147,10 @@ namespace Polymulator
         private int selectedLevel = 1;
         private int hoverChapter;
         private int hoverLevel;
-        private bool hoverIsLevel;
+        private bool hoverOverPie;
         private bool hasActive;
 
-        public event Action<int, int, RadialPreviewSource, int, int> PreviewChanged;
+        public event Action<int, int> PreviewChanged;
         public event Action<int, int> LevelLaunched;
         public event Action LevelRejected;
         public event Action HighlightCleared;
@@ -223,7 +216,7 @@ namespace Polymulator
             focusedLevel = selectedLevel;
             hoverChapter = 0;
             hoverLevel = 0;
-            hoverIsLevel = false;
+            hoverOverPie = false;
             hasActive = false;
             mode = RadialSelectionMode.ChapterOverview;
             expandedChapter = 0;
@@ -261,11 +254,11 @@ namespace Polymulator
             expandedChapter = expanded ? focusedChapter : 0;
             hoverChapter = 0;
             hoverLevel = 0;
-            hoverIsLevel = false;
+            hoverOverPie = false;
             hasActive = true;
             MarkDirtyRepaint();
             UpdateOverlayLayout();
-            NotifyPreview(RadialPreviewSource.Keyboard);
+            NotifyPreview();
         }
 
         public void ExpandChapter(int chapter)
@@ -277,38 +270,22 @@ namespace Polymulator
             focusedLevel = PreferredLevel(target);
             hoverChapter = 0;
             hoverLevel = 0;
-            hoverIsLevel = false;
+            hoverOverPie = false;
             hasActive = true;
             MarkDirtyRepaint();
             UpdateOverlayLayout();
-            NotifyPreview(RadialPreviewSource.Keyboard);
-        }
-
-        public void Collapse()
-        {
-            mode = RadialSelectionMode.ChapterOverview;
-            expandedChapter = 0;
-            focusedChapter = selectedChapter;
-            focusedLevel = selectedLevel;
-            hoverChapter = 0;
-            hoverLevel = 0;
-            hoverIsLevel = false;
-            hasActive = false;
-            MarkDirtyRepaint();
-            UpdateOverlayLayout();
+            NotifyPreview();
         }
 
         public void ClearActive()
         {
-            string restingCenter = selectedChapter.ToString();
-            bool wasActive = hasActive || centerValue != restingCenter;
+            bool wasActive = hasActive;
             hasActive = false;
             hoverChapter = 0;
             hoverLevel = 0;
-            hoverIsLevel = false;
+            hoverOverPie = false;
             mode = RadialSelectionMode.ChapterOverview;
             expandedChapter = 0;
-            SetCenterNumber(restingCenter);
 
             if (!wasActive) return;
             MarkDirtyRepaint();
@@ -401,14 +378,11 @@ namespace Polymulator
             return level > 0 ? level : 1;
         }
 
-        private void NotifyPreview(RadialPreviewSource source)
+        private void NotifyPreview()
         {
             int chapter = ActiveChapter();
             if (chapter <= 0) return;
-            CampaignRadialChapter data = FindChapter(chapter);
-            int cleared = data != null ? data.ClearedCount : 0;
-            int total = data != null ? Mathf.Max(1, data.Levels.Count) : 1;
-            PreviewChanged?.Invoke(chapter, ActiveLevel(), source, cleared, total);
+            PreviewChanged?.Invoke(chapter, ActiveLevel());
         }
 
         private void RebuildLevelLabels()
@@ -783,12 +757,12 @@ namespace Polymulator
 
             hasActive = true;
             if (!HasKeyboardFocus) Focus();
-            if (chapter == hoverChapter && level == hoverLevel && overLevelPie == hoverIsLevel) return;
+            if (chapter == hoverChapter && level == hoverLevel && overLevelPie == hoverOverPie) return;
             hoverChapter = chapter;
             hoverLevel = level;
-            hoverIsLevel = overLevelPie;
+            hoverOverPie = overLevelPie;
             MarkDirtyRepaint();
-            NotifyPreview(overLevelPie ? RadialPreviewSource.LevelSlice : RadialPreviewSource.ChapterArc);
+            NotifyPreview();
         }
 
         private void OnPointerDown(PointerDownEvent evt)
