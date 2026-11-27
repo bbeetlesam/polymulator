@@ -545,7 +545,7 @@ namespace Polymulator
         }
 
         private void DrawLevelPie(Painter2D painter, RadialGeometry geo,
-            float start, float end, int arrayIndex, int activeLevel)
+            float start, float end, int arrayIndex, int activeChapter, int activeLevel)
         {
             CampaignRadialChapter chapter = chapters[arrayIndex];
             float span = (end - start) / Mathf.Max(1, chapter.Levels.Count);
@@ -567,7 +567,8 @@ namespace Polymulator
                         : PaletteSettings.Base);
                 painter.Fill();
 
-                bool highlight = level.Level == activeLevel && (hoverChapter == 0 || hoverIsLevel);
+                bool highlight = chapter.Index == activeChapter && level.Level == activeLevel
+                    && (hoverChapter == 0 || hoverIsLevel);
                 if (highlight)
                 {
                     painter.strokeColor = PaletteSettings.Crust;
@@ -588,6 +589,7 @@ namespace Polymulator
 
             Painter2D painter = ctx.painter2D;
             float span = LevelSpan();
+            int activeChapter = ActiveChapter();
             int activeLevel = ActiveLevel();
             float angle = 0f;
 
@@ -613,7 +615,7 @@ namespace Polymulator
             {
                 float chapterSpan = chapters[i].Levels.Count * span;
                 if (chapterGrowth[i] > 0.02f)
-                    DrawLevelPie(painter, geo, angle + geo.GapHalf, angle + chapterSpan - geo.GapHalf, i, activeLevel);
+                    DrawLevelPie(painter, geo, angle + geo.GapHalf, angle + chapterSpan - geo.GapHalf, i, activeChapter, activeLevel);
                 angle += chapterSpan;
             }
 
@@ -769,7 +771,8 @@ namespace Polymulator
                     Vector2 point = PolarPoint(geo.Center, labelRadius, mid);
                     level.Label.style.left = Mathf.Clamp(point.x - 20f * geo.Scale, 0f, contentRect.width - 40f * geo.Scale);
                     level.Label.style.top = Mathf.Clamp(point.y - 14f * geo.Scale, 0f, contentRect.height - 28f * geo.Scale);
-                    bool highlight = level.Level == activeLevel && (hoverChapter == 0 || hoverIsLevel);
+                    bool highlight = chapter.Index == activeChapter && level.Level == activeLevel
+                        && (hoverChapter == 0 || hoverIsLevel);
                     level.Label.style.color = highlight
                         ? PaletteSettings.Yellow
                         : PaletteSettings.TextPrimary;
