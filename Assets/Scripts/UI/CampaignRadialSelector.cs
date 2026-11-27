@@ -557,6 +557,56 @@ namespace Polymulator
             return result;
         }
 
+        private enum PieLevelState
+        {
+            Cleared,
+            Current,
+            LockedInUnlocked,
+            LockedChapter,
+            Unlocked
+        }
+
+        private static PieLevelState StateOf(CampaignRadialChapter chapter, CampaignRadialLevel level)
+        {
+            if (level.Cleared) return PieLevelState.Cleared;
+            if (level.Current) return PieLevelState.Current;
+            if (!level.Unlocked)
+                return chapter.Locked ? PieLevelState.LockedChapter : PieLevelState.LockedInUnlocked;
+            return PieLevelState.Unlocked;
+        }
+
+        private static Color LevelFillColor(CampaignRadialChapter chapter, CampaignRadialLevel level)
+        {
+            switch (StateOf(chapter, level))
+            {
+                case PieLevelState.Cleared: return PaletteSettings.Blue;
+                case PieLevelState.Current: return PaletteSettings.Surface2;
+                case PieLevelState.LockedChapter: return PaletteSettings.Surface0;
+                case PieLevelState.LockedInUnlocked: return PaletteSettings.Surface1;
+                default: return WithAlpha(PaletteSettings.Subtext0, 0.2f);
+            }
+        }
+
+        private static Color SeparatorColor(CampaignRadialChapter chapter,
+            CampaignRadialLevel left, CampaignRadialLevel right)
+        {
+            PieLevelState a = StateOf(chapter, left);
+            PieLevelState b = StateOf(chapter, right);
+            if (a == b)
+            {
+                if (a == PieLevelState.Cleared) return PaletteSettings.Base;
+                if (a == PieLevelState.LockedChapter) return PaletteSettings.Crust;
+                if (a == PieLevelState.LockedInUnlocked) return PaletteSettings.Surface0;
+            }
+            if ((a == PieLevelState.Cleared && b == PieLevelState.Current) ||
+                (a == PieLevelState.Current && b == PieLevelState.Cleared))
+                return PaletteSettings.Surface0;
+            if ((a == PieLevelState.Current && b == PieLevelState.LockedInUnlocked) ||
+                (a == PieLevelState.LockedInUnlocked && b == PieLevelState.Current))
+                return PaletteSettings.Overlay0;
+            return PaletteSettings.Surface1;
+        }
+
         private void DrawChapterBand(Painter2D painter, RadialGeometry geo,
             float start, float end, int arrayIndex)
         {
@@ -565,8 +615,8 @@ namespace Polymulator
 
             AddWedge(painter, geo, start, end, geo.ArcInner, outer);
             painter.fillColor = chapter.Locked
-                ? WithAlpha(PaletteSettings.Subtext0, 0.2f)
-                : PaletteSettings.Base;
+                ? PaletteSettings.Surface0
+                : WithAlpha(PaletteSettings.Subtext0, 0.2f);
             painter.Fill();
 
             if (!chapter.Locked && chapterProgress[arrayIndex] > 0f)
@@ -576,6 +626,22 @@ namespace Polymulator
                 painter.fillColor = PaletteSettings.Blue;
                 painter.Fill();
             }
+
+            if (chapter.Locked) return;
+
+            float span = (end - start) / Mathf.Max(1, chapter.Levels.Count);
+            for (int l = 0; l < chapter.Levels.Count; l++)
+            {
+                CampaignRadialLevel level = chapter.Levels[l];
+                bool locked = !level.Unlocked && !level.Cleared && !level.Current;
+                if (!level.Current && !locked) continue;
+
+                float levelStart = start + l * span;
+                float levelEnd = levelStart + span;
+                AddWedge(painter, geo, levelStart, levelEnd, geo.ArcInner, outer);
+                painter.fillColor = level.Current ? PaletteSettings.Surface2 : PaletteSettings.Surface1;
+                painter.Fill();
+            }
         }
 
         private void DrawLevelPie(Painter2D painter, RadialGeometry geo,
@@ -583,7 +649,7 @@ namespace Polymulator
         {
             CampaignRadialChapter chapter = chapters[arrayIndex];
             float span = (end - start) / Mathf.Max(1, chapter.Levels.Count);
-            float inner = geo.Outer;
+            float inner = geo.Outer - Mathf.Max(0.5f, geo.Scale);
             float outer = inner + geo.LevelBand * chapterGrowth[arrayIndex];
 
             for (int l = 0; l < chapter.Levels.Count; l++)
@@ -591,23 +657,18 @@ namespace Polymulator
                 CampaignRadialLevel level = chapter.Levels[l];
                 float levelStart = start + l * span;
                 float levelEnd = levelStart + span;
-                bool locked = !level.Unlocked && !level.Cleared && !level.Current;
-
                 AddWedge(painter, geo, levelStart, levelEnd, inner, outer);
-                painter.fillColor = level.Cleared
-                    ? WithAlpha(PaletteSettings.Blue, 0.85f)
-                    : (locked
-                        ? WithAlpha(PaletteSettings.Subtext0, 0.22f)
-                        : PaletteSettings.Base);
+                painter.fillColor = LevelFillColor(chapter, level);
                 painter.Fill();
             }
 
-            painter.strokeColor = Color.Lerp(PaletteSettings.Base, PaletteSettings.Blue, 0.67f);
+            float separatorOuter = Mathf.Lerp(geo.ArcInner, geo.Outer + geo.LevelBand, chapterGrowth[arrayIndex]);
             painter.lineWidth = geo.Separator;
             for (int l = 1; l < chapter.Levels.Count; l++)
             {
                 float boundaryAngle = start + l * span;
-                AddRadialLine(painter, geo, boundaryAngle, inner, outer);
+                AddRadialLine(painter, geo, boundaryAngle, geo.ArcInner, separatorOuter);
+                painter.strokeColor = SeparatorColor(chapter, chapter.Levels[l - 1], chapter.Levels[l]);
                 painter.Stroke();
             }
         }
@@ -679,15 +740,6 @@ namespace Polymulator
             }
 
             angle = 0f;
-            for (int i = 0; i < chapters.Count; i++)
-            {
-                float chapterSpan = chapters[i].Levels.Count * span;
-                if (chapterGrowth[i] > 0.02f)
-                    DrawLevelPie(painter, geo, angle + geo.GapHalf, angle + chapterSpan - geo.GapHalf, i);
-                angle += chapterSpan;
-            }
-
-            angle = 0f;
             painter.strokeColor = PaletteSettings.Base;
             painter.lineWidth = geo.Outline;
             painter.lineJoin = LineJoin.Round;
@@ -699,6 +751,15 @@ namespace Polymulator
                     AddArc(painter, geo, geo.Outer, angle + geo.GapHalf, angle + chapterSpan - geo.GapHalf);
                     painter.Stroke();
                 }
+                angle += chapterSpan;
+            }
+
+            angle = 0f;
+            for (int i = 0; i < chapters.Count; i++)
+            {
+                float chapterSpan = chapters[i].Levels.Count * span;
+                if (chapterGrowth[i] > 0.02f)
+                    DrawLevelPie(painter, geo, angle + geo.GapHalf, angle + chapterSpan - geo.GapHalf, i);
                 angle += chapterSpan;
             }
 
