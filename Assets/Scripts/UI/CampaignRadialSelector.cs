@@ -545,7 +545,7 @@ namespace Polymulator
         }
 
         private void DrawLevelPie(Painter2D painter, RadialGeometry geo,
-            float start, float end, int arrayIndex, int activeChapter, int activeLevel)
+            float start, float end, int arrayIndex)
         {
             CampaignRadialChapter chapter = chapters[arrayIndex];
             float span = (end - start) / Mathf.Max(1, chapter.Levels.Count);
@@ -566,18 +566,44 @@ namespace Polymulator
                         ? WithAlpha(PaletteSettings.Subtext0, 0.22f)
                         : PaletteSettings.Base);
                 painter.Fill();
+            }
+        }
 
-                bool highlight = chapter.Index == activeChapter && level.Level == activeLevel
-                    && (hoverChapter == 0 || hoverIsLevel);
-                if (highlight)
+        private void DrawLevelHighlight(Painter2D painter, RadialGeometry geo,
+            float span, int activeChapter, int activeLevel)
+        {
+            if (activeChapter <= 0 || activeLevel <= 0 || !hasActive) return;
+            if (hoverChapter > 0 && !hoverIsLevel) return;
+
+            int arrayIndex = ChapterArrayIndex(activeChapter);
+            if (arrayIndex < 0 || chapterGrowth[arrayIndex] <= 0.02f) return;
+            CampaignRadialChapter chapter = chapters[arrayIndex];
+
+            float boundary = 0f;
+            for (int c = 0; c < chapters.Count; c++)
+            {
+                float chapterSpan = chapters[c].Levels.Count * span;
+                if (chapters[c].Index == activeChapter)
                 {
+                    int levelIndex = activeLevel - 1;
+                    if (levelIndex < 0 || levelIndex >= chapter.Levels.Count) return;
+                    if (chapter.Levels[levelIndex].Level != activeLevel) return;
+
+                    float insetSpan = (chapterSpan - 2f * geo.GapHalf) / chapter.Levels.Count;
+                    float levelStart = boundary + geo.GapHalf + levelIndex * insetSpan;
+                    float levelEnd = levelStart + insetSpan;
+                    float outer = geo.Outer + geo.LevelBand * chapterGrowth[arrayIndex];
+
+                    AddWedge(painter, geo, levelStart, levelEnd, geo.ArcInner, outer);
                     painter.strokeColor = PaletteSettings.Crust;
                     painter.lineWidth = geo.Outline + Mathf.Max(1f, geo.Outline * 0.5f);
                     painter.Stroke();
                     painter.strokeColor = PaletteSettings.Yellow;
                     painter.lineWidth = geo.Outline;
                     painter.Stroke();
+                    return;
                 }
+                boundary += chapterSpan;
             }
         }
 
@@ -615,7 +641,7 @@ namespace Polymulator
             {
                 float chapterSpan = chapters[i].Levels.Count * span;
                 if (chapterGrowth[i] > 0.02f)
-                    DrawLevelPie(painter, geo, angle + geo.GapHalf, angle + chapterSpan - geo.GapHalf, i, activeChapter, activeLevel);
+                    DrawLevelPie(painter, geo, angle + geo.GapHalf, angle + chapterSpan - geo.GapHalf, i);
                 angle += chapterSpan;
             }
 
@@ -644,6 +670,8 @@ namespace Polymulator
             painter.lineJoin = LineJoin.Round;
             painter.lineCap = LineCap.Round;
             painter.Stroke();
+
+            DrawLevelHighlight(painter, geo, span, activeChapter, activeLevel);
         }
 
         private bool HitTest(Vector2 localPoint, out int chapter, out int level, out bool overLevelPie)
