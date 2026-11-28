@@ -1643,10 +1643,9 @@ namespace Polymulator.EditorTools
 
             UnityEngine.TextCore.Text.FontAsset aktReg =
                 AssetDatabase.LoadAssetAtPath<UnityEngine.TextCore.Text.FontAsset>(fontsFolder + "/Font_AktRegular.asset");
-            UnityEngine.TextCore.Text.FontAsset interSemi = EnsureSdfFont(
-                "Packages/com.unity.dt.app-ui/PackageResources/Fonts/Inter-SemiBold.ttf",
-                fontsFolder + "/Font_InterSemiBold.asset");
-            EnsureSdfFont("Packages/com.unity.dt.app-ui/PackageResources/Fonts/Inter-Regular.ttf", fontsFolder + "/Font_InterRegular.asset");
+            UnityEngine.TextCore.Text.FontAsset soraSemi = EnsureSdfFont(
+                fontsFolder + "/Sora-SemiBold.ttf", fontsFolder + "/Font_SoraSemiBold.asset");
+            EnsureSdfFont(fontsFolder + "/Sora-Regular.ttf", fontsFolder + "/Font_SoraRegular.asset");
             EnsureSdfFont("Packages/com.unity.dt.app-ui/PackageResources/Fonts/RobotoMono-Regular.ttf", fontsFolder + "/Font_RobotoMono.asset");
 
             PanelSettings panel = AssetDatabase.LoadAssetAtPath<PanelSettings>(PanelSettingsPath);
@@ -1666,7 +1665,7 @@ namespace Polymulator.EditorTools
             panel.match = 0.5f;
             panel.sortingOrder = 10f;
 
-            UnityEngine.TextCore.Text.FontAsset preferredDefaultFont = aktReg != null ? aktReg : interSemi;
+            UnityEngine.TextCore.Text.FontAsset preferredDefaultFont = aktReg != null ? aktReg : soraSemi;
             if (preferredDefaultFont != null)
             {
                 string tsPath = UIFolder + "/PanelTextSettings.asset";

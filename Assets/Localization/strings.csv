@@ -339,21 +339,19 @@ ui.hud.plate.released,Weight plate released: energy bridge off,Pelat beban lepas
 ui.hud.start.room,Chamber {0}: ,Ruangan {0}: 
 ui.hud.start.showcase,Showcase Chamber: ,Ruang Showcase: 
 ui.hud.story.next,[SPACE] Continue,[SPACE] Lanjut
+ui.hud.target.rotation,Rotation {0:0}°,Rotasi {0:0}°
 ui.hud.target.weight,Weight {0:0.0} t,Bobot {0:0.0} t
 ui.language.english,ENGLISH,INGGRIS
 ui.language.indonesian,INDONESIAN,INDONESIA
 ui.menu.active_badge,ACTIVE,AKTIF
 ui.menu.archive_short,ARCHIVE,ARSIP
+ui.menu.buttons.back,Back,Kembali
 ui.menu.buttons.chapters,Select Chamber,Pilih Ruangan
-ui.menu.buttons.home,[Esc] Home,[Esc] Beranda
-ui.menu.buttons.open_demo,Open Demo,Buka Demo
 ui.menu.buttons.quit,Quit,Keluar
 ui.menu.buttons.showcase,Showcase Chamber,Ruang Showcase
+ui.menu.chapter_footer,Chapter {0} - {1},Bab {0} - {1}
 ui.menu.chapter_pill,CHAPTER 0{0},CHAPTER 0{0}
 ui.menu.continue,Continue Chamber {0}.{1},Lanjutkan Ruangan {0}.{1}
-ui.menu.demo.off,[F2] Unlock All: Off,[F2] Buka Semua: Mati
-ui.menu.demo.on,[F2] Unlock All: On,[F2] Buka Semua: Nyala
-ui.menu.hints.ribbon_nav,Drag / Scroll / A-D: Browse Chapters   •   Click a chamber node or press Enter to enter,Geser / Scroll / A-D: Telusuri Chapter   •   Klik titik ruangan atau tekan Enter untuk masuk
 ui.menu.hints.title_nav,Arrow / W-S: Select   •   Enter: Open,Panah / W-S: Pilih   •   Enter: Buka
 ui.menu.kicker,DISTRICT EDGE  /  SPATIAL ARCHIVE,KOTA TEPI  /  ARSIP SPASIAL
 ui.menu.preview.chapter,Chapter {0}  •  {1},Chapter {0}  •  {1}
@@ -361,14 +359,16 @@ ui.menu.preview.launch.locked,Locked,Terkunci
 ui.menu.preview.launch.replay,Replay,Main Ulang
 ui.menu.preview.launch.start,Start,Mulai
 ui.menu.preview.memory_saved,  •  Memory saved,  •  Memori tersimpan
+ui.menu.preview.memory_saved_short,Memory saved,Memori tersimpan
 ui.menu.preview.showcase.chapter,Showcase Chamber  •  All Mechanics Unlocked,Ruang Showcase  •  Semua Mekanik Terbuka
 ui.menu.preview.showcase.launch,Open Showcase,Buka Showcase
 ui.menu.preview.showcase.status,"Partition [1], Fusion [2], Telekinesis [F], Rotation [R], and Flexible Mode are active immediately","Partition [1], Fusion [2], Telekinesis [F], Rotasi [R], dan Mode Fleksibel langsung aktif"
 ui.menu.preview.showcase.title,Full POLYMULATOR Demo,Demo Lengkap POLYMULATOR
 ui.menu.preview.status.cleared,Cleared  [{0}]{1},Selesai  [{0}]{1}
 ui.menu.preview.status.locked,Chamber locked: clear the previous chamber first,Ruangan terkunci: selesaikan ruangan sebelumnya lebih dulu
-ui.menu.preview.status.ready,Ready to start  •  Click a chamber node or press Enter,Siap dimulai  •  Klik titik ruangan atau tekan Enter
+ui.menu.preview.status.ready,Ready to start  •  Launch from the button below,Siap dimulai  •  Lanjutkan dari tombol di bawah
 ui.menu.preview.title,{0}.{1}  •  {2},{0}.{1}  •  {2}
+ui.menu.preview.unselected,Please select the simulation level.,Silakan pilih level simulasi.
 ui.menu.progress.ribbon,{0}/{1} Chambers  •  {2} Memories,{0}/{1} Ruangan  •  {2} Memori
 ui.menu.progress.title,{0}/{1} Chambers Cleared  •  {2} Memories,{0}/{1} Ruangan Selesai  •  {2} Memori
 ui.menu.room_fallback,Chamber {0}.{1},Ruangan {0}.{1}

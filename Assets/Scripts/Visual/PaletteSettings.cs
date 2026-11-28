@@ -24,7 +24,7 @@ namespace Polymulator
         [Header("Typography")]
         [SerializeField] private Color textPrimary = Hex(0xCD, 0xD6, 0xF4);
         [SerializeField] private Color textSecondary = Hex(0xBA, 0xC2, 0xDE);
-        [SerializeField] private Color textSubtext = Hex(0xA6, 0xAD, 0xC8);
+        [SerializeField] private Color subtext2 = Hex(0xA6, 0xAD, 0xC8);
 
         [Header("Accents & Semantic Roles")]
         [SerializeField] private Color sapphire = Hex(0x74, 0xC7, 0xEC);
@@ -77,10 +77,10 @@ namespace Polymulator
 
         public static Color TextPrimary => Instance.textPrimary;
         public static Color TextSecondary => Instance.textSecondary;
-        public static Color TextSubtext => Instance.textSubtext;
+        public static Color Subtext2 => Instance.subtext2;
         public static Color Text => Instance.textPrimary;
         public static Color Subtext1 => Instance.textSecondary;
-        public static Color Subtext0 => Instance.textSubtext;
+        public static Color Subtext0 => Instance.subtext2;
 
         public static Color Sapphire => Instance.sapphire;
         public static Color Green => Instance.green;
@@ -168,7 +168,7 @@ namespace Polymulator
             overlay1 = Hex(0x7F, 0x84, 0x9C);
             overlay2 = Hex(0x93, 0x99, 0xB2);
 
-            textSubtext = Hex(0xA6, 0xAD, 0xC8);
+            subtext2 = Hex(0xA6, 0xAD, 0xC8);
             textSecondary = Hex(0xBA, 0xC2, 0xDE);
             textPrimary = Hex(0xCD, 0xD6, 0xF4);
 

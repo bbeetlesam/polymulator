@@ -20,7 +20,14 @@
                 <ui:VisualElement name="target-accent-bar" class="card-top-rule" picking-mode="Ignore" />
                 <ui:VisualElement class="target-content" picking-mode="Ignore">
                     <ui:Label name="target-name-label" text="" class="target-name-label" picking-mode="Ignore" />
-                    <ui:Label name="target-meta-label" text="" class="target-meta-label" picking-mode="Ignore" />
+                    <ui:VisualElement class="target-metric-row" picking-mode="Ignore">
+                        <ui:Label name="target-meta-label" text="" class="target-meta-label" picking-mode="Ignore" />
+                        <poly:UiVectorIcon icon-kind="Weight" class="target-metric-icon" picking-mode="Ignore" />
+                    </ui:VisualElement>
+                    <ui:VisualElement class="target-metric-row" picking-mode="Ignore">
+                        <ui:Label name="target-rotation-label" text="" class="target-rotation-label" picking-mode="Ignore" />
+                        <poly:UiVectorIcon icon-kind="Rotasi" class="target-metric-icon" picking-mode="Ignore" />
+                    </ui:VisualElement>
                 </ui:VisualElement>
             </ui:VisualElement>
         </ui:VisualElement>
@@ -90,34 +97,34 @@
 
                 <ui:VisualElement name="ability-dock" class="ability-dock" picking-mode="Ignore">
                     <ui:VisualElement name="slot-translasi" class="ability-slot ability-slot--active" picking-mode="Ignore">
-                        <poly:HudVectorIcon name="icon-translasi" icon-kind="Translasi" class="ability-icon" picking-mode="Ignore" />
+                        <poly:UiVectorIcon name="icon-translasi" icon-kind="Translasi" class="ability-icon" picking-mode="Ignore" />
                         <poly:LocalizedText loc-key="ui.hud.ability.translation" class="loc-text ability-title" picking-mode="Ignore" />
                     </ui:VisualElement>
 
                     <ui:VisualElement name="slot-elevasi" class="ability-slot ability-slot--active" picking-mode="Ignore">
-                        <poly:HudVectorIcon name="icon-elevasi" icon-kind="Elevasi" class="ability-icon" picking-mode="Ignore" />
+                        <poly:UiVectorIcon name="icon-elevasi" icon-kind="Elevasi" class="ability-icon" picking-mode="Ignore" />
                         <poly:LocalizedText loc-key="ui.hud.ability.elevation" class="loc-text ability-title" picking-mode="Ignore" />
                     </ui:VisualElement>
 
                     <ui:VisualElement name="slot-rotasi" class="ability-slot ability-slot--active" picking-mode="Ignore">
-                        <poly:HudVectorIcon name="icon-rotasi" icon-kind="Rotasi" class="ability-icon" picking-mode="Ignore" />
+                        <poly:UiVectorIcon name="icon-rotasi" icon-kind="Rotasi" class="ability-icon" picking-mode="Ignore" />
                         <poly:LocalizedText loc-key="ui.hud.ability.rotation" class="loc-text ability-title" picking-mode="Ignore" />
                     </ui:VisualElement>
 
                     <ui:VisualElement name="slot-special" class="ability-slot ability-slot--highlight" picking-mode="Ignore">
-                        <poly:HudVectorIcon name="icon-special" icon-kind="Throw" class="ability-icon" picking-mode="Ignore" />
+                        <poly:UiVectorIcon name="icon-special" icon-kind="Throw" class="ability-icon" picking-mode="Ignore" />
                         <ui:Label name="title-special" text="" class="ability-title" picking-mode="Ignore" />
                     </ui:VisualElement>
 
                     <ui:VisualElement class="dock-divider" picking-mode="Ignore" />
 
                     <ui:VisualElement name="slot-partition" class="ability-slot ability-slot--queued" picking-mode="Ignore">
-                        <poly:HudVectorIcon name="icon-partition" icon-kind="Partition" class="ability-icon" picking-mode="Ignore" />
+                        <poly:UiVectorIcon name="icon-partition" icon-kind="Partition" class="ability-icon" picking-mode="Ignore" />
                         <poly:LocalizedText loc-key="ui.hud.ability.partition" class="loc-text ability-title" picking-mode="Ignore" />
                     </ui:VisualElement>
 
                     <ui:VisualElement name="slot-fusion" class="ability-slot ability-slot--queued ability-slot--last" picking-mode="Ignore">
-                        <poly:HudVectorIcon name="icon-fusion" icon-kind="Fusion" class="ability-icon" picking-mode="Ignore" />
+                        <poly:UiVectorIcon name="icon-fusion" icon-kind="Fusion" class="ability-icon" picking-mode="Ignore" />
                         <poly:LocalizedText loc-key="ui.hud.ability.fusion" class="loc-text ability-title" picking-mode="Ignore" />
                     </ui:VisualElement>
                 </ui:VisualElement>
@@ -132,7 +139,12 @@
                 <ui:VisualElement name="modal-accent-bar" class="modal-top-bar" picking-mode="Ignore" />
                 <ui:Label name="modal-subtitle" text="" class="modal-subtitle" picking-mode="Ignore" />
                 <ui:Label name="modal-title" text="" class="modal-title" picking-mode="Ignore" />
-                <ui:Label name="modal-rank-label" text="" class="modal-rank modal-rank--hidden" picking-mode="Ignore" />
+                <ui:VisualElement name="modal-rank-label" class="modal-rank modal-rank--hidden" picking-mode="Ignore">
+                    <poly:UiVectorIcon name="modal-star-0" icon-kind="StarOutline" class="modal-rank-star" picking-mode="Ignore" />
+                    <poly:UiVectorIcon name="modal-star-1" icon-kind="StarOutline" class="modal-rank-star" picking-mode="Ignore" />
+                    <poly:UiVectorIcon name="modal-star-2" icon-kind="StarOutline" class="modal-rank-star" picking-mode="Ignore" />
+                    <ui:Label name="modal-rank-tag" text="" class="modal-rank-tag" picking-mode="Ignore" />
+                </ui:VisualElement>
 
                 <ui:VisualElement name="ending-epilogue-box" class="ending-epilogue-box ending-epilogue-box--hidden">
                     <ui:Label name="ending-summary-label" text="" class="ending-summary" />
@@ -162,17 +174,26 @@
 
                 <ui:VisualElement name="pause-settings-panel" class="pause-settings-panel pause-settings-panel--hidden">
                     <ui:VisualElement class="pause-setting-row">
-                        <poly:LocalizedText loc-key="ui.menu.settings.volume" class="loc-text pause-setting-label" picking-mode="Ignore" />
+                        <ui:VisualElement class="pause-setting-label-group" picking-mode="Ignore">
+                            <poly:UiVectorIcon icon-kind="Volume" class="pause-setting-icon" picking-mode="Ignore" />
+                            <poly:LocalizedText loc-key="ui.menu.settings.volume" class="loc-text pause-setting-label" picking-mode="Ignore" />
+                        </ui:VisualElement>
                         <ui:Slider name="pause-slider-volume" low-value="0" high-value="100" value="85" class="pause-setting-slider" />
                         <ui:Label name="pause-val-volume" text="" class="pause-setting-value" picking-mode="Ignore" />
                     </ui:VisualElement>
                     <ui:VisualElement class="pause-setting-row">
-                        <poly:LocalizedText loc-key="ui.menu.settings.sensitivity" class="loc-text pause-setting-label" picking-mode="Ignore" />
+                        <ui:VisualElement class="pause-setting-label-group" picking-mode="Ignore">
+                            <poly:UiVectorIcon icon-kind="Camera" class="pause-setting-icon" picking-mode="Ignore" />
+                            <poly:LocalizedText loc-key="ui.menu.settings.sensitivity" class="loc-text pause-setting-label" picking-mode="Ignore" />
+                        </ui:VisualElement>
                         <ui:Slider name="pause-slider-sensitivity" low-value="40" high-value="220" value="100" class="pause-setting-slider" />
                         <ui:Label name="pause-val-sensitivity" text="" class="pause-setting-value" picking-mode="Ignore" />
                     </ui:VisualElement>
                     <ui:VisualElement class="pause-setting-row pause-setting-row--last">
-                        <poly:LocalizedText loc-key="ui.menu.settings.reduce_motion" class="loc-text pause-setting-label" picking-mode="Ignore" />
+                        <ui:VisualElement class="pause-setting-label-group" picking-mode="Ignore">
+                            <poly:UiVectorIcon icon-kind="ReduceMotion" class="pause-setting-icon" picking-mode="Ignore" />
+                            <poly:LocalizedText loc-key="ui.menu.settings.reduce_motion" class="loc-text pause-setting-label" picking-mode="Ignore" />
+                        </ui:VisualElement>
                         <ui:Toggle name="pause-toggle-reduce" class="pause-setting-toggle" />
                     </ui:VisualElement>
                 </ui:VisualElement>
