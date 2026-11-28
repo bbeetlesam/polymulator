@@ -19,6 +19,7 @@ namespace Polymulator
         public bool Unlocked;
         public bool Cleared;
         public bool Current;
+        public int Stars;
         public Label Label;
         public UiVectorIcon Icon;
     }
@@ -586,7 +587,7 @@ namespace Polymulator
             switch (StateOf(chapter, level))
             {
                 case PieLevelState.Cleared: return PaletteSettings.Blue;
-                case PieLevelState.Current: return PaletteSettings.Surface2;
+                case PieLevelState.Current: return PaletteSettings.Lavender;
                 case PieLevelState.LockedChapter: return PaletteSettings.Surface0;
                 case PieLevelState.LockedInUnlocked: return PaletteSettings.Surface1;
                 default: return WithAlpha(PaletteSettings.Subtext0, 0.2f);
@@ -645,7 +646,7 @@ namespace Polymulator
                 float levelStart = start + l * span;
                 float levelEnd = levelStart + span;
                 AddWedge(painter, geo, levelStart, levelEnd, geo.ArcInner, outer);
-                painter.fillColor = level.Current ? PaletteSettings.Surface2 : PaletteSettings.Surface1;
+                painter.fillColor = level.Current ? PaletteSettings.Lavender : PaletteSettings.Surface1;
                 painter.Fill();
             }
         }
@@ -899,13 +900,25 @@ namespace Polymulator
                     Vector2 point = PolarPoint(geo.Center, labelRadius, mid);
                     level.Label.style.left = Mathf.Clamp(point.x - 20f * geo.Scale, 0f, contentRect.width - 40f * geo.Scale);
                     level.Label.style.top = Mathf.Clamp(point.y - 14f * geo.Scale, 0f, contentRect.height - 28f * geo.Scale);
+                    PieLevelState state = StateOf(chapter, level);
+                    bool lockedState = state == PieLevelState.LockedChapter || state == PieLevelState.LockedInUnlocked;
+                    Color labelColor = state == PieLevelState.Cleared
+                        ? PaletteSettings.Base
+                        : (state == PieLevelState.Current
+                            ? PaletteSettings.Surface0
+                            : (lockedState ? PaletteSettings.Overlay0 : PaletteSettings.TextPrimary));
                     bool highlight = chapter.Index == activeChapter && level.Level == activeLevel;
-                    level.Label.style.color = highlight
-                        ? PaletteSettings.Yellow
-                        : PaletteSettings.TextPrimary;
+                    if (highlight)
+                    {
+                        labelColor = state == PieLevelState.Cleared
+                            ? PaletteSettings.Green
+                            : (state == PieLevelState.Current
+                                ? PaletteSettings.Base
+                                : (lockedState ? PaletteSettings.Overlay1 : PaletteSettings.TextPrimary));
+                    }
+                    level.Label.style.color = labelColor;
 
                     if (level.Icon == null) continue;
-                    PieLevelState state = StateOf(chapter, level);
                     if (state == PieLevelState.Unlocked)
                     {
                         level.Icon.style.display = DisplayStyle.None;
@@ -919,12 +932,12 @@ namespace Polymulator
                     if (state == PieLevelState.Cleared)
                     {
                         level.Icon.IconKind = UiIconKind.StarFilled;
-                        level.Icon.SetTint(PaletteSettings.Green);
+                        level.Icon.SetTint(level.Stars >= 3 ? PaletteSettings.Green : PaletteSettings.Surface0);
                     }
                     else if (state == PieLevelState.Current)
                     {
                         level.Icon.IconKind = UiIconKind.Play;
-                        level.Icon.SetTint(PaletteSettings.Peach);
+                        level.Icon.SetTint(PaletteSettings.Surface0);
                     }
                     else
                     {

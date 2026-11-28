@@ -211,10 +211,13 @@ namespace Polymulator
                 case UiIconKind.StarFilled:
                 case UiIconKind.StarOutline:
                 {
+                    float inset = iconKind == UiIconKind.StarOutline ? painter.lineWidth * 0.5f / s : 0f;
+                    float k = Mathf.Clamp01(1f - inset / 12f);
+                    Vector2 Q(float x, float y) => P(12f + (x - 12f) * k, 12f + (y - 12f) * k);
                     Vector2[] pts =
                     {
-                        P(12f, 3.5f), P(14.2f, 9.3f), P(20.1f, 9.9f), P(15.5f, 13.6f), P(17.2f, 19.4f),
-                        P(12f, 15.9f), P(6.8f, 19.4f), P(8.5f, 13.6f), P(3.9f, 9.9f), P(9.8f, 9.3f)
+                        Q(12f, 3.5f), Q(14.2f, 9.3f), Q(20.1f, 9.9f), Q(15.5f, 13.6f), Q(17.2f, 19.4f),
+                        Q(12f, 15.9f), Q(6.8f, 19.4f), Q(8.5f, 13.6f), Q(3.9f, 9.9f), Q(9.8f, 9.3f)
                     };
                     painter.BeginPath();
                     painter.MoveTo(pts[0]);

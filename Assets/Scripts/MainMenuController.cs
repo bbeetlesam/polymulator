@@ -364,7 +364,8 @@ namespace Polymulator
                         Code = c + "." + l,
                         Unlocked = unlocked,
                         Cleared = cleared,
-                        Current = c == currentChapter && l == currentLevel && !cleared
+                        Current = c == currentChapter && l == currentLevel && !cleared,
+                        Stars = cleared ? SimulationProgress.GetStars(sceneName) : 0
                     });
                 }
 
